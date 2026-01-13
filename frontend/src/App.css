@@ -1,20 +1,27 @@
-/* Story 1: Distraction-Free Design System */
 :root {
   /* Brand Palette - Derived from Zebra/Accessibility Theme (High Contrast) */
-  --primary-color: #2c3e50; /* Deep Navy - Text & Headings (Calm, High Contrast) */
-  --accent-color: #e67e22; /* Warm Orange - Action Buttons (Focus, Energy) */
-  --accent-hover: #d35400; /* Darker Orange for hover */
-  --bg-color: #f4f6f8; /* Soft Grey-Blue - Background (Low Glare) */
+  --primary-color: #2c3e50;
+  /* Deep Navy - Text & Headings (Calm, High Contrast) */
+  --accent-color: #e67e22;
+  /* Warm Orange - Action Buttons (Focus, Energy) */
+  --accent-hover: #d35400;
+  /* Darker Orange for hover */
+  --bg-color: #ecf0f1;
+  /* Very Light Grey - Matches the zebra/white theme */
+  --page-bg: #2c3e50;
+  /* Dark Navy Background for the whole page (Brands the experience) */
   --card-bg: #ffffff;
   --text-main: #2c3e50;
   --text-muted: #7f8c8d;
-  --border-color: #cbd5e1; /* Distinct boarders */
+  --border-color: #cbd5e1;
+  /* Distinct boarders */
   --error-bg: #fee2e2;
   --error-text: #b91c1c;
 }
 
 body {
-  background-color: var(--bg-color);
+  background-color: var(--page-bg);
+  /* Dark Navy Background */
   font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
@@ -35,12 +42,32 @@ body {
 .login-box {
   background: var(--card-bg);
   padding: 40px;
-  border-radius: 16px; /* Dofter corners */
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08); /* Minimal shadow for depth without clutter */
+  border-radius: 20px;
+  /* Softer, friendlier corners */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  /* Stronger shadow to pop against dark bg */
   width: 100%;
   max-width: 420px;
-  text-align: left; /* Easier to read for many */
-  border: 1px solid rgba(0,0,0,0.05);
+  text-align: left;
+  /* Easier to read for many */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.app-logo {
+  width: 120px;
+  /* Good size to be visible but not overwhelming */
+  height: auto;
+  border-radius: 50%;
+  /* If the image is square, this makes it a circle */
+  object-fit: contain;
 }
 
 .brand-title {
@@ -93,7 +120,8 @@ label {
 input {
   width: 100%;
   padding: 14px;
-  border: 2px solid var(--border-color); /* Thick, clear boundaries */
+  border: 2px solid var(--border-color);
+  /* Thick, clear boundaries */
   border-radius: 10px;
   font-size: 16px;
   box-sizing: border-box;
@@ -103,7 +131,8 @@ input {
 
 input:focus {
   outline: none;
-  border-color: var(--accent-color); /* Clear focus state */
+  border-color: var(--accent-color);
+  /* Clear focus state */
   box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2);
 }
 
