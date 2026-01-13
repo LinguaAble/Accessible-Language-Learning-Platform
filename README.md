@@ -83,7 +83,7 @@ ACCESSIBLE-LANGUAGE-LEARNING-PLATFORM
 │   └── package.json
 │
 └── README.md
-
+```
 
 🚀 How to Run the Project
 Backend:
