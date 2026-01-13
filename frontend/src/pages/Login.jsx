@@ -51,8 +51,14 @@ const Login = () => {
         </div>
 
         {/* Story 1: Minimal Layout - High Contrast Header */}
-        <h1 className="brand-title">LinguaAble</h1>
-        <h2 className="page-title">Welcome Back</h2>
+        <h2 className="welcome-text">Welcome to</h2>
+        <h1 className="brand-title">
+          <span className="text-brand-blue">Lingua</span>
+          <span className="text-brand-red">Able</span>
+        </h1>
+        <p className="subtitle">
+          Built around learners not limitations
+        </p>
 
         {error && <div className="error-message" role="alert">{error}</div>}
 
