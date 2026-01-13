@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword'; // <--- Import added
 import './App.css';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   // Theme State: Default to 'dark'
@@ -33,6 +34,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} /> {/* <--- Route added */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
       </div>
     </Router>

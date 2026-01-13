@@ -1,0 +1,13 @@
+# Secrets (Never upload these!)
+.env
+.env.local
+
+# Heavy Dependencies (Users install these themselves)
+node_modules/
+/backend/node_modules/
+/frontend/node_modules/
+
+# Build outputs
+dist/
+build/
+.DS_Store
