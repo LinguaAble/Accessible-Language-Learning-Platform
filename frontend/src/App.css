@@ -155,6 +155,27 @@ body {
 
 .input-group {
   margin-bottom: 24px;
+  position: relative;
+  /* Allows absolute positioning of icons inside */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 48px;
+  /* Adjust based on label height + padding */
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle:hover {
+  color: var(--accent-color);
 }
 
 .label-row {
@@ -292,14 +313,15 @@ input:focus {
 .signup-text a:hover {
   text-decoration: underline;
 }
+
 /* --- FIX: Stop Browser Autofill from turning inputs white --- */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    /* Forces the background to stay Dark Gray/Blue */
-    -webkit-box-shadow: 0 0 0 30px #1f2937 inset !important; 
-    /* Forces the text to be White */
-    -webkit-text-fill-color: white !important;
-    caret-color: white;
+  /* Forces the background to stay Dark Gray/Blue */
+  -webkit-box-shadow: 0 0 0 30px #1f2937 inset !important;
+  /* Forces the text to be White */
+  -webkit-text-fill-color: white !important;
+  caret-color: white;
 }
