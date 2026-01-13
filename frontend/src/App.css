@@ -8,46 +8,43 @@
   --primary-color: #2c3e50;
   --accent-color: #e67e22;
   --accent-hover: #d35400;
-  --bg-color: #ffffff;
-  /* User request: White */
-  --bg-pattern: radial-gradient(#cbd5e1 1px, transparent 1px);
-  /* Subtle dots */
+  --bg-color: #f8f9fa;
+  /* Warm White */
+  /* User request: "style it in your own style" - Soft, cloudy gradient */
+  --bg-pattern: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
   --card-bg: #ffffff;
   --text-main: #2c3e50;
   --text-muted: #7f8c8d;
-  --border-color: #cbd5e1;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --border-color: #e2e8f0;
+  --shadow-color: rgba(0, 0, 0, 0.05);
   --input-bg: #ffffff;
 }
 
 /* Dark Theme (Navy Blue) */
 [data-theme='dark'] {
   --primary-color: #ecf0f1;
-  /* Light text for contrast */
   --accent-color: #e67e22;
-  /* Orange pops on navy */
   --accent-hover: #d35400;
-  --bg-color: #0F2027;
+  --bg-color: #0f2027;
   /* Deep Navy base */
-  --bg-pattern: linear-gradient(to right, #203a43, #2c5364);
-  /* Rich Navy Gradient */
-  --card-bg: #1c2e3e;
-  /* Slightly lighter navy for cards */
+  /* Premium Dark Gradient */
+  --bg-pattern: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  --card-bg: rgba(28, 46, 62, 0.95);
+  /* Slight transparency for premium feel */
   --text-main: #ecf0f1;
   --text-muted: #bdc3c7;
   --border-color: #34495e;
-  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.4);
   --input-bg: #2c3e50;
 }
 
 body {
   background-color: var(--bg-color);
-  /* "Bring in some designs" - CSS Pattern */
   background-image: var(--bg-pattern);
-  background-size: 20px 20px, 100% 100%;
-  /* Dot pattern size for light, cover for dark */
+  background-attachment: fixed;
+  /* Keeps gradient smooth across scroll */
 
-  font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
+  font-family: 'Nunito', 'Segoe UI', Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
   display: flex;
@@ -56,6 +53,23 @@ body {
   min-height: 100vh;
   color: var(--text-main);
   transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+/* Text Brand Colors */
+.text-brand-blue {
+  color: var(--primary-color);
+  /* Navy Blue */
+}
+
+.text-brand-red {
+  color: #e67e22;
+  /* Using the Brand Orange/Red from logo */
+}
+
+/* In dark mode, ensure readability */
+[data-theme='dark'] .text-brand-blue {
+  color: #ecf0f1;
+  /* White/Light Blue for contrast on dark bg */
 }
 
 .login-container {
@@ -100,10 +114,11 @@ body {
 .brand-title {
   text-align: center;
   color: var(--text-main);
-  font-size: 28px;
+  font-size: 36px;
   margin-bottom: 5px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  width: 100%;
 }
 
 .page-title {
@@ -113,6 +128,25 @@ body {
   font-weight: 500;
   margin-bottom: 30px;
   margin-top: 0;
+  width: 100%;
+}
+
+.welcome-text {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  margin-top: 0;
+  width: 100%;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 5px;
+  margin-bottom: 30px;
+  width: 100%;
 }
 
 .input-group {
