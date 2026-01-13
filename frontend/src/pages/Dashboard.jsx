@@ -4,9 +4,10 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // 1. Remove the "ID Card" (Token)
+    // 1. Remove the "ID Card" (Token) from BOTH storages
     localStorage.removeItem('token');
-    
+    sessionStorage.removeItem('token');
+
     // 2. Send user back to Login
     navigate('/');
   };
@@ -15,8 +16,8 @@ const Dashboard = () => {
     <div style={{ padding: '50px', textAlign: 'center' }}>
       <h1>My Dashboard</h1>
       <p>Welcome! Your distraction-free learning space is ready.</p>
-      
-      <button 
+
+      <button
         onClick={handleLogout}
         style={{
           marginTop: '20px',
