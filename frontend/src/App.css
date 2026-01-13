@@ -1,27 +1,52 @@
+/* Story 1: Distraction-Free Design System with Themes */
 :root {
-  /* Brand Palette - Derived from Zebra/Accessibility Theme (High Contrast) */
+  --transition-speed: 0.3s;
+}
+
+/* Light Theme (Default) */
+[data-theme='light'] {
   --primary-color: #2c3e50;
-  /* Deep Navy - Text & Headings (Calm, High Contrast) */
   --accent-color: #e67e22;
-  /* Warm Orange - Action Buttons (Focus, Energy) */
   --accent-hover: #d35400;
-  /* Darker Orange for hover */
-  --bg-color: #ecf0f1;
-  /* Very Light Grey - Matches the zebra/white theme */
-  --page-bg: #2c3e50;
-  /* Dark Navy Background for the whole page (Brands the experience) */
+  --bg-color: #ffffff;
+  /* User request: White */
+  --bg-pattern: radial-gradient(#cbd5e1 1px, transparent 1px);
+  /* Subtle dots */
   --card-bg: #ffffff;
   --text-main: #2c3e50;
   --text-muted: #7f8c8d;
   --border-color: #cbd5e1;
-  /* Distinct boarders */
-  --error-bg: #fee2e2;
-  --error-text: #b91c1c;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --input-bg: #ffffff;
+}
+
+/* Dark Theme (Navy Blue) */
+[data-theme='dark'] {
+  --primary-color: #ecf0f1;
+  /* Light text for contrast */
+  --accent-color: #e67e22;
+  /* Orange pops on navy */
+  --accent-hover: #d35400;
+  --bg-color: #0F2027;
+  /* Deep Navy base */
+  --bg-pattern: linear-gradient(to right, #203a43, #2c5364);
+  /* Rich Navy Gradient */
+  --card-bg: #1c2e3e;
+  /* Slightly lighter navy for cards */
+  --text-main: #ecf0f1;
+  --text-muted: #bdc3c7;
+  --border-color: #34495e;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --input-bg: #2c3e50;
 }
 
 body {
-  background-color: var(--page-bg);
-  /* Dark Navy Background */
+  background-color: var(--bg-color);
+  /* "Bring in some designs" - CSS Pattern */
+  background-image: var(--bg-pattern);
+  background-size: 20px 20px, 100% 100%;
+  /* Dot pattern size for light, cover for dark */
+
   font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
@@ -30,6 +55,7 @@ body {
   align-items: center;
   min-height: 100vh;
   color: var(--text-main);
+  transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
 .login-container {
@@ -44,15 +70,16 @@ body {
   padding: 40px;
   border-radius: 20px;
   /* Softer, friendlier corners */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px var(--shadow-color);
   /* Stronger shadow to pop against dark bg */
   width: 100%;
   max-width: 420px;
   text-align: left;
   /* Easier to read for many */
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
+  transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
 }
 
 .logo-container {
@@ -72,7 +99,7 @@ body {
 
 .brand-title {
   text-align: center;
-  color: var(--primary-color);
+  color: var(--text-main);
   font-size: 28px;
   margin-bottom: 5px;
   font-weight: 800;
@@ -101,7 +128,7 @@ body {
 
 label {
   display: block;
-  color: var(--primary-color);
+  color: var(--text-main);
   font-weight: 600;
   font-size: 15px;
 }
@@ -125,7 +152,8 @@ input {
   border-radius: 10px;
   font-size: 16px;
   box-sizing: border-box;
-  background-color: #fff;
+  background-color: var(--input-bg);
+  color: var(--text-main);
   transition: all 0.2s;
 }
 
@@ -134,6 +162,29 @@ input:focus {
   border-color: var(--accent-color);
   /* Clear focus state */
   box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2);
+}
+
+/* Theme Toggle Button Style */
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 20px;
+  box-shadow: 0 2px 5px var(--shadow-color);
+  transition: all 0.3s;
+  z-index: 1000;
+  /* Ensure it's on top */
+}
+
+.theme-toggle:hover {
+  transform: scale(1.05);
+  border-color: var(--accent-color);
 }
 
 /* Story 2: Helpful Error Styling */
