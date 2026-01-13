@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import '../App.css'; // We will style this next
-import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png'; // Import the logo
+import { useNavigate, Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
+import '../App.css'; 
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false); // Story 4
+  const [rememberMe, setRememberMe] = useState(false); 
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -20,17 +21,16 @@ const Login = () => {
       const res = await axios.post('http://localhost:5000/api/auth/login', {
         email,
         password,
-        rememberMe // Send preference to backend if needed, or handle locally
+        rememberMe 
       });
 
       // Story 4: Stay Signed In
       if (rememberMe) {
         localStorage.setItem('token', res.data.token);
       } else {
-        sessionStorage.setItem('token', res.data.token); // Clears on close
+        sessionStorage.setItem('token', res.data.token); 
       }
 
-      // Story 9: Redirect to last activity
       navigate('/dashboard');
 
     } catch (err) {
@@ -42,6 +42,21 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSuccess = (credentialResponse) => {
+    const decoded = jwtDecode(credentialResponse.credential);
+    console.log("Logged in with Google:", decoded);
+
+    // TODO: Connect this to backend later. 
+    // For now, we simulate login by saving the Google token.
+    localStorage.setItem('token', credentialResponse.credential);
+    navigate('/dashboard');
+  };
+
+  const handleGoogleError = () => {
+    console.log('Login Failed');
+    setError("Google Sign In Failed");
+  };
+
   return (
     <div className="login-container">
       <div className="login-box">
@@ -50,7 +65,6 @@ const Login = () => {
           <img src={logo} alt="LinguaAble Zebra Mascot" className="app-logo" />
         </div>
 
-        {/* Story 1: Minimal Layout - High Contrast Header */}
         <h2 className="welcome-text">Welcome to</h2>
         <h1 className="brand-title">
           <span className="text-brand-blue">Lingua</span>
@@ -72,14 +86,13 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
               required
-              autoFocus // Story 6: Reduce steps
+              autoFocus 
             />
           </div>
 
           <div className="input-group">
             <div className="label-row">
               <label htmlFor="password">Password</label>
-              {/* Story 3: Account Recovery */}
               <Link to="/forgot-password" class="forgot-link">Forgot Password?</Link>
             </div>
             <input
@@ -92,7 +105,6 @@ const Login = () => {
             />
           </div>
 
-          {/* Story 4: Stay Signed In */}
           <div className="checkbox-group">
             <input
               type="checkbox"
@@ -104,6 +116,24 @@ const Login = () => {
           </div>
 
           <button type="submit" className="login-btn">Sign In</button>
+
+          {/* --- NEW: Google Sign In Section --- */}
+          <div style={{ margin: '20px 0', textAlign: 'center', color: '#6b7280', fontSize: '0.9rem' }}>
+            OR
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="filled_blue"
+              shape="pill"
+              text="signin_with"
+              width="250" 
+            />
+          </div>
+          {/* ----------------------------------- */}
+
         </form>
 
         <p className="signup-text">
