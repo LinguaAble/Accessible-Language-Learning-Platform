@@ -1,42 +1,90 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/* Story 1: Distraction-Free Design System */
+body {
+  background-color: #f0f4f8; /* Soft blue-gray, easy on eyes */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.login-box {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Soft shadow, no harsh lines */
+  width: 100%;
+  max-width: 400px;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+h1 {
+  color: #2c3e50;
+  margin-bottom: 10px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.subtitle {
+  color: #7f8c8d;
+  margin-bottom: 30px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.input-group {
+  margin-bottom: 20px;
+  text-align: left;
 }
 
-.card {
-  padding: 2em;
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #34495e;
+  font-weight: 500;
 }
 
-.read-the-docs {
-  color: #888;
+input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e6ed; /* Thick borders are easier to see */
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box; /* Ensures padding doesn't break width */
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #3498db; /* Blue focus for clarity */
+}
+
+/* Story 2: Helpful Error Styling */
+.error-message {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  background-color: #2980b9;
 }
