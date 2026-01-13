@@ -1,90 +1,176 @@
 /* Story 1: Distraction-Free Design System */
+:root {
+  /* Brand Palette - Derived from Zebra/Accessibility Theme (High Contrast) */
+  --primary-color: #2c3e50; /* Deep Navy - Text & Headings (Calm, High Contrast) */
+  --accent-color: #e67e22; /* Warm Orange - Action Buttons (Focus, Energy) */
+  --accent-hover: #d35400; /* Darker Orange for hover */
+  --bg-color: #f4f6f8; /* Soft Grey-Blue - Background (Low Glare) */
+  --card-bg: #ffffff;
+  --text-main: #2c3e50;
+  --text-muted: #7f8c8d;
+  --border-color: #cbd5e1; /* Distinct boarders */
+  --error-bg: #fee2e2;
+  --error-text: #b91c1c;
+}
+
 body {
-  background-color: #f0f4f8; /* Soft blue-gray, easy on eyes */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  color: var(--text-main);
 }
 
 .login-container {
   width: 100%;
   display: flex;
   justify-content: center;
+  padding: 20px;
 }
 
 .login-box {
-  background: white;
+  background: var(--card-bg);
   padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Soft shadow, no harsh lines */
+  border-radius: 16px; /* Dofter corners */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08); /* Minimal shadow for depth without clutter */
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  text-align: left; /* Easier to read for many */
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.brand-title {
   text-align: center;
+  color: var(--primary-color);
+  font-size: 28px;
+  margin-bottom: 5px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-h1 {
-  color: #2c3e50;
-  margin-bottom: 10px;
-}
-
-.subtitle {
-  color: #7f8c8d;
+.page-title {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 18px;
+  font-weight: 500;
   margin-bottom: 30px;
+  margin-top: 0;
 }
 
 .input-group {
-  margin-bottom: 20px;
-  text-align: left;
+  margin-bottom: 24px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 label {
   display: block;
-  margin-bottom: 8px;
-  color: #34495e;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.forgot-link {
+  font-size: 13px;
+  color: var(--accent-color);
+  text-decoration: none;
   font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
 }
 
 input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e6ed; /* Thick borders are easier to see */
-  border-radius: 8px;
+  padding: 14px;
+  border: 2px solid var(--border-color); /* Thick, clear boundaries */
+  border-radius: 10px;
   font-size: 16px;
-  box-sizing: border-box; /* Ensures padding doesn't break width */
-  transition: border-color 0.3s;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: all 0.2s;
 }
 
 input:focus {
   outline: none;
-  border-color: #3498db; /* Blue focus for clarity */
+  border-color: var(--accent-color); /* Clear focus state */
+  box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2);
 }
 
 /* Story 2: Helpful Error Styling */
 .error-message {
-  background-color: #fee2e2;
-  color: #dc2626;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  background-color: var(--error-bg);
+  color: var(--error-text);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 24px;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #fca5a5;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.checkbox-group input {
+  width: auto;
+  margin-right: 10px;
+  cursor: pointer;
+  accent-color: var(--accent-color);
+  height: 18px;
+  width: 18px;
+}
+
+.checkbox-group label {
+  cursor: pointer;
+  margin-bottom: 0;
+  font-weight: 400;
 }
 
 .login-btn {
   width: 100%;
-  padding: 14px;
-  background-color: #3498db;
+  padding: 16px;
+  background-color: var(--accent-color);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
+  transition: background-color 0.2s;
 }
 
 .login-btn:hover {
-  background-color: #2980b9;
+  background-color: var(--accent-hover);
+}
+
+.signup-text {
+  text-align: center;
+  margin-top: 25px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.signup-text a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-text a:hover {
+  text-decoration: underline;
 }
