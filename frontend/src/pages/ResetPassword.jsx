@@ -3,14 +3,18 @@ import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import '../App.css';
+import { Eye, EyeOff } from 'lucide-react'; 
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   
-  // Get the secret token from the URL
   const { token } = useParams();
   const navigate = useNavigate();
 
@@ -24,14 +28,12 @@ const ResetPassword = () => {
     }
 
     try {
-      // Send the token and new password to backend
       const res = await axios.put(`http://localhost:5000/api/auth/reset-password/${token}`, {
         password
       });
 
       setMessage("Password Updated! Redirecting to login...");
       
-      // Redirect to login after 2 seconds
       setTimeout(() => {
         navigate('/');
       }, 2000);
@@ -62,25 +64,75 @@ const ResetPassword = () => {
         <form onSubmit={handleReset}>
           <div className="input-group">
             <label>New Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter new password"
-              required
-              autoFocus
-            />
+            {/* Wrapper takes the margin instead of input */}
+            <div style={{ position: 'relative', marginBottom: '15px' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter new password"
+                required
+                autoFocus
+                // Force margin 0 so 'center' is calculated correctly
+                style={{ paddingRight: '40px', marginBottom: 0 }} 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  zIndex: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: 0 
+                }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <div className="input-group">
             <label>Confirm Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-              required
-            />
+            {/* Wrapper takes the margin instead of input */}
+            <div style={{ position: 'relative', marginBottom: '15px' }}>
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+                required
+                // Force margin 0 so 'center' is calculated correctly
+                style={{ paddingRight: '40px', marginBottom: 0 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  zIndex: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: 0
+                }}
+              >
+                {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="login-btn">
