@@ -292,3 +292,14 @@ input:focus {
 .signup-text a:hover {
   text-decoration: underline;
 }
+/* --- FIX: Stop Browser Autofill from turning inputs white --- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    /* Forces the background to stay Dark Gray/Blue */
+    -webkit-box-shadow: 0 0 0 30px #1f2937 inset !important; 
+    /* Forces the text to be White */
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+}
