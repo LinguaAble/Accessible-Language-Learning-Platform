@@ -55,7 +55,6 @@ ESLint (code quality)
 
 
 📂 Project Structure
-
 ACCESSIBLE-LANGUAGE-LEARNING-PLATFORM
 ├── backend
 │   ├── controllers
@@ -87,18 +86,18 @@ ACCESSIBLE-LANGUAGE-LEARNING-PLATFORM
 
 Backend
 
-
 cd backend
 npm install
 npm start
 
 
-Frontend
 
+Frontend
 
 cd frontend
 npm install
 npm run dev
+
 
 
 📈 Future Enhancements
