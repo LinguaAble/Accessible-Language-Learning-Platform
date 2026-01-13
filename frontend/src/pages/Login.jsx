@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../App.css'; // We will style this next
-
+import { Link } from 'react-router-dom';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,6 +67,9 @@ const Login = () => {
 
           <button type="submit" className="login-btn">Sign In</button>
         </form>
+        <p style={{ marginTop: '20px', color: '#7f8c8d' }}>
+          New here? <Link to="/signup" style={{ color: '#3498db' }}>Create an Account</Link>
+        </p>
       </div>
     </div>
   );
