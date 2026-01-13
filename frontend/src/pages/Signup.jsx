@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import '../App.css';
+import logo from '../assets/logo.png'; // Use the same logo
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +12,7 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const { email, password, confirmPassword } = formData;
@@ -23,7 +24,7 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     // 1. Client-Side Validation (Instant Feedback)
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
@@ -35,6 +36,7 @@ const Signup = () => {
     try {
       setLoading(true);
       // 2. Call the Backend
+      // Story 8: Default settings are applied in backend (authRoutes.js)
       const res = await axios.post('http://localhost:5000/api/auth/register', {
         email,
         password
@@ -42,6 +44,8 @@ const Signup = () => {
 
       // 3. Auto-Login upon success (Professional UX)
       localStorage.setItem('token', res.data.token);
+
+      // Story 10: Guided Onboarding (Future Step: Redirect to /onboarding instead of /dashboard)
       navigate('/dashboard');
 
     } catch (err) {
@@ -59,45 +63,54 @@ const Signup = () => {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1>Create Account</h1>
-        <p className="subtitle">Join LinguaAble today</p>
+        {/* Same Logo & Branding as Login Page */}
+        <div className="logo-container">
+          <img src={logo} alt="LinguaAble Zebra Mascot" className="app-logo" />
+        </div>
 
-        {error && <div className="error-message">{error}</div>}
+        <h1 className="brand-title">LinguaAble</h1>
+        <h2 className="page-title">Create Account</h2>
+
+        {error && <div className="error-message" role="alert">{error}</div>}
 
         <form onSubmit={handleSignup}>
           <div className="input-group">
-            <label>Email Address</label>
-            <input 
-              type="email" 
+            <label htmlFor="email">Email Address</label>
+            <input
+              id="email"
+              type="email"
               name="email"
               value={email}
               onChange={handleChange}
               placeholder="name@company.com"
-              required 
+              required
+              autoFocus // Focus here first
             />
           </div>
 
           <div className="input-group">
-            <label>Password</label>
-            <input 
-              type="password" 
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
               name="password"
               value={password}
               onChange={handleChange}
               placeholder="Create a password"
-              required 
+              required
             />
           </div>
 
           <div className="input-group">
-            <label>Confirm Password</label>
-            <input 
-              type="password" 
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
               name="confirmPassword"
               value={confirmPassword}
               onChange={handleChange}
               placeholder="Confirm your password"
-              required 
+              required
             />
           </div>
 
@@ -106,8 +119,8 @@ const Signup = () => {
           </button>
         </form>
 
-        <p style={{ marginTop: '20px', color: '#7f8c8d' }}>
-          Already have an account? <Link to="/" style={{ color: '#3498db' }}>Sign In</Link>
+        <p className="signup-text">
+          Already have an account? <Link to="/">Sign In</Link>
         </p>
       </div>
     </div>
