@@ -1,8 +1,3 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import Signup from './pages/Signup'; // <--- IMPORT THIS
-import Dashboard from './pages/Dashboard';
-import './App.css';
 
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
