@@ -57,7 +57,7 @@ const Login = () => {
           <span className="text-brand-red">Able</span>
         </h1>
         <p className="subtitle">
-          Built around learners not limitations
+          Built Around Learners, Not Limitations!
         </p>
 
         {error && <div className="error-message" role="alert">{error}</div>}
