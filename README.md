@@ -1,60 +1,65 @@
-#📘 Accessible Language Learning Platform
+# 📘 Accessible Language Learning Platform
 
-📌 Project Overview
-The Accessible Language Learning Platform is a web‑based application designed to support learners with ADHD in learning English and Hindi.
-The platform focuses on simplicity, accessibility, and personalization, ensuring that learners are not overwhelmed and can learn at their own pace.
+## 📌 Project Overview
+The Accessible Language Learning Platform is a web-based application designed to support learners with ADHD in learning **English and Hindi**.  
+The platform focuses on **simplicity, accessibility, and personalization**, ensuring learners are not overwhelmed and can progress at their own pace.
 
-The application is developed using the MERN stack (MongoDB, Express, React, Node.js) and follows proper software engineering practices such as modular design and separation of concerns.
+The application is developed using the **MERN stack (MongoDB, Express, React, Node.js)** and follows software engineering best practices such as **modular design** and **separation of concerns**.
 
-🎯 Objectives
-To provide an accessible and distraction‑free learning environment
+---
 
-To support learners with ADHD through personalized guidance
+## 🎯 Objectives
+- Provide an accessible and distraction-free learning environment  
+- Support learners with ADHD through personalized guidance  
+- Track learning progress in a positive, non-stressful manner  
+- Deliver gentle notifications and constructive feedback  
+- Ensure scalability for future enhancements  
 
-To track learning progress in a positive, non‑stressful manner
+---
 
-To deliver gentle notifications and constructive feedback
+## 🧩 Functional Modules
 
-To ensure scalability for future features
-
-🧩 Functional Modules
-The system is divided into the following functional modules:
-
-Login Module
+### Login Module
 Provides secure and simple user authentication.
 
-Personalized Guidance Module
-Supports learners with adaptive and learner‑centric guidance.
+### Personalized Guidance Module
+Supports learners with adaptive and learner-centric guidance.
 
-Progress Tracking Module
+### Progress Tracking Module
 Tracks learning progress in a simple and motivating way.
 
-Notification Module
+### Notification Module
 Sends gentle reminders and supportive notifications.
 
-Feedback & Analysis Module
+### Feedback & Analysis Module
 Provides constructive feedback to encourage continuous learning.
 
-🛠️ Technology Stack
+---
 
-Frontend
-React (with Vite)
-HTML, CSS, JavaScript
+## 🛠️ Technology Stack
 
-Backend
-Node.js
-Express.js
+### Frontend
+- React (Vite)
+- HTML
+- CSS
+- JavaScript
 
-Database
-MongoDB
+### Backend
+- Node.js
+- Express.js
 
+### Database
+- MongoDB
+- Mongoose (MongoDB ODM)
 
-Mongoose (MongoDB ODM)
+### Tools
+- ESLint (Code Quality)
 
-ESLint (code quality)
+---
 
+## 📂 Project Structure
 
-📂 Project Structure
+```text
 ACCESSIBLE-LANGUAGE-LEARNING-PLATFORM
 ├── backend
 │   ├── controllers
@@ -80,36 +85,22 @@ ACCESSIBLE-LANGUAGE-LEARNING-PLATFORM
 └── README.md
 
 
-
-
 🚀 How to Run the Project
-
-Backend
-
+Backend:
 cd backend
 npm install
 npm start
 
-
-
-Frontend
-
+Frontend:
 cd frontend
 npm install
 npm run dev
 
-
-
 📈 Future Enhancements
-Adaptive content delivery using AI
-
-Voice‑based learning support
-
-Advanced analytics for learning patterns
-
-Enhanced accessibility options
-
+- Adaptive content delivery using AI
+- Voice-based learning support
+- Advanced analytics
+- Enhanced accessibility
 
 📄 Conclusion
-This project demonstrates the application of software engineering principles to build an accessible and scalable learning platform.
-By focusing on user needs rather than technical complexity, the system aims to create a supportive learning environment for learners with ADHD.
+This project demonstrates software engineering principles.
