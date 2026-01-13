@@ -86,15 +86,21 @@ ACCESSIBLE-LANGUAGE-LEARNING-PLATFORM
 ```
 
 🚀 How to Run the Project
+
 Backend:
+
+```text
 cd backend
 npm install
 npm start
+```
 
 Frontend:
+```text
 cd frontend
 npm install
 npm run dev
+```
 
 📈 Future Enhancements
 - Adaptive content delivery using AI
