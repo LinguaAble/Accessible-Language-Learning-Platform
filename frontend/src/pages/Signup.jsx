@@ -2,7 +2,8 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import '../App.css';
-import logo from '../assets/logo.png'; // Use the same logo
+import logo from '../assets/logo.png';
+import { Eye, EyeOff } from 'lucide-react'; // <--- Icons
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,11 @@ const Signup = () => {
     password: '',
     confirmPassword: ''
   });
+  
+  // Separate toggle states for each field
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false); 
+  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +31,6 @@ const Signup = () => {
     e.preventDefault();
     setError('');
 
-    // 1. Client-Side Validation (Instant Feedback)
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
     }
@@ -35,21 +40,15 @@ const Signup = () => {
 
     try {
       setLoading(true);
-      // 2. Call the Backend
-      // Story 8: Default settings are applied in backend (authRoutes.js)
       const res = await axios.post('http://localhost:5000/api/auth/register', {
         email,
         password
       });
 
-      // 3. Auto-Login upon success (Professional UX)
       localStorage.setItem('token', res.data.token);
-
-      // Story 10: Guided Onboarding (Future Step: Redirect to /onboarding instead of /dashboard)
       navigate('/dashboard');
 
     } catch (err) {
-      // Handle Backend Errors (e.g., "User already exists")
       if (err.response && err.response.data.message) {
         setError(err.response.data.message);
       } else {
@@ -63,7 +62,6 @@ const Signup = () => {
   return (
     <div className="login-container">
       <div className="login-box">
-        {/* Same Logo & Branding as Login Page */}
         <div className="logo-container">
           <img src={logo} alt="LinguaAble Zebra Mascot" className="app-logo" />
         </div>
@@ -84,34 +82,80 @@ const Signup = () => {
               onChange={handleChange}
               placeholder="name@company.com"
               required
-              autoFocus // Focus here first
+              autoFocus
             />
           </div>
 
           <div className="input-group">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              value={password}
-              onChange={handleChange}
-              placeholder="Create a password"
-              required
-            />
+            {/* --- FIX 1: Password Wrapper --- */}
+            <div style={{ position: 'relative' }}>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={password}
+                onChange={handleChange}
+                placeholder="Create a password"
+                required
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)', // Centers vertically
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  zIndex: 10, // Keeps it clickable
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <div className="input-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              name="confirmPassword"
-              value={confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              required
-            />
+            {/* --- FIX 2: Confirm Password Wrapper --- */}
+            <div style={{ position: 'relative' }}>
+              <input
+                id="confirmPassword"
+                type={showConfirm ? "text" : "password"}
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                required
+                style={{ paddingRight: '40px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)', // Centers vertically
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  zIndex: 10, // Keeps it clickable
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="login-btn" disabled={loading}>

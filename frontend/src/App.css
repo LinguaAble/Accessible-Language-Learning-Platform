@@ -325,3 +325,8 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: white !important;
   caret-color: white;
 }
+/* --- FIX: Remove Default Browser Password Eye --- */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
