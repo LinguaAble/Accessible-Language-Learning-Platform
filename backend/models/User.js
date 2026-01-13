@@ -13,12 +13,18 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  
+  // --- NEW: Password Reset Fields ---
+  resetPasswordToken: String,
+  resetPasswordExpire: Date,
+  // ----------------------------------
+
   // Story 8: Default ADHD-friendly settings applied automatically
   preferences: {
-    theme: { type: String, default: 'minimalist' }, // Distraction-free by default
-    soundEffects: { type: Boolean, default: false }, // Quiet by default
-    animationReduced: { type: Boolean, default: true }, // No moving distractions
-    sessionDuration: { type: Number, default: 15 } // Short 15-min sessions
+    theme: { type: String, default: 'minimalist' },
+    soundEffects: { type: Boolean, default: false },
+    animationReduced: { type: Boolean, default: true },
+    sessionDuration: { type: Number, default: 15 }
   },
   createdAt: {
     type: Date,
