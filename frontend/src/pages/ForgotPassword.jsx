@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
@@ -6,15 +6,12 @@ import '../App.css';
 import { Eye, EyeOff } from 'lucide-react';
 
 const ForgotPassword = () => {
-  // Steps: 1 = Enter Email, 2 = Enter OTP & New Password
   const [step, setStep] = useState(1);
-  
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // Toggle States for Eye Icons
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   
@@ -22,11 +19,25 @@ const ForgotPassword = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const [timer, setTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
+
   const navigate = useNavigate();
 
-  // STEP 1: Send OTP to Email
+  useEffect(() => {
+    let interval;
+    if (step === 2 && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (timer === 0) {
+      setCanResend(true);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
+
   const handleSendOtp = async (e) => {
-    e.preventDefault();
+    if(e) e.preventDefault();
     setLoading(true);
     setError('');
     setMessage('');
@@ -34,7 +45,9 @@ const ForgotPassword = () => {
     try {
       await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
       setMessage(`OTP sent to ${email}. Check your inbox!`);
-      setStep(2); // Move to next step
+      setStep(2);
+      setTimer(60);
+      setCanResend(false); 
     } catch (err) {
       setError(err.response?.data?.message || "User not found");
     } finally {
@@ -42,7 +55,6 @@ const ForgotPassword = () => {
     }
   };
 
-  // STEP 2: Verify OTP and Reset Password
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -52,23 +64,18 @@ const ForgotPassword = () => {
       setLoading(false);
       return setError("Password is too short");
     }
-
     if (newPassword !== confirmPassword) {
       setLoading(false);
       return setError("Passwords do not match");
     }
 
     try {
-      // We send the OTP as the 'token' in the URL
       await axios.put(`http://localhost:5000/api/auth/reset-password/${otp}`, {
         password: newPassword
       });
 
       setMessage("Password Changed Successfully! Redirecting...");
-      
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      setTimeout(() => navigate('/'), 2000);
 
     } catch (err) {
       setError(err.response?.data?.message || "Invalid OTP or Expired");
@@ -90,7 +97,7 @@ const ForgotPassword = () => {
         </h1>
 
         <h2 className="page-title">
-          {step === 1 ? "Forgot Password?" : "Enter OTP Code"}
+          {step === 1 ? "Forgot Password?" : "Enter the OTP"}
         </h2>
 
         {message && (
@@ -101,7 +108,7 @@ const ForgotPassword = () => {
 
         {error && <div className="error-message" role="alert">{error}</div>}
 
-        {/* FORM STEP 1: ASK FOR EMAIL */}
+        {/* STEP 1 FORM */}
         {step === 1 && (
           <form onSubmit={handleSendOtp}>
             <div className="input-group">
@@ -119,10 +126,14 @@ const ForgotPassword = () => {
             <button type="submit" className="login-btn" disabled={loading}>
               {loading ? 'Sending...' : 'Send OTP Code'}
             </button>
+            
+             <p className="signup-text">
+                Remembered your password? <Link to="/">Sign In</Link>
+             </p>
           </form>
         )}
 
-        {/* FORM STEP 2: ASK FOR OTP + NEW PASSWORD */}
+        {/* STEP 2 FORM */}
         {step === 2 && (
           <form onSubmit={handleResetPassword}>
             <div className="input-group">
@@ -141,9 +152,7 @@ const ForgotPassword = () => {
 
             <div className="input-group">
               <label>New Password</label>
-              
-              {/* --- WRAPPER FIX START --- */}
-              <div style={{ position: 'relative', marginBottom: '5px' }}>
+              <div style={{ position: 'relative', marginBottom: '30px' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={newPassword}
@@ -155,39 +164,20 @@ const ForgotPassword = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#6b7280',
-                    zIndex: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: 0
-                  }}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: 0 }}
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
+                {newPassword.length > 0 && newPassword.length < 6 && (
+                  <p style={{ position: 'absolute', bottom: '-25px', left: '0', color: '#e74c3c', fontSize: '0.8rem', fontWeight: '500', margin: 0 }}>
+                    ⚠️ Password must be at least 6 characters
+                  </p>
+                )}
               </div>
-              {/* --- WRAPPER FIX END --- */}
-
-              {/* --- 6-CHAR WARNING TEXT --- */}
-              {newPassword.length > 0 && newPassword.length < 6 && (
-                <p style={{ color: '#e74c3c', fontSize: '0.85rem', marginTop: '5px', fontWeight: '500' }}>
-                  ⚠️ Password must be at least 6 characters
-                </p>
-              )}
-              {/* --------------------------- */}
             </div>
 
-            <div className="input-group" style={{ marginTop: '15px' }}>
+            <div className="input-group">
               <label>Confirm Password</label>
-              
-              {/* --- WRAPPER FIX START --- */}
               <div style={{ position: 'relative' }}>
                 <input
                   type={showConfirm ? "text" : "password"}
@@ -200,46 +190,70 @@ const ForgotPassword = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
-                  style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#6b7280',
-                    zIndex: 10,
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: 0
-                  }}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: 0 }}
                 >
                   {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {/* --- WRAPPER FIX END --- */}
-
             </div>
 
             <button type="submit" className="login-btn" disabled={loading}>
               {loading ? 'Updating...' : 'Change Password'}
             </button>
-            
-            <div style={{textAlign: 'center', marginTop: '15px'}}>
-               <button 
-                 type="button" 
-                 onClick={() => setStep(1)} 
-                 style={{background:'none', border:'none', color:'#7f8c8d', cursor:'pointer', textDecoration:'underline'}}>
-                 Wrong email? Go back
-               </button>
+
+            {/* --- FIXED: Spacing and Colors --- */}
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              gap: '15px', 
+              marginTop: '20px' 
+            }}>
+              
+              {/* 1. Resend OTP - Now Orange */}
+              <button
+                type="button"
+                onClick={() => handleSendOtp()}
+                disabled={!canResend || loading}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  // Changed from Blue (#2563eb) to Orange (#e67e22) to match theme
+                  color: canResend ? '#e67e22' : '#9ca3af', 
+                  cursor: canResend ? 'pointer' : 'not-allowed',
+                  textDecoration: 'underline',
+                  fontSize: '0.9rem',
+                  fontWeight: '600'
+                }}
+              >
+                {canResend ? "Resend OTP" : `Resend OTP in ${timer}s`}
+              </button>
+              
+              {/* 2. Go Back & Sign In - Grouped neatly */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setStep(1)} 
+                  style={{
+                    background:'none', 
+                    border:'none', 
+                    color:'#7f8c8d', 
+                    cursor:'pointer', 
+                    fontSize: '0.9rem'
+                  }}>
+                  Wrong email? <span style={{textDecoration: 'underline'}}>Go back</span>
+                </button>
+
+                <p className="signup-text" style={{margin: 0, fontSize: '0.9rem'}}>
+                  Remembered Your Password? <Link to="/" style={{color: '#e67e22', fontWeight: 'bold'}}>Sign In</Link>
+                </p>
+              </div>
+
             </div>
+            {/* -------------------------------- */}
+            
           </form>
         )}
-
-        <p className="signup-text">
-          Remembered your password? <Link to="/">Sign In</Link>
-        </p>
       </div>
     </div>
   );
