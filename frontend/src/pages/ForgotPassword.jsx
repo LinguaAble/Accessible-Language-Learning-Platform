@@ -2,19 +2,22 @@ import { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
-import '../App.css';
+import '../App.css'; 
+import { Eye, EyeOff } from 'lucide-react';
 
 const ForgotPassword = () => {
   // Steps: 1 = Enter Email, 2 = Enter OTP & New Password
   const [step, setStep] = useState(1);
-
+  
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Toggle States for Eye Icons
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [showConfirm, setShowConfirm] = useState(false);
+  
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,7 +30,7 @@ const ForgotPassword = () => {
     setLoading(true);
     setError('');
     setMessage('');
-
+    
     try {
       await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
       setMessage(`OTP sent to ${email}. Check your inbox!`);
@@ -45,14 +48,14 @@ const ForgotPassword = () => {
     setLoading(true);
     setError('');
 
+    if (newPassword.length < 6) {
+      setLoading(false);
+      return setError("Password is too short");
+    }
+
     if (newPassword !== confirmPassword) {
       setLoading(false);
       return setError("Passwords do not match");
-    }
-
-    if (newPassword.length < 6) {
-      setLoading(false);
-      return setError("Password must be at least 6 characters");
     }
 
     try {
@@ -62,7 +65,7 @@ const ForgotPassword = () => {
       });
 
       setMessage("Password Changed Successfully! Redirecting...");
-
+      
       setTimeout(() => {
         navigate('/');
       }, 2000);
@@ -86,7 +89,6 @@ const ForgotPassword = () => {
           <span className="text-brand-red">Able</span>
         </h1>
 
-        {/* Dynamic Title based on Step */}
         <h2 className="page-title">
           {step === 1 ? "Forgot Password?" : "Enter OTP Code"}
         </h2>
@@ -139,65 +141,20 @@ const ForgotPassword = () => {
 
             <div className="input-group">
               <label>New Password</label>
-              <div style={{ position: 'relative' }}>
+              
+              {/* --- WRAPPER FIX START --- */}
+              <div style={{ position: 'relative', marginBottom: '5px' }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="New secure password"
                   required
-                  style={{ paddingRight: '40px' }}
+                  style={{ paddingRight: '40px', marginBottom: 0 }}
                 />
                 <button
                   type="button"
-                  className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#6b7280', // Match Signup.jsx color or inherit
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: 0
-                  }}
-                >
-                  {showPassword ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label>Confirm Password</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Type password again"
-                  required
-                  style={{ paddingRight: '40px' }}
-                />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                   style={{
                     position: 'absolute',
                     right: '10px',
@@ -207,37 +164,75 @@ const ForgotPassword = () => {
                     border: 'none',
                     cursor: 'pointer',
                     color: '#6b7280',
+                    zIndex: 10,
                     display: 'flex',
                     alignItems: 'center',
                     padding: 0
                   }}
                 >
-                  {showConfirmPassword ? (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  )}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {/* --- WRAPPER FIX END --- */}
+
+              {/* --- 6-CHAR WARNING TEXT --- */}
+              {newPassword.length > 0 && newPassword.length < 6 && (
+                <p style={{ color: '#e74c3c', fontSize: '0.85rem', marginTop: '5px', fontWeight: '500' }}>
+                  ⚠️ Password must be at least 6 characters
+                </p>
+              )}
+              {/* --------------------------- */}
+            </div>
+
+            <div className="input-group" style={{ marginTop: '15px' }}>
+              <label>Confirm Password</label>
+              
+              {/* --- WRAPPER FIX START --- */}
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Type password again"
+                  required
+                  style={{ paddingRight: '40px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#6b7280',
+                    zIndex: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: 0
+                  }}
+                >
+                  {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {/* --- WRAPPER FIX END --- */}
+
             </div>
 
             <button type="submit" className="login-btn" disabled={loading}>
               {loading ? 'Updating...' : 'Change Password'}
             </button>
-
-            <div style={{ textAlign: 'center', marginTop: '15px' }}>
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                style={{ background: 'none', border: 'none', color: '#7f8c8d', cursor: 'pointer', textDecoration: 'underline' }}>
-                Wrong email? Go back
-              </button>
+            
+            <div style={{textAlign: 'center', marginTop: '15px'}}>
+               <button 
+                 type="button" 
+                 onClick={() => setStep(1)} 
+                 style={{background:'none', border:'none', color:'#7f8c8d', cursor:'pointer', textDecoration:'underline'}}>
+                 Wrong email? Go back
+               </button>
             </div>
           </form>
         )}

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import '../App.css';
 import logo from '../assets/logo.png';
-import { Eye, EyeOff } from 'lucide-react'; // <--- Icons
+import { Eye, EyeOff } from 'lucide-react';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +12,6 @@ const Signup = () => {
     confirmPassword: ''
   });
   
-  // Separate toggle states for each field
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false); 
   
@@ -31,11 +30,11 @@ const Signup = () => {
     e.preventDefault();
     setError('');
 
+    if (password.length < 6) {
+      return setError('Password is too short');
+    }
     if (password !== confirmPassword) {
       return setError('Passwords do not match');
-    }
-    if (password.length < 6) {
-      return setError('Password must be at least 6 characters');
     }
 
     try {
@@ -88,8 +87,9 @@ const Signup = () => {
 
           <div className="input-group">
             <label htmlFor="password">Password</label>
-            {/* --- FIX 1: Password Wrapper --- */}
-            <div style={{ position: 'relative' }}>
+            
+            {/* Wrapper: Increased marginBottom to 30px for more space */}
+            <div style={{ position: 'relative', marginBottom: '30px' }}>
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
@@ -98,7 +98,7 @@ const Signup = () => {
                 onChange={handleChange}
                 placeholder="Create a password"
                 required
-                style={{ paddingRight: '40px' }}
+                style={{ paddingRight: '40px', marginBottom: 0 }}
               />
               <button
                 type="button"
@@ -107,24 +107,42 @@ const Signup = () => {
                   position: 'absolute',
                   right: '10px',
                   top: '50%',
-                  transform: 'translateY(-50%)', // Centers vertically
+                  transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
                   color: '#6b7280',
-                  zIndex: 10, // Keeps it clickable
+                  zIndex: 10,
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  padding: 0
                 }}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
+
+              {/* --- FIX: Absolute Positioned Warning --- */}
+              {/* Adjusted bottom to -25px to fit nicely in the larger gap */}
+              {password.length > 0 && password.length < 6 && (
+                <p style={{ 
+                  position: 'absolute',
+                  bottom: '-25px', 
+                  left: '0',
+                  color: '#e74c3c', 
+                  fontSize: '0.8rem', 
+                  fontWeight: '500',
+                  margin: 0
+                }}>
+                  ⚠️ Password must be at least 6 characters
+                </p>
+              )}
+              {/* -------------------------------------- */}
             </div>
           </div>
 
           <div className="input-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
-            {/* --- FIX 2: Confirm Password Wrapper --- */}
+            
             <div style={{ position: 'relative' }}>
               <input
                 id="confirmPassword"
@@ -143,14 +161,15 @@ const Signup = () => {
                   position: 'absolute',
                   right: '10px',
                   top: '50%',
-                  transform: 'translateY(-50%)', // Centers vertically
+                  transform: 'translateY(-50%)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
                   color: '#6b7280',
-                  zIndex: 10, // Keeps it clickable
+                  zIndex: 10,
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  padding: 0
                 }}
               >
                 {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
