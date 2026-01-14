@@ -85,8 +85,8 @@ router.post('/forgot-password', async (req, res) => {
       .update(otp)
       .digest('hex');
 
-    // Expires in 10 minutes
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+    // Expires in 1 minute
+    user.resetPasswordExpire = Date.now() + 1 * 60 * 1000;
 
     await user.save();
 
@@ -103,7 +103,7 @@ router.post('/forgot-password', async (req, res) => {
       from: `"LinguaAble Support" <${process.env.EMAIL_USER}>`,
       to: user.email,
       subject: 'Password Reset Code',
-      text: `Your password reset code is: ${otp}\n\nThis code expires in 10 minutes.`
+      text: `Your password reset otp is: ${otp}\n\nThis code expires in 1 minute.`
     };
 
     await transporter.sendMail(message);
