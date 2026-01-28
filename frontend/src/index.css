@@ -1,0 +1,48 @@
+:root {
+  /* LIGHT THEME DEFAULTS */
+  --bg-color: #f0f2f5;
+  --bg-pattern: radial-gradient(#e1e4e8 1px, transparent 1px);
+  --bg-size: 20px 20px;
+  
+  --card-bg: #ffffff;
+  --text-main: #1a1a1a;
+  --text-muted: #65676b;
+  --border-color: #e4e6eb;
+  
+  --primary-color: #4a90e2;
+  --accent-color: #f79c42;
+  --accent-hover: #e67e22;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s;
+}
+
+/* DARK THEME (This is your main template) */
+[data-theme='dark'] {
+  --bg-color: #0f172a; 
+  --bg-pattern: radial-gradient(#1e293b 1px, transparent 1px);
+  
+  --card-bg: #1e293b;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  
+  --primary-color: #3b82f6;
+  --accent-color: #f97316;
+  --accent-hover: #ea580c;
+  --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+/* GLOBAL BODY STYLES */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+  /* THIS connects the variables to the page */
+  background-color: var(--bg-color);
+  background-image: var(--bg-pattern);
+  background-size: var(--bg-size);
+  color: var(--text-main);
+  
+  transition: background-color 0.3s, color 0.3s;
+}
