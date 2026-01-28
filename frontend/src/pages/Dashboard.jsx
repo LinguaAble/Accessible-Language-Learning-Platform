@@ -7,6 +7,16 @@ import '../Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [user] = useState(JSON.parse(localStorage.getItem('user')) || {});
+
+  // Derive a display name from email (everything before @), capitalizing the first letter
+  const getDisplayName = () => {
+    if (!user.email) return "Learner";
+    const namePart = user.email.split('@')[0];
+    return namePart.charAt(0).toUpperCase() + namePart.slice(1);
+  };
+
+  const displayName = getDisplayName();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -17,7 +27,7 @@ const Dashboard = () => {
     <div className="main-content-scrollable">
       <header className="content-header">
         <div className="greeting">
-          <h2>नमस्ते, Arjun! 👋</h2>
+          <h2>नमस्ते, {displayName}! 👋</h2>
           <p>You're 15 minutes away from your daily goal.</p>
         </div>
         <div className="header-stats">
@@ -26,7 +36,7 @@ const Dashboard = () => {
           </div>
           <button className="notif-btn"><Bell size={20} /></button>
           <div className="profile-avatar">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun" alt="User" />
+            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} alt="User" />
           </div>
         </div>
       </header>

@@ -28,8 +28,10 @@ const Login = () => {
 
       if (rememberMe) {
         localStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify(res.data.user)); // Save user data
       } else {
         sessionStorage.setItem('token', res.data.token);
+        localStorage.setItem('user', JSON.stringify(res.data.user)); // Save to local for Dashboard access or handle session logic
       }
 
       navigate('/dashboard');
@@ -46,7 +48,18 @@ const Login = () => {
   const handleGoogleSuccess = (credentialResponse) => {
     const decoded = jwtDecode(credentialResponse.credential);
     console.log("Logged in with Google:", decoded);
+
+    // Save token
     localStorage.setItem('token', credentialResponse.credential);
+
+    // Create and save user object from Google data
+    const googleUser = {
+      email: decoded.email,
+      name: decoded.name,
+      picture: decoded.picture
+    };
+    localStorage.setItem('user', JSON.stringify(googleUser));
+
     navigate('/dashboard');
   };
 
@@ -96,34 +109,34 @@ const Login = () => {
             {/* --- WRAPPER FIX START --- */}
             {/* This relative div makes sure the icon stays inside the input box */}
             <div style={{ position: 'relative' }}>
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  style={{ paddingRight: '40px' }} // Make space for icon
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '10px',
-                    top: '50%',
-                    transform: 'translateY(-50%)', // <--- THIS centers it vertically
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#6b7280',
-                    display: 'flex',
-                    alignItems: 'center',
-                    zIndex: 10
-                  }}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                style={{ paddingRight: '40px' }} // Make space for icon
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)', // <--- THIS centers it vertically
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  display: 'flex',
+                  alignItems: 'center',
+                  zIndex: 10
+                }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {/* --- WRAPPER FIX END --- */}
 
