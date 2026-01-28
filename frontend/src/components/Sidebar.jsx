@@ -4,6 +4,8 @@ import {
     LayoutDashboard, BookOpen, Trophy, Settings, LogOut, MessageSquare
 } from 'lucide-react';
 
+import zebraMascot from '../assets/zebra-mascot.png';
+
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -21,8 +23,11 @@ const Sidebar = () => {
     return (
         <aside className="sidebar">
             <div className="logo-section">
-                <div className="logo-circle">L</div>
-                <h1 className="brand-name">Linguable</h1>
+                <img src={zebraMascot} alt="LinguaAble Logo" className="logo-image" />
+                <div className="branding-container">
+                    <h1 className="brand-name">Lingua<span className="highlight-text">Able</span></h1>
+                    <span className="slogan-text">Built Around Learners, Not Limitations!</span>
+                </div>
             </div>
 
             <nav className="side-nav">
