@@ -1,50 +1,54 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import './App.css';
+import Lessons from './pages/Lessons';
+import Practice from './pages/Practice';
+import Leaderboard from './pages/Leaderboard';
+import Settings from './pages/Settings';
+import Layout from './components/Layout';
+// Import other pages as needed
+
+import './App.css'; // Make sure this exists, even if empty
 
 function App() {
-  const [theme, setTheme] = useState('dark');
-  const navigate = useNavigate(); // <--- Now we can use this!
+  // 1. Initialize Theme (Default to 'dark' to fix the white flash)
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  const navigate = useNavigate();
   const location = useLocation();
 
-  // --- LOGIC: Auto-Login on App Load ---
+  // 2. Apply Theme to Body
   useEffect(() => {
-    // 1. Check if a token exists in either storage
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    
-    // 2. If token exists AND user is trying to access the Login page ('/'), send them to Dashboard
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // 3. Auto-Login Logic
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    // If we have a token and are on the login page, go to dashboard
     if (token && location.pathname === '/') {
       navigate('/dashboard');
     }
   }, [navigate, location.pathname]);
-  // -------------------------------------
-
-  const toggleTheme = () => {
-    setTheme((curr) => (curr === 'light' ? 'dark' : 'light'));
-  };
-
-  useEffect(() => {
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
 
   return (
-    <div className="app-wrapper">
-      <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle Dark/Light Mode">
-        {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
-      </button>
-
-      {/* Note: No <Router> here anymore, it is in main.jsx */}
+    <div className="app-container">
+      {/* Routes */}
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        {/* Protected Routes wrapped in Layout */}
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/lessons" element={<Lessons />} />
+          <Route path="/practice" element={<Practice />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+
+        {/* Add your other routes like /lessons here later */}
       </Routes>
     </div>
   );
