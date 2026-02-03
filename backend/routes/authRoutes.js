@@ -5,7 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-
+const axios = require('axios');
+const LoginActivity = require('../models/LoginActivity');
 // 1. REGISTER USER
 router.post('/register', async (req, res) => {
   try {
@@ -28,6 +29,44 @@ router.post('/register', async (req, res) => {
     });
 
     await user.save();
+    // --- Suspicious login detection start ---
+
+// Get user's IP
+
+    const userIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+// Fetch geolocation data
+
+    const geoRes = await axios.get(`http://ip-api.com/json/${userIp}`);
+
+    const geo = geoRes.data; // geo.country, geo.city
+
+// Fetch last 5 logins for this user
+
+    const pastLogins = await LoginActivity.find({ userId: user._id }).sort({ createdAt: -1 }).limit(5);
+
+    let suspicious = false;
+// Rule 1: Login from a new country
+    if (pastLogins.length > 0 && pastLogins[0].country !== geo.country) {
+      suspicious = true;
+    }
+
+
+// If suspicious, block login
+
+    if (suspicious) {
+      return res.status(403).json({
+        message: "Suspicious login detected — verification required"
+      });
+    }
+
+// Save this login attempt
+    await LoginActivity.create({
+    userId: user._id,
+    ip: userIp,
+    country: geo.country,
+    city: geo.city
+    });
 
     // Create Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });

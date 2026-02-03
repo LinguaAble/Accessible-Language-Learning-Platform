@@ -37,6 +37,12 @@ const Login = () => {
       navigate('/dashboard');
 
     } catch (err) {
+      // Suspicious Login Handling
+      if (err.response && err.response.status === 403) {
+        setError("⚠️ Suspicious login detected — Login attempt blocked.");
+        return;
+      }
+
       if (err.response && err.response.data.message) {
         setError(err.response.data.message);
       } else {

@@ -1,4 +1,5 @@
 :root {
+<<<<<<< HEAD
   /* LIGHT THEME DEFAULTS */
   --bg-color: #f0f2f5;
   --bg-pattern: radial-gradient(#e1e4e8 1px, transparent 1px);
@@ -30,19 +31,96 @@
   --accent-color: #f97316;
   --accent-hover: #ea580c;
   --shadow-color: rgba(0, 0, 0, 0.5);
+=======
+  /* ADHD-FRIENDLY PALETTE "Calm Focus" */
+  /* Light Theme */
+  --bg-color: #f4f7f5; /* Soft Sage Cream - Low glare */
+  --bg-pattern: radial-gradient(#d8e2dc 1px, transparent 1px);
+  --bg-size: 24px 24px;
+  
+  --card-bg: rgba(255, 255, 255, 0.85); /* Glassmorphic base */
+  --text-main: #2c3e50; /* Deep Blue Grey - High contrast but not harsh black */
+  --text-muted: #5d6d7e;
+  --border-color: rgba(74, 124, 111, 0.15); /* Muted Teal Border */
+  
+  --primary-color: #4a7c6f; /* Muted Teal - Calming, natural */
+  --primary-hover: #3a6358;
+  --accent-color: #e09f3e; /* Warm Sand - Friendly attention */
+  --accent-hover: #c4882e;
+  
+  --success-color: #6a994e; /* Muted Green */
+  --error-color: #bc4749; /* Brick Red - Alert without panic */
+  
+  --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(74, 124, 111, 0.1);
+  --shadow-color: rgba(74, 124, 111, 0.15);
+  --transition-speed: 0.3s;
+}
+
+/* DARK THEME */
+[data-theme='dark'] {
+  --bg-color: #152028; /* Deep Jungle Slate - Reduces eye strain */
+  --bg-pattern: radial-gradient(#1f2d36 1px, transparent 1px);
+  
+  --card-bg: rgba(30, 41, 59, 0.75);
+  --text-main: #dce7e3; /* Soft Off-White */
+  --text-muted: #94a3b8;
+  --border-color: rgba(91, 161, 144, 0.2);
+  
+  --primary-color: #5ba190; /* Seafoam - Visible on dark */
+  --primary-hover: #4d8f7f;
+  --accent-color: #d68c45; /* Burnt Ochre */
+  --accent-hover: #b87538;
+  
+  --success-color: #8cb369;
+  --error-color: #d66853;
+  
+  --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.4);
+>>>>>>> 6320a95 (added dashboard)
 }
 
 /* GLOBAL BODY STYLES */
 body {
   margin: 0;
   padding: 0;
+<<<<<<< HEAD
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   
   /* THIS connects the variables to the page */
+=======
+  font-family: 'Outfit', 'Segoe UI', Tahoma, Verdana, sans-serif; /* Setup for a modern font */
+  
+>>>>>>> 6320a95 (added dashboard)
   background-color: var(--bg-color);
   background-image: var(--bg-pattern);
   background-size: var(--bg-size);
   color: var(--text-main);
   
+<<<<<<< HEAD
   transition: background-color 0.3s, color 0.3s;
+=======
+  transition: background-color 0.4s ease, color 0.3s ease;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+>>>>>>> 6320a95 (added dashboard)
 }
