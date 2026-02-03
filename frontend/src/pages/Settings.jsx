@@ -1,30 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Flame, Bell } from 'lucide-react';
-import '../Dashboard.css';
-
-const Settings = () => {
-    return (
-        <div>
-            <header className="content-header">
-                <div className="greeting">
-                    <h2>Settings</h2>
-                    <p>Manage your preferences.</p>
-                </div>
-                <div className="header-stats">
-                    <div className="stat-pill streak">
-                        <Flame size={18} fill="currentColor" /> 5 Day Streak
-                    </div>
-                    <button className="notif-btn"><Bell size={20} /></button>
-                    <div className="profile-avatar">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun" alt="User" />
-                    </div>
-                </div>
-            </header>
-            <div className="dashboard-grid">
-                <h2>Settings Content Goes Here</h2>
-            </div>
-=======
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bell, Volume2, Moon, Sun, Save } from 'lucide-react';
@@ -203,13 +176,12 @@ const Settings = () => {
 
                 </div>
             </main>
->>>>>>> 6320a95 (added dashboard)
+
         </div>
     );
 };
 
-<<<<<<< HEAD
-=======
+
 // Simple check icon for the save state
 const Check = ({ size }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -217,5 +189,5 @@ const Check = ({ size }) => (
     </svg>
 );
 
->>>>>>> 6320a95 (added dashboard)
+
 export default Settings;
