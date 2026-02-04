@@ -361,8 +361,14 @@
   }
 
   .brand-name,
-  .nav-item span {
+  .nav-item span,
+  .slogan-text,
+  .logo-section .branding-container {
     display: none;
+  }
+
+  .logo-section {
+    justify-content: center;
   }
 
   .dashboard-grid {
@@ -370,110 +376,169 @@
   }
 }
 
+/* --- COLLAPSED STATE (Manual Toggle & Hover) --- */
+.sidebar.collapsed {
+  width: 80px;
+}
+
+/* Smooth Text Hiding */
+.nav-item span,
+.slogan-text,
+.brand-name {
+  transition: opacity 0.2s, max-width 0.3s, margin 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 200px;
+  /* Arbitrary large width */
+  opacity: 1;
+}
+
+.branding-container {
+  transition: width 0.3s, flex 0.3s;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .nav-item span,
+.sidebar.collapsed .slogan-text,
+.sidebar.collapsed .brand-name {
+  max-width: 0;
+  opacity: 0;
+  margin: 0;
+}
+
+.sidebar.collapsed .branding-container {
+  width: 0 !important;
+  flex: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar.collapsed .logo-section {
+  justify-content: center;
+  padding-left: 0;
+  gap: 0;
+}
+
+.sidebar.collapsed .logo-image {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+
+
 /* --- PASTE THIS AT THE BOTTOM OF src/Dashboard.css --- */
 
 /* Chapter Section Layout */
 .chapters-scroll {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    padding-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-bottom: 50px;
 }
 
 .chapter-section {
-    animation: fadeIn 0.5s ease-in-out;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 /* Chapter Header Strip */
 .chapter-header {
-    background: var(--card-bg);
-    padding: 20px 25px;
-    border-radius: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px var(--shadow-color);
+  background: var(--card-bg);
+  padding: 20px 25px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px var(--shadow-color);
 }
 
 .chapter-badge {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
 }
 
 /* Lesson Grid */
 .lessons-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive Grid */
-    gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* Responsive Grid */
+  gap: 15px;
 }
 
 /* Individual Lesson Card */
 .lesson-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    padding: 20px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 15px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 20px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
 .lesson-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent-color);
-    background: linear-gradient(135deg, var(--card-bg), rgba(230, 126, 34, 0.05));
+  transform: translateY(-5px);
+  border-color: var(--accent-color);
+  background: linear-gradient(135deg, var(--card-bg), rgba(230, 126, 34, 0.05));
 }
 
 /* Locked State */
 .lesson-card.locked {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background: rgba(0,0,0,0.2);
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.2);
 }
+
 .lesson-card.locked:hover {
-    transform: none;
-    border-color: var(--border-color);
+  transform: none;
+  border-color: var(--border-color);
 }
 
 /* Completed State */
 .lesson-card.completed {
-    border-color: #2ecc71;
+  border-color: #2ecc71;
 }
 
 .lesson-info {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .lesson-num {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-    font-weight: 700;
-    margin-bottom: 5px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: 5px;
 }
 
 .lesson-title {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-main);
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-main);
 }
 
 /* Animation */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

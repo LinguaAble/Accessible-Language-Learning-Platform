@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, MessageSquare
+    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, MessageSquare, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 import zebraMascot from '../assets/zebra-mascot.png';
@@ -9,6 +9,8 @@ import zebraMascot from '../assets/zebra-mascot.png';
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    // Default to collapsed (minimized)
+    const [isCollapsed, setIsCollapsed] = useState(true);
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -21,8 +23,12 @@ const Sidebar = () => {
     };
 
     return (
-        <aside className="sidebar">
-            <div className="logo-section">
+        <aside
+            className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}
+            onMouseEnter={() => setIsCollapsed(false)}
+            onMouseLeave={() => setIsCollapsed(true)}
+        >
+            <div className="logo-section" style={{ position: 'relative' }}>
                 <img src={zebraMascot} alt="LinguaAble Logo" className="logo-image" />
                 <div className="branding-container">
                     <h1 className="brand-name">Lingua<span className="highlight-text">Able</span></h1>
@@ -34,6 +40,7 @@ const Sidebar = () => {
                 <button
                     className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}
                     onClick={() => handleNavigation('/dashboard')}
+                    title="Dashboard"
                 >
                     <LayoutDashboard size={20} /> <span>Dashboard</span>
                 </button>
@@ -41,6 +48,7 @@ const Sidebar = () => {
                 <button
                     className={`nav-item ${location.pathname === '/lessons' ? 'active' : ''}`}
                     onClick={() => handleNavigation('/lessons')}
+                    title="Lessons"
                 >
                     <BookOpen size={20} /> <span>Lessons</span>
                 </button>
@@ -48,6 +56,7 @@ const Sidebar = () => {
                 <button
                     className={`nav-item ${location.pathname === '/practice' ? 'active' : ''}`}
                     onClick={() => handleNavigation('/practice')}
+                    title="Practice"
                 >
                     <MessageSquare size={20} /> <span>Practice</span>
                 </button>
@@ -55,6 +64,7 @@ const Sidebar = () => {
                 <button
                     className={`nav-item ${location.pathname === '/leaderboard' ? 'active' : ''}`}
                     onClick={() => handleNavigation('/leaderboard')}
+                    title="Leaderboard"
                 >
                     <Trophy size={20} /> <span>Leaderboard</span>
                 </button>
@@ -64,11 +74,12 @@ const Sidebar = () => {
                 <button
                     className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}
                     onClick={() => handleNavigation('/settings')}
+                    title="Settings"
                 >
                     <Settings size={20} /> <span>Settings</span>
                 </button>
 
-                <button className="nav-item logout" onClick={handleLogout}>
+                <button className="nav-item logout" onClick={handleLogout} title="Logout">
                     <LogOut size={20} /> <span>Logout</span>
                 </button>
             </div>
