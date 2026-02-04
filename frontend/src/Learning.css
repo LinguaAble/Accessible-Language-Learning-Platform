@@ -221,3 +221,46 @@
     align-items: center;
     gap: 5px;
 }
+
+/* --- DESKTOP RESPONSIVE LAYOUT --- */
+@media (min-width: 1024px) {
+    .slide-content {
+        max-width: 1000px; /* Increase width for desktop */
+        flex-direction: row; /* Side-by-side layout */
+        flex-wrap: wrap; /* Allow wrapping */
+        align-items: flex-start;
+        align-content: center; 
+        gap: 40px; /* Space between card and options */
+    }
+
+    /* Full width for Header elements */
+    .badge-container, 
+    .quiz-question {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    /* Left Column: Visual Card */
+    .card-container {
+        flex: 1;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Right Column: Options */
+    .options-grid {
+        flex: 1;
+        min-width: 300px;
+        margin-top: 0 !important; /* Override inline margin */
+        align-self: center; /* Vertically align with card */
+    }
+
+    /* Ensure Options don't look too stretched if Card is missing */
+    .slide-content:not(:has(.card-container)) .options-grid {
+        flex: 0 1 600px; /* Don't grow beyond 600px */
+        margin: 0 auto;
+    }
+}
