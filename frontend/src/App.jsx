@@ -10,9 +10,9 @@ import Practice from './pages/Practice';
 import Leaderboard from './pages/Leaderboard';
 import Settings from './pages/Settings';
 import Layout from './components/Layout';
-// Import other pages as needed
+import LearningScreen from './pages/LearningScreen'; // <--- 1. Import Added
 
-import './App.css'; // Make sure this exists, even if empty
+import './App.css'; 
 
 function App() {
   // 1. Initialize Theme (Default to 'dark' to fix the white flash)
@@ -45,7 +45,11 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* Protected Routes wrapped in Layout */}
+        {/* --- 2. Learning Screen Added Here --- */}
+        {/* We keep it OUTSIDE the <Layout> so it is full-screen (no sidebar) */}
+        <Route path="/learn" element={<LearningScreen />} />
+
+        {/* Protected Routes wrapped in Layout (Has Sidebar) */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/lessons" element={<Lessons />} />
@@ -54,7 +58,6 @@ function App() {
           <Route path="/settings" element={<Settings />} />
         </Route>
 
-        {/* Add your other routes like /lessons here later */}
       </Routes>
     </div>
   );
