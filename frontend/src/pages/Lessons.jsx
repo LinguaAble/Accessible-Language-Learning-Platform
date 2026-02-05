@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, Bell, PlayCircle, Lock, CheckCircle } from 'lucide-react';
+import { Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import '../Dashboard.css';
 
@@ -7,30 +7,30 @@ const Lessons = () => {
     const navigate = useNavigate();
     const [completedLessons, setCompletedLessons] = useState([]);
 
-    // Load progress from localStorage
+    // Load progress
     React.useEffect(() => {
         const stored = JSON.parse(localStorage.getItem('completedLessons') || '[]');
         setCompletedLessons(stored);
     }, []);
 
-    // --- CHAPTER DATA ---
+    // --- CURRICULUM DATA ---
     const chaptersData = [
         {
             id: 1,
-            title: "Chapter 1: The Basics",
-            subtitle: "Hindi Varnamala (Script)",
+            title: "Chapter 1: Mastering the Script",
+            subtitle: "Hindi Varnamala (Vowels & Consonants)",
             color: "#e67e22", // Orange
             lessons: [
                 { id: 1, title: "Vowels (Swar) - Part 1" },
                 { id: 2, title: "Vowels (Swar) - Part 2" },
-                { id: 3, title: "Consonants (Vyanjan) - 1" },
-                { id: 4, title: "Consonants (Vyanjan) - 2" },
-                { id: 5, title: "Namaste! (Greetings)" },
-                { id: 6, title: "Introducing Yourself" },
-                { id: 7, title: "Yes & No (Haan/Nahi)" },
-                { id: 8, title: "Politeness Words" },
-                { id: 9, title: "Common Objects" },
-                { id: 10, title: "Review: The Basics" }
+                { id: 3, title: "Review: All Vowels", isRecap: true }, // Recap
+                { id: 4, title: "Consonants: K & Ch Series" },
+                { id: 5, title: "Consonants: T & Th Series" },
+                { id: 6, title: "Consonants: D & N Series" },
+                { id: 7, title: "Consonants: P & Y Series" },
+                { id: 8, title: "Consonants: R & Sh Series" },
+                { id: 9, title: "Consonants: S & Conjuncts" },
+                { id: 10, title: "Grand Review: The Script", isRecap: true } // Grand Recap
             ]
         },
         {
@@ -48,7 +48,7 @@ const Lessons = () => {
                 { id: 17, title: "Food & Drink" },
                 { id: 18, title: "Days of the Week" },
                 { id: 19, title: "Time of Day" },
-                { id: 20, title: "Review: Daily Life" }
+                { id: 20, title: "Review: Daily Life", isRecap: true }
             ]
         },
         {
@@ -66,18 +66,17 @@ const Lessons = () => {
                 { id: 27, title: "Adjectives (Big/Small)" },
                 { id: 28, title: "Possessives (My/Your)" },
                 { id: 29, title: "Feelings (Happy/Sad)" },
-                { id: 30, title: "Review: Sentences" }
+                { id: 30, title: "Review: Sentences", isRecap: true }
             ]
         }
     ];
 
     return (
         <div className="lessons-container">
-            {/* --- HEADER --- */}
             <header className="content-header">
                 <div className="greeting">
                     <h2>Lessons</h2>
-                    <p>Explore new languages and skills.</p>
+                    <p>Master the Hindi alphabet and basic conversation.</p>
                 </div>
                 <div className="header-stats">
                     <div className="stat-pill streak">
@@ -90,11 +89,9 @@ const Lessons = () => {
                 </div>
             </header>
 
-            {/* --- CHAPTER LIST --- */}
             <div className="chapters-scroll">
                 {chaptersData.map((chapter) => (
                     <div key={chapter.id} className="chapter-section">
-                        {/* Chapter Title Bar */}
                         <div className="chapter-header" style={{ borderLeft: `5px solid ${chapter.color}` }}>
                             <div>
                                 <h3 style={{ margin: 0, fontSize: '20px' }}>{chapter.title}</h3>
@@ -103,11 +100,9 @@ const Lessons = () => {
                             <span className="chapter-badge">10 Lessons</span>
                         </div>
 
-                        {/* Grid of Lessons */}
                         <div className="lessons-grid">
                             {chapter.lessons.map((lesson) => {
                                 const isCompleted = completedLessons.includes(lesson.id);
-                                // A lesson is unlocked if it's the first one OR the previous one is completed
                                 const isLocked = lesson.id !== 1 && !completedLessons.includes(lesson.id - 1);
 
                                 return (
@@ -121,6 +116,8 @@ const Lessons = () => {
                                                 <CheckCircle size={24} color="#2ecc71" />
                                             ) : isLocked ? (
                                                 <Lock size={24} color="#95a5a6" />
+                                            ) : lesson.isRecap ? (
+                                                <RotateCcw size={24} color={chapter.color} />
                                             ) : (
                                                 <PlayCircle size={24} color={chapter.color} />
                                             )}
