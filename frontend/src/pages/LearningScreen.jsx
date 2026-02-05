@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
 
 import '../Learning.css';
 
@@ -178,6 +179,14 @@ const LearningScreen = () => {
     }
   }, [currentSlideIndex, activeSlides]);
 
+  const playSoundEffect = (type) => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.preferences?.soundEffects) {
+      if (type === 'correct') playCorrectSound();
+      if (type === 'incorrect') playIncorrectSound();
+    }
+  };
+
   const handleQuizAnswer = (option) => {
     if (isCorrect !== null) return;
 
@@ -192,9 +201,10 @@ const LearningScreen = () => {
 
     if (option === currentSlide.answer) {
       setIsCorrect(true);
-      // Audio removed on success to prevent double playback
+      playSoundEffect('correct');
     } else {
       setIsCorrect(false);
+      playSoundEffect('incorrect');
       setMistakeQueue((prev) => [...prev, { ...currentSlide, isReview: true }]);
     }
   };

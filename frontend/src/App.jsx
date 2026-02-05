@@ -14,6 +14,8 @@ import LearningScreen from './pages/LearningScreen'; // <--- 1. Import Added
 
 import './App.css';
 
+import { playClickSound, playNavigationSound } from './utils/soundUtils';
+
 function App() {
   // 1. Initialize Theme (Default to 'dark' to fix the white flash)
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
@@ -44,6 +46,29 @@ function App() {
       navigate('/dashboard');
     }
   }, [navigate, location.pathname]);
+
+  // 4. Global Sound Effects (Navigation & Clicks)
+  useEffect(() => {
+    playNavigationSound();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      // Determine if the clicked element is interactive
+      const target = e.target;
+      const interactiveTag = ['BUTTON', 'A', 'INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName);
+      const isRole = target.getAttribute('role') === 'button' || target.getAttribute('role') === 'link';
+      const isClass = target.className && typeof target.className === 'string' && (target.className.includes('btn') || target.className.includes('button'));
+      const closestInteractive = target.closest('button, a, [role="button"], [role="link"]');
+
+      if (interactiveTag || isRole || isClass || closestInteractive) {
+        playClickSound();
+      }
+    };
+
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
+  }, []);
 
   return (
     <div className="app-container">
