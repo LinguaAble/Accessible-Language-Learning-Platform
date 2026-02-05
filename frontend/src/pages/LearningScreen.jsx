@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
-import axios from 'axios';
+
 import '../Learning.css';
 
 // --- HELPER: GENERATE SLIDES ---
@@ -210,28 +210,21 @@ const LearningScreen = () => {
           localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
 
           // Sync with backend
-<<<<<<< HEAD
           const user = JSON.parse(localStorage.getItem('user') || '{}');
           if (user.email) {
             axios.put('http://localhost:5000/api/auth/update-progress', {
               email: user.email,
               completedLessons
             }).catch(err => console.error("Failed to sync progress", err));
-=======
-          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-          if (token) {
-            axios.put('http://localhost:5000/api/auth/update-progress',
-              { lessonId },
-              { headers: { Authorization: `Bearer ${token}` } }
-            ).catch(err => console.error("Failed to sync progress:", err));
->>>>>>> f4359cf5491da1f1e18eba712734563a924ba34e
           }
         }
+
         setProgress(100);
         setShowSuccess(true);
       }
     }
-  };
+  }
+
 
   if (showSuccess) {
     return (
