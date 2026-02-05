@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { protect } = require('../middleware/authMiddleware'); // Import protect middleware
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -32,7 +33,18 @@ router.post('/register', async (req, res) => {
     // Create Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+<<<<<<< HEAD
     res.json({ token, user: { email: user.email, preferences: user.preferences, completedLessons: user.completedLessons } });
+=======
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons
+      }
+    });
+>>>>>>> f4359cf5491da1f1e18eba712734563a924ba34e
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -59,7 +71,18 @@ router.post('/login', async (req, res) => {
     // Create Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+<<<<<<< HEAD
     res.json({ token, user: { email: user.email, preferences: user.preferences, completedLessons: user.completedLessons } });
+=======
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons
+      }
+    });
+>>>>>>> f4359cf5491da1f1e18eba712734563a924ba34e
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -152,6 +175,7 @@ router.put('/reset-password/:token', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // 5. UPDATE USER PROGRESS
 router.put('/update-progress', async (req, res) => {
   try {
@@ -191,6 +215,42 @@ router.put('/update-progress', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server Error" });
+=======
+// 5. UPDATE PROGRESS
+router.put('/update-progress', protect, async (req, res) => {
+  try {
+    const { lessonId } = req.body;
+
+    // Use $addToSet to avoid duplicates
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { completedLessons: lessonId } },
+      { new: true }
+    ).select('-password');
+
+    res.json({
+      success: true,
+      completedLessons: user.completedLessons
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 6. GET CURRENT USER (For syncing progress)
+router.get('/me', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    res.json({
+      email: user.email,
+      preferences: user.preferences,
+      completedLessons: user.completedLessons
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+>>>>>>> f4359cf5491da1f1e18eba712734563a924ba34e
   }
 });
 

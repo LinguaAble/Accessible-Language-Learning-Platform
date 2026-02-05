@@ -29,9 +29,11 @@ const Login = () => {
       if (rememberMe) {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user)); // Save user data
+        localStorage.setItem('completedLessons', JSON.stringify(res.data.user.completedLessons || [])); // Save progress
       } else {
         sessionStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user)); // Save to local for Dashboard access or handle session logic
+        localStorage.setItem('user', JSON.stringify(res.data.user)); // Save to local for Dashboard access
+        localStorage.setItem('completedLessons', JSON.stringify(res.data.user.completedLessons || [])); // Save progress
       }
 
       // Sync progress from backend to local storage
