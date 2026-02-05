@@ -17,8 +17,8 @@ const Sidebar = () => {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.clear(); // Clear all local storage (token, user, completedLessons)
+        sessionStorage.clear(); // Clear session storage (in case token is there)
         navigate('/');
     };
 

@@ -26,6 +26,8 @@ const UserSchema = new mongoose.Schema({
     animationReduced: { type: Boolean, default: true },
     sessionDuration: { type: Number, default: 15 }
   },
+
+  // Story: Track User Progress
   completedLessons: {
     type: [Number],
     default: []
