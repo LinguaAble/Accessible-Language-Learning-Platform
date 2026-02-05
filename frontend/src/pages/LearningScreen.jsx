@@ -171,12 +171,18 @@ const LearningScreen = () => {
   const handleQuizAnswer = (option) => {
     if (isCorrect !== null) return;
     
-    setSelectedOption(option);
     const currentSlide = activeSlides[currentSlideIndex];
+
+    // Feature: Play audio when clicking Hindi options (Char Select mode)
+    if (currentSlide.subtype === 'char_select') {
+         playAudio(option);
+    }
+    
+    setSelectedOption(option);
     
     if (option === currentSlide.answer) {
       setIsCorrect(true);
-      playAudio(option);
+      // Audio removed on success to prevent double playback
     } else {
       setIsCorrect(false);
       setMistakeQueue((prev) => [...prev, { ...currentSlide, isReview: true }]);
