@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../Dashboard.css';
 
 const Lessons = () => {
@@ -9,8 +10,30 @@ const Lessons = () => {
 
     // Load progress
     React.useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-        setCompletedLessons(stored);
+        const fetchProgress = async () => {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            if (token) {
+                try {
+                    const res = await axios.get('http://localhost:5000/api/auth/me', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.data.completedLessons) {
+                        setCompletedLessons(res.data.completedLessons);
+                        localStorage.setItem('completedLessons', JSON.stringify(res.data.completedLessons));
+                    }
+                } catch (err) {
+                    console.error("Error fetching progress:", err);
+                    // Fallback to local storage if API fails
+                    const stored = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+                    setCompletedLessons(stored);
+                }
+            } else {
+                const stored = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+                setCompletedLessons(stored);
+            }
+        };
+
+        fetchProgress();
     }, []);
 
     // --- CURRICULUM DATA ---

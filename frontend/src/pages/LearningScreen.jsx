@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import axios from 'axios';
 import '../Learning.css';
 
 // --- HELPER: GENERATE SLIDES ---
@@ -116,22 +117,22 @@ const lessonDatabase = {
   7: { title: "Consonants 4", slides: consonantsL7 },
   8: { title: "Consonants 5", slides: consonantsL8 },
   9: { title: "Consonants 6", slides: consonantsL9 },
-  10: { 
-      title: "Grand Review", 
-      slides: [
-          ...vowelsPart1, ...vowelsPart2, 
-          ...consonantsL4, ...consonantsL5, ...consonantsL6, 
-          ...consonantsL7, ...consonantsL8, ...consonantsL9
-      ].sort(() => 0.5 - Math.random()).slice(0, 20) // Random 20 questions
+  10: {
+    title: "Grand Review",
+    slides: [
+      ...vowelsPart1, ...vowelsPart2,
+      ...consonantsL4, ...consonantsL5, ...consonantsL6,
+      ...consonantsL7, ...consonantsL8, ...consonantsL9
+    ].sort(() => 0.5 - Math.random()).slice(0, 20) // Random 20 questions
   }
 };
 
 const LearningScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const lessonId = location.state?.lessonId || 1;
-  const initialLessonData = lessonDatabase[lessonId] || lessonDatabase[1]; 
+  const initialLessonData = lessonDatabase[lessonId] || lessonDatabase[1];
 
   const [activeSlides, setActiveSlides] = useState(initialLessonData.slides);
   const [originalCount] = useState(initialLessonData.slides.length);
@@ -145,7 +146,7 @@ const LearningScreen = () => {
 
   useEffect(() => {
     if (currentSlideIndex >= originalCount) {
-      setProgress(95); 
+      setProgress(95);
     } else {
       setProgress(((currentSlideIndex) / originalCount) * 100);
     }
@@ -164,22 +165,22 @@ const LearningScreen = () => {
   useEffect(() => {
     const slide = activeSlides[currentSlideIndex];
     if (slide && slide.audioText) {
-        setTimeout(() => playAudio(slide.audioText), 600);
+      setTimeout(() => playAudio(slide.audioText), 600);
     }
   }, [currentSlideIndex, activeSlides]);
 
   const handleQuizAnswer = (option) => {
     if (isCorrect !== null) return;
-    
+
     const currentSlide = activeSlides[currentSlideIndex];
 
     // Feature: Play audio when clicking Hindi options (Char Select mode)
     if (currentSlide.subtype === 'char_select') {
-         playAudio(option);
+      playAudio(option);
     }
-    
+
     setSelectedOption(option);
-    
+
     if (option === currentSlide.answer) {
       setIsCorrect(true);
       // Audio removed on success to prevent double playback
@@ -206,6 +207,15 @@ const LearningScreen = () => {
         if (!completedLessons.includes(lessonId)) {
           completedLessons.push(lessonId);
           localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+
+          // Sync with backend
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          if (token) {
+            axios.put('http://localhost:5000/api/auth/update-progress',
+              { lessonId },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ).catch(err => console.error("Failed to sync progress:", err));
+          }
         }
         setProgress(100);
         setShowSuccess(true);
@@ -247,72 +257,72 @@ const LearningScreen = () => {
 
       <div className="slide-content">
         {slide.isReview ? (
-           <div className="badge-container fade-in text-center mb-10">
-              <span className="badge-new" style={{background:'#f59e0b'}}>Previous Mistake</span>
-           </div>
+          <div className="badge-container fade-in text-center mb-10">
+            <span className="badge-new" style={{ background: '#f59e0b' }}>Previous Mistake</span>
+          </div>
         ) : slide.badge && (
-           <div className="badge-container fade-in text-center mb-10">
-              <span className="badge-new"><Zap size={14} fill="currentColor"/> {slide.badge}</span>
-           </div>
+          <div className="badge-container fade-in text-center mb-10">
+            <span className="badge-new"><Zap size={14} fill="currentColor" /> {slide.badge}</span>
+          </div>
         )}
 
         <h2 className="quiz-question">{slide.question}</h2>
 
         {(slide.subtype === 'intro' || slide.subtype === 'audio_match') && (
-            <div className="card-container text-center fade-in">
-                <div className="card-display" onClick={() => playAudio(slide.audioText)} style={{cursor: 'pointer'}}>
-                    <h1 className="hindi-large">{slide.mainChar}</h1>
-                    <div className="pronunciation">
-                        <button className="audio-btn-circle" onClick={(e) => {e.stopPropagation(); playAudio(slide.audioText);}}>
-                            <Volume2 size={24} />
-                        </button>
-                    </div>
-                </div>
+          <div className="card-container text-center fade-in">
+            <div className="card-display" onClick={() => playAudio(slide.audioText)} style={{ cursor: 'pointer' }}>
+              <h1 className="hindi-large">{slide.mainChar}</h1>
+              <div className="pronunciation">
+                <button className="audio-btn-circle" onClick={(e) => { e.stopPropagation(); playAudio(slide.audioText); }}>
+                  <Volume2 size={24} />
+                </button>
+              </div>
             </div>
+          </div>
         )}
 
-        <div className={`options-grid fade-in ${slide.subtype === 'char_select' ? 'grid-cols-3' : 'grid-cols-2'}`} style={{marginTop: '30px'}}>
-            {slide.options.map((opt, idx) => (
-            <button 
-                key={idx}
-                className={`option-btn 
+        <div className={`options-grid fade-in ${slide.subtype === 'char_select' ? 'grid-cols-3' : 'grid-cols-2'}`} style={{ marginTop: '30px' }}>
+          {slide.options.map((opt, idx) => (
+            <button
+              key={idx}
+              className={`option-btn 
                 ${slide.subtype === 'char_select' ? 'hindi-option' : ''}
                 ${selectedOption === opt ? 'selected' : ''} 
                 ${isCorrect === true && selectedOption === opt ? 'correct' : ''}
                 ${isCorrect === false && selectedOption === opt ? 'wrong' : ''}
                 `}
-                onClick={() => handleQuizAnswer(opt)}
+              onClick={() => handleQuizAnswer(opt)}
             >
-                {opt}
+              {opt}
             </button>
-            ))}
+          ))}
         </div>
       </div>
 
       <div className={`learning-footer ${isCorrect === true ? 'footer-success' : ''} ${isCorrect === false ? 'footer-error' : ''}`}>
         <div className="footer-feedback-content">
-            {isCorrect === true && (
-                <div className="feedback-row">
-                    <div className="icon-circle success"><CheckCircle size={20} color="#2ecc71" /></div>
-                    <span className="feedback-text success">Excellent!</span>
-                </div>
-            )}
-            {isCorrect === false && (
-                <div className="feedback-row">
-                    <div className="icon-circle error"><AlertCircle size={20} color="#ef4444" /></div>
-                    <div className="feedback-text-group">
-                        <span className="feedback-text error">Incorrect</span>
-                        <span className="feedback-subtext">Correct answer: {slide.answer}</span>
-                    </div>
-                </div>
-            )}
+          {isCorrect === true && (
+            <div className="feedback-row">
+              <div className="icon-circle success"><CheckCircle size={20} color="#2ecc71" /></div>
+              <span className="feedback-text success">Excellent!</span>
+            </div>
+          )}
+          {isCorrect === false && (
+            <div className="feedback-row">
+              <div className="icon-circle error"><AlertCircle size={20} color="#ef4444" /></div>
+              <div className="feedback-text-group">
+                <span className="feedback-text error">Incorrect</span>
+                <span className="feedback-subtext">Correct answer: {slide.answer}</span>
+              </div>
+            </div>
+          )}
         </div>
-        <button 
+        <button
           className={`next-btn ${isCorrect === false ? 'btn-error' : ''}`}
           onClick={handleNext}
           disabled={isCorrect === null}
         >
-          {currentSlideIndex === activeSlides.length - 1 && mistakeQueue.length === 0 ? 'Finish' : (isCorrect === false ? 'Got it' : 'Next')} 
+          {currentSlideIndex === activeSlides.length - 1 && mistakeQueue.length === 0 ? 'Finish' : (isCorrect === false ? 'Got it' : 'Next')}
           <ChevronRight size={20} />
         </button>
       </div>
