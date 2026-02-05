@@ -75,6 +75,10 @@ const Settings = () => {
         const newPrefs = { ...preferences, [key]: value };
         setPreferences(newPrefs);
 
+        // Update localStorage strictly
+        const updatedUser = { ...user, preferences: newPrefs };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+
         if (user.email) {
             axios.put('http://localhost:5000/api/auth/update-settings', {
                 email: user.email,
