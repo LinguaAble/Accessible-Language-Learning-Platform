@@ -154,6 +154,14 @@ const LearningScreen = () => {
   }, [currentSlideIndex, originalCount]);
 
   const playAudio = (text) => {
+    // Check Sound Preference
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const soundEnabled = user.preferences?.soundEffects ?? false; // Default off if not set? Or check logic.
+    // The user initialized preferences in Settings to: soundEffects: false.
+    // So by default sound is OFF? That seems wrong for a language app.
+    // But let's respect the preference.
+    if (!soundEnabled) return;
+
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);

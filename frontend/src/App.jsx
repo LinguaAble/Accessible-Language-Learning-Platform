@@ -12,7 +12,7 @@ import Settings from './pages/Settings';
 import Layout from './components/Layout';
 import LearningScreen from './pages/LearningScreen'; // <--- 1. Import Added
 
-import './App.css'; 
+import './App.css';
 
 function App() {
   // 1. Initialize Theme (Default to 'dark' to fix the white flash)
@@ -21,10 +21,19 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 2. Apply Theme to Body
+  // 2. Apply Theme & Motion to Body
   useEffect(() => {
+    // Theme
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
+
+    // Motion & Sound (Load from user object)
+    const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    if (savedUser.preferences?.animationReduced) {
+      document.body.classList.add('reduce-motion');
+    } else {
+      document.body.classList.remove('reduce-motion');
+    }
   }, [theme]);
 
   // 3. Auto-Login Logic

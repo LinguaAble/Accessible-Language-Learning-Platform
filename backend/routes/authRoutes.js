@@ -25,7 +25,8 @@ router.post('/register', async (req, res) => {
     // Create User
     user = new User({
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      loginHistory: [{ timestamp: new Date(), device: 'Web Browser' }]
     });
 
     await user.save();
@@ -63,6 +64,14 @@ router.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid email or password.' });
     }
+
+    // Update Login History
+    user.loginHistory.push({ timestamp: new Date(), device: 'Web Browser' });
+    // Keep only last 10 entries
+    if (user.loginHistory.length > 10) {
+      user.loginHistory.shift();
+    }
+    await user.save();
 
     // Create Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -196,6 +205,45 @@ router.put('/update-progress', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// 6. GET USER DATA (Settings & History)
+router.post('/get-user-data', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email required" });
+
+    const user = await User.findOne({ email }).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      preferences: user.preferences,
+      loginHistory: user.loginHistory,
+      completedLessons: user.completedLessons
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 7. UPDATE SETTINGS
+router.put('/update-settings', async (req, res) => {
+  try {
+    const { email, preferences } = req.body;
+    if (!email || !preferences) return res.status(400).json({ message: "Data missing" });
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { $set: { preferences } },
+      { new: true }
+    );
+
+    res.json({ success: true, preferences: user.preferences });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
   }
 });
 

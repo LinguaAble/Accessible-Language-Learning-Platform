@@ -32,6 +32,13 @@ const UserSchema = new mongoose.Schema({
     type: [Number],
     default: []
   },
+
+  // Story: Login History
+  loginHistory: [{
+    timestamp: { type: Date, default: Date.now },
+    device: { type: String, default: 'Web Browser' }
+  }],
+
   createdAt: {
     type: Date,
     default: Date.now
