@@ -11,10 +11,10 @@ const Signup = () => {
     password: '',
     confirmPassword: ''
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false); 
-  
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +45,10 @@ const Signup = () => {
       });
 
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      if (res.data.user.completedLessons) {
+        localStorage.setItem('completedLessons', JSON.stringify(res.data.user.completedLessons));
+      }
       navigate('/dashboard');
 
     } catch (err) {
@@ -87,7 +91,7 @@ const Signup = () => {
 
           <div className="input-group">
             <label htmlFor="password">Password</label>
-            
+
             {/* Wrapper: Increased marginBottom to 30px for more space */}
             <div style={{ position: 'relative', marginBottom: '30px' }}>
               <input
@@ -124,12 +128,12 @@ const Signup = () => {
               {/* --- FIX: Absolute Positioned Warning --- */}
               {/* Adjusted bottom to -25px to fit nicely in the larger gap */}
               {password.length > 0 && password.length < 6 && (
-                <p style={{ 
+                <p style={{
                   position: 'absolute',
-                  bottom: '-25px', 
+                  bottom: '-25px',
                   left: '0',
-                  color: '#e74c3c', 
-                  fontSize: '0.8rem', 
+                  color: '#e74c3c',
+                  fontSize: '0.8rem',
                   fontWeight: '500',
                   margin: 0
                 }}>
@@ -142,7 +146,7 @@ const Signup = () => {
 
           <div className="input-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
-            
+
             <div style={{ position: 'relative' }}>
               <input
                 id="confirmPassword"

@@ -34,6 +34,11 @@ const Login = () => {
         localStorage.setItem('user', JSON.stringify(res.data.user)); // Save to local for Dashboard access or handle session logic
       }
 
+      // Sync progress from backend to local storage
+      if (res.data.user.completedLessons) {
+        localStorage.setItem('completedLessons', JSON.stringify(res.data.user.completedLessons));
+      }
+
       navigate('/dashboard');
 
     } catch (err) {
