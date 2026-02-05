@@ -32,7 +32,7 @@ router.post('/register', async (req, res) => {
     // Create Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.json({ token, user: { email: user.email, preferences: user.preferences } });
+    res.json({ token, user: { email: user.email, preferences: user.preferences, completedLessons: user.completedLessons } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
     // Create Token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    res.json({ token, user: { email: user.email, preferences: user.preferences } });
+    res.json({ token, user: { email: user.email, preferences: user.preferences, completedLessons: user.completedLessons } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -146,6 +146,48 @@ router.put('/reset-password/:token', async (req, res) => {
 
     res.status(200).json({ success: true, data: "Password updated success" });
 
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
+// 5. UPDATE USER PROGRESS
+router.put('/update-progress', async (req, res) => {
+  try {
+    const { email, completedLessons } = req.body;
+
+    if (!email || !completedLessons) {
+      return res.status(400).json({ message: "Please provide email and completedLessons" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Merge or overwrite? The user says "login with my credentials... completed lessons upto 3".
+    // If I use backend as truth, I should overwrite.
+    // However, lets ensuring uniqueness at least.
+    // If the logical flow is: Frontend adds lesson -> calls API -> API saves unique union.
+
+    // Update logic: simple overwrite with what frontend sends?
+    // Or union? user.completedLessons = [...new Set([...user.completedLessons, ...completedLessons])];
+    // The frontend logic (seen earlier) maintains an array in localStorage. If we send that array, we can just save it.
+    // But safely, let's just save what is sent, assuming frontend sends the full list.
+
+    // Merge existing and new completed lessons to prevent data loss
+    // Ensure both are treated as arrays of numbers
+    const existing = user.completedLessons || [];
+    const incoming = completedLessons || [];
+
+    // Create a Set from both arrays to ensure uniqueness
+    const mergedLessons = [...new Set([...existing, ...incoming])];
+
+    user.completedLessons = mergedLessons;
+    await user.save();
+
+    res.json({ success: true, completedLessons: user.completedLessons });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server Error" });

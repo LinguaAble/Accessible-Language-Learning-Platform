@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {
   BookOpen, Flame, PlayCircle, BarChart3, Bell
@@ -8,6 +9,23 @@ import '../Dashboard.css';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user] = useState(JSON.parse(localStorage.getItem('user')) || {});
+
+  // Sync progress on load
+  useEffect(() => {
+    if (user.email) {
+      const localLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+      axios.put('http://localhost:5000/api/auth/update-progress', {
+        email: user.email,
+        completedLessons: localLessons
+      }).then(res => {
+        if (res.data.success && res.data.completedLessons) {
+          // Update local with the merged result from server
+          localStorage.setItem('completedLessons', JSON.stringify(res.data.completedLessons));
+          console.log("Progress synced:", res.data.completedLessons);
+        }
+      }).catch(err => console.error("Sync failed", err));
+    }
+  }, [user.email]);
 
   // Derive a display name from email (everything before @), capitalizing the first letter
   const getDisplayName = () => {
