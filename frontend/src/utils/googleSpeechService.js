@@ -21,20 +21,23 @@ const blobToBase64 = (blob) => {
 
 /**
  * Sends audio data to Google Speech-to-Text API
- * @param {Blob} audioBlob - The recorded audio blob
+ * @param {Array<string>} phrases - Optional list of phrases/words to boost in detection (Speech Context)
  * @returns {Promise<string>} - The transcribed text
  */
-export const transcribeAudio = async (audioBlob) => {
+export const transcribeAudio = async (audioBlob, phrases = []) => {
     try {
         const base64Audio = await blobToBase64(audioBlob);
 
         const requestBody = {
             config: {
                 encoding: 'WEBM_OPUS', // Standard format for Chrome/Firefox MediaRecorder
-                sampleRateHertz: 48000, // Optional, can often be omitted for WEBM
                 languageCode: 'hi-IN',  // Hindi India
                 enableAutomaticPunctuation: true,
-                model: 'default'
+                model: 'default',
+                speechContexts: phrases.length > 0 ? [{
+                    phrases: phrases,
+                    boost: 20.0 // Boost the likelihood of these phrases
+                }] : []
             },
             audio: {
                 content: base64Audio
