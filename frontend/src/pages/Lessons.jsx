@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw } from 'lucide-react';
+import { Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw, Volume2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../Dashboard.css';
@@ -53,7 +53,13 @@ const Lessons = () => {
                 { id: 7, title: "Consonants: P & Y Series" },
                 { id: 8, title: "Consonants: R & Sh Series" },
                 { id: 9, title: "Consonants: S & Conjuncts" },
-                { id: 10, title: "Grand Review: The Script", isRecap: true } // Grand Recap
+                { id: 10, title: "Grand Review: The Script", isRecap: true }, // Grand Recap
+                // New Lessons
+                { id: 11, title: "Recap: Vowels & Consonants Mixed", isRecap: true },
+                { id: 12, title: "Recap: Rapid Fire Script", isRecap: true },
+                { id: 13, title: "Pronunciation: Basic Vowels", isPronunciation: true },
+                { id: 14, title: "Pronunciation: Tricky Consonants", isPronunciation: true },
+                { id: 15, title: "Pronunciation: Common Words", isPronunciation: true }
             ]
         },
         {
@@ -62,16 +68,16 @@ const Lessons = () => {
             subtitle: "Family, Numbers & Colors",
             color: "#3498db", // Blue
             lessons: [
-                { id: 11, title: "Numbers 1-10" },
-                { id: 12, title: "Numbers 11-20" },
-                { id: 13, title: "Family: Mom & Dad" },
-                { id: 14, title: "Family: Siblings" },
-                { id: 15, title: "Colors of Rainbow" },
-                { id: 16, title: "Fruits & Veggies" },
-                { id: 17, title: "Food & Drink" },
-                { id: 18, title: "Days of the Week" },
-                { id: 19, title: "Time of Day" },
-                { id: 20, title: "Review: Daily Life", isRecap: true }
+                { id: 16, title: "Numbers 1-10" },
+                { id: 17, title: "Numbers 11-20" },
+                { id: 18, title: "Family: Mom & Dad" },
+                { id: 19, title: "Family: Siblings" },
+                { id: 20, title: "Colors of Rainbow" },
+                { id: 21, title: "Fruits & Veggies" },
+                { id: 22, title: "Food & Drink" },
+                { id: 23, title: "Days of the Week" },
+                { id: 24, title: "Time of Day" },
+                { id: 25, title: "Review: Daily Life", isRecap: true }
             ]
         },
         {
@@ -80,16 +86,16 @@ const Lessons = () => {
             subtitle: "Grammar & Basic Verbs",
             color: "#9b59b6", // Purple
             lessons: [
-                { id: 21, title: "Pronouns (I, You)" },
-                { id: 22, title: "Verbs: Eat, Sleep, Go" },
-                { id: 23, title: "I am... (Hoon)" },
-                { id: 24, title: "You are... (Ho/Hain)" },
-                { id: 25, title: "Asking: What?" },
-                { id: 26, title: "Asking: Where?" },
-                { id: 27, title: "Adjectives (Big/Small)" },
-                { id: 28, title: "Possessives (My/Your)" },
-                { id: 29, title: "Feelings (Happy/Sad)" },
-                { id: 30, title: "Review: Sentences", isRecap: true }
+                { id: 26, title: "Pronouns (I, You)" },
+                { id: 27, title: "Verbs: Eat, Sleep, Go" },
+                { id: 28, title: "I am... (Hoon)" },
+                { id: 29, title: "You are... (Ho/Hain)" },
+                { id: 30, title: "Asking: What?" },
+                { id: 31, title: "Asking: Where?" },
+                { id: 32, title: "Adjectives (Big/Small)" },
+                { id: 33, title: "Possessives (My/Your)" },
+                { id: 34, title: "Feelings (Happy/Sad)" },
+                { id: 35, title: "Review: Sentences", isRecap: true }
             ]
         }
     ];
@@ -141,6 +147,8 @@ const Lessons = () => {
                                                 <Lock size={24} color="#95a5a6" />
                                             ) : lesson.isRecap ? (
                                                 <RotateCcw size={24} color={chapter.color} />
+                                            ) : lesson.isPronunciation ? (
+                                                <Volume2 size={24} color={chapter.color} />
                                             ) : (
                                                 <PlayCircle size={24} color={chapter.color} />
                                             )}
