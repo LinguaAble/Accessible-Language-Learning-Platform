@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic } from 'lucide-react';
 import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
+import { transcribeAudio } from '../utils/googleSpeechService';
 
 import '../Learning.css';
 
@@ -214,39 +215,73 @@ const LearningScreen = () => {
   const [isListening, setIsListening] = useState(false);
   const [listeningText, setListeningText] = useState("");
 
-  const startListening = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert("Speech Recognition not supported in this browser.");
+  const mediaRecorderRef = React.useRef(null);
+  const audioChunksRef = React.useRef([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Toggle Recording
+  const handleMicClick = async () => {
+    if (isListening) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  const startRecording = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Microphone access is not supported in this browser.");
       return;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'hi-IN'; // Hindi (India)
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Use 'audio/webm' as it is widely supported and works with Google API (WEBM_OPUS)
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
 
-    setIsListening(true);
-    setListeningText("Listening...");
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setListeningText(transcript);
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setIsProcessing(true);
+        setListeningText("Analyzing...");
+
+        try {
+          // Use our new Google Speech Service
+          const transcript = await transcribeAudio(audioBlob);
+          setListeningText(transcript || "No speech detected, try again.");
+          checkPronunciation(transcript);
+        } catch (error) {
+          console.error("Speech analysis failed", error);
+          setListeningText("Error analyzing speech. Try again.");
+        } finally {
+          setIsProcessing(false);
+          // Stop all tracks to release mic
+          stream.getTracks().forEach(track => track.stop());
+        }
+      };
+
+      mediaRecorder.start();
+      setIsListening(true);
+      setListeningText("Listening... (Click to stop)");
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      alert("Could not access microphone. Please check permissions.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
       setIsListening(false);
-      checkPronunciation(transcript);
-    };
-
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error", event.error);
-      setIsListening(false);
-      setListeningText("Error. Try again.");
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
+    }
   };
 
   const checkPronunciation = (transcript) => {
@@ -441,9 +476,9 @@ const LearningScreen = () => {
 
               <div className="mic-container" style={{ marginTop: '40px' }}>
                 <button
-                  className={`mic-btn ${isListening ? 'listening' : ''}`}
-                  onClick={startListening}
-                  disabled={isCorrect !== null}
+                  className={`mic-btn ${isListening ? 'listening' : ''} ${isProcessing ? 'processing' : ''}`}
+                  onClick={handleMicClick}
+                  disabled={isCorrect !== null || isProcessing}
                 >
                   <Mic size={40} />
                 </button>
