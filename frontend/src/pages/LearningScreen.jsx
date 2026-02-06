@@ -255,7 +255,11 @@ const LearningScreen = () => {
 
         try {
           // Use our new Google Speech Service
-          const transcript = await transcribeAudio(audioBlob);
+          // Pass the expected character as a 'hint' to the API to boost accuracy
+          const currentSlide = activeSlides[currentSlideIndex];
+          const hints = currentSlide ? [currentSlide.mainChar] : [];
+
+          const transcript = await transcribeAudio(audioBlob, hints);
           setListeningText(transcript || "No speech detected, try again.");
           checkPronunciation(transcript);
         } catch (error) {
@@ -286,20 +290,12 @@ const LearningScreen = () => {
 
   const checkPronunciation = (transcript) => {
     const currentSlide = activeSlides[currentSlideIndex];
-    // Simple check: does the transcript contain the target char?
-    // In a real app, this would be fuzzier.
-    // For now, let's just accept anything non-empty as "Attempted" for demo, 
-    // or check if it roughly matches.
-    // Since Hindi speech to text might give words vs chars, let's be lenient.
 
-    // logic: if transcript includes the mainChar, or if it's correct.
-    // For demo purposes, we will treat any input as "Good try!" but ideally we match.
-    // Let's try to match exactly if possible.
+    // Strict Hindi Matching: Validates if the transcript contains the exact Hindi character/word
+    // We trim whitespace to handle potential leading/trailing spaces
+    const correct = transcript.trim().includes(currentSlide.mainChar.trim());
 
-    // Normalize?
-    const correct = transcript.includes(currentSlide.mainChar) || transcript.toLowerCase().includes(currentSlide.answer.toLowerCase());
-
-    if (correct || transcript.length > 0) { // LENIENT: Accept any input for now so user isn't stuck
+    if (correct) {
       setIsCorrect(true);
       playSoundEffect('correct');
     } else {
