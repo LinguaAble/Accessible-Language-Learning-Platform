@@ -34,6 +34,32 @@ const createCharPair = (hindiChar, englishSound, hintText, optionsEnglish, optio
   ];
 };
 
+// Helper for vocabulary words (Chapter 2+)
+const createVocabPair = (hindiWord, englishMeaning, hintText, optionsEnglish, optionsHindi) => {
+  return [
+    {
+      type: 'quiz',
+      subtype: 'intro',
+      badge: "New Word",
+      title: "New Vocabulary",
+      question: "What does this word mean?",
+      mainChar: hindiWord,
+      audioText: hindiWord,
+      hint: hintText,
+      options: optionsEnglish,
+      answer: englishMeaning
+    },
+    {
+      type: 'quiz',
+      subtype: 'char_select',
+      question: `Select the Hindi word for '${englishMeaning}'`,
+      audioText: hindiWord,
+      options: optionsHindi,
+      answer: hindiWord
+    }
+  ];
+};
+
 // --- DATA: VOWELS ---
 const vowelsPart1 = [
   ...createCharPair("अ", "a", "Like 'a' in 'America'", ["a", "aa", "i", "ee"], ["अ", "आ", "इ", "ई"]),
@@ -144,6 +170,11 @@ const lessonDatabase = {
   13: {
     title: "Pronunciation: Vowels",
     slides: [
+      // Teaching slides first
+      { type: 'teach', title: "Learn: Vowel Sounds", mainChar: "अ आ इ ई उ ऊ", audioText: "अ आ इ ई उ ऊ", hint: "Listen carefully to each vowel sound. Click the speaker to hear them.", instruction: "These are the basic Hindi vowels. Practice listening before we test your pronunciation." },
+      { type: 'teach', title: "Short Vowels", mainChar: "अ इ उ", audioText: "अ इ उ", hint: "Short vowels: a (America), i (Sit), u (Put)", instruction: "These vowels are pronounced briefly and crisply." },
+      { type: 'teach', title: "Long Vowels", mainChar: "आ ई ऊ", audioText: "आ ई ऊ", hint: "Long vowels: aa (Father), ee (Feet), oo (Boot)", instruction: "Hold these sounds longer than the short vowels." },
+      // Now practice
       { type: 'pronounce', question: "Speak this sound", mainChar: "अ", answer: "a", hint: "Like 'a' in America" },
       { type: 'pronounce', question: "Speak this sound", mainChar: "आ", answer: "aa", hint: "Like 'a' in Father" },
       { type: 'pronounce', question: "Speak this sound", mainChar: "इ", answer: "e", hint: "Like 'i' in Sit" },
@@ -154,39 +185,157 @@ const lessonDatabase = {
   14: {
     title: "Pronunciation: Tricky Consonants",
     slides: [
-      { type: 'pronounce', question: "Speak this sound", mainChar: "क", answer: "ka", hint: "Like 'k' in Skate" },
-      { type: 'pronounce', question: "Speak this sound", mainChar: "ख", answer: "kha", hint: "Aspirated 'kh'" },
+      // Teaching slides
+      { type: 'teach', title: "Learn: Consonant Sounds", mainChar: "क ख ग घ च", audioText: "क ख ग घ च", hint: "Listen to these consonant sounds carefully.", instruction: "Hindi has aspirated (breathy) and non-aspirated consonants. Listen to the difference." },
+      { type: 'teach', title: "Aspirated vs Non-Aspirated", mainChar: "क vs ख", audioText: "क ख", hint: "क = 'k' (no breath), ख = 'kh' (with breath)", instruction: "Hold your hand in front of your mouth. You should feel air with ख but not with क." },
+      // Practice
+      { type: 'pronounce', question: "Speak this sound", mainChar: "क", answer: "ka", hint: "Like 'k' in Skate (no breath)" },
+      { type: 'pronounce', question: "Speak this sound", mainChar: "ख", answer: "kha", hint: "Aspirated 'kh' (with breath)" },
       { type: 'pronounce', question: "Speak this sound", mainChar: "ग", answer: "ga", hint: "Like 'g' in Go" },
       { type: 'pronounce', question: "Speak this sound", mainChar: "घ", answer: "gha", hint: "Voiced aspirated 'gh'" },
       { type: 'pronounce', question: "Speak this sound", mainChar: "च", answer: "cha", hint: "Like 'ch' in Chat" },
     ]
   },
   15: {
+    title: "Pronunciation: Script Review",
+    slides: [
+      // Teaching slide
+      { type: 'teach', title: "Mixed Practice", mainChar: "अ क च त म", audioText: "अ क च त म", hint: "Review: Mix of vowels and consonants", instruction: "Let's practice a mix of the sounds you've learned. Listen and repeat." },
+      // Practice mixed characters (NOT words yet - that's for Chapter 2)
+      { type: 'pronounce', question: "Speak this sound", mainChar: "म", answer: "ma", hint: "Like 'm' in Man" },
+      { type: 'pronounce', question: "Speak this sound", mainChar: "न", answer: "na", hint: "Like 'n' in No" },
+      { type: 'pronounce', question: "Speak this sound", mainChar: "त", answer: "ta", hint: "Soft 't' like in pasta" },
+      { type: 'pronounce', question: "Speak this sound", mainChar: "र", answer: "ra", hint: "Like 'r' in Run" },
+      { type: 'pronounce', question: "Speak this sound", mainChar: "स", answer: "sa", hint: "Like 's' in Sun" },
+    ]
+  },
+  // --- CHAPTER 2: MY WORLD (Quiz-based + Pronunciation) ---
+  16: {
+    title: "Common Words",
+    slides: [
+      ...createVocabPair("नमस्ते", "Hello", "Common greeting", ["Hello", "Goodbye", "Thanks", "Sorry"], ["नमस्ते", "अलविदा", "धन्यवाद", "माफ़ करें"]),
+      ...createVocabPair("हाँ", "Yes", "Affirmative", ["Yes", "No", "Maybe", "Okay"], ["हाँ", "नहीं", "शायद", "ठीक है"]),
+      ...createVocabPair("नहीं", "No", "Negative", ["No", "Yes", "Never", "Always"], ["नहीं", "हाँ", "कभी नहीं", "हमेशा"]),
+    ]
+  },
+  17: {
+    title: "Numbers 1-5",
+    slides: [
+      ...createVocabPair("एक", "One", "Number 1", ["One", "Two", "Three", "Four"], ["एक", "दो", "तीन", "चार"]),
+      ...createVocabPair("दो", "Two", "Number 2", ["Two", "One", "Three", "Five"], ["दो", "एक", "तीन", "पाँच"]),
+      ...createVocabPair("तीन", "Three", "Number 3", ["Three", "Two", "Four", "Five"], ["तीन", "दो", "चार", "पाँच"]),
+      ...createVocabPair("चार", "Four", "Number 4", ["Four", "Three", "Five", "Six"], ["चार", "तीन", "पाँच", "छह"]),
+      ...createVocabPair("पाँच", "Five", "Number 5", ["Five", "Four", "Six", "Seven"], ["पाँच", "चार", "छह", "सात"]),
+    ]
+  },
+  18: {
+    title: "Numbers 6-10",
+    slides: [
+      ...createVocabPair("छह", "Six", "Number 6", ["Six", "Seven", "Eight", "Five"], ["छह", "सात", "आठ", "पाँच"]),
+      ...createVocabPair("सात", "Seven", "Number 7", ["Seven", "Six", "Eight", "Nine"], ["सात", "छह", "आठ", "नौ"]),
+      ...createVocabPair("आठ", "Eight", "Number 8", ["Eight", "Seven", "Nine", "Ten"], ["आठ", "सात", "नौ", "दस"]),
+      ...createVocabPair("नौ", "Nine", "Number 9", ["Nine", "Eight", "Ten", "Seven"], ["नौ", "आठ", "दस", "सात"]),
+      ...createVocabPair("दस", "Ten", "Number 10", ["Ten", "Nine", "Eight", "Seven"], ["दस", "नौ", "आठ", "सात"]),
+    ]
+  },
+  19: {
+    title: "Recap: Numbers",
+    slides: [
+      { type: 'quiz', subtype: 'char_select', question: "Select 'One'", audioText: "एक", options: ["एक", "दो", "तीन", "चार"], answer: "एक" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Five'", audioText: "पाँच", options: ["तीन", "चार", "पाँच", "छह"], answer: "पाँच" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Ten'", audioText: "दस", options: ["सात", "आठ", "नौ", "दस"], answer: "दस" },
+    ]
+  },
+  20: {
+    title: "Family: Parents",
+    slides: [
+      ...createVocabPair("माँ", "Mother", "Mom", ["Mother", "Father", "Sister", "Brother"], ["माँ", "पिता", "बहन", "भाई"]),
+      ...createVocabPair("पिता", "Father", "Dad", ["Father", "Mother", "Uncle", "Aunt"], ["पिता", "माँ", "चाचा", "चाची"]),
+    ]
+  },
+  21: {
+    title: "Family: Siblings",
+    slides: [
+      ...createVocabPair("भाई", "Brother", "Male sibling", ["Brother", "Sister", "Father", "Mother"], ["भाई", "बहन", "पिता", "माँ"]),
+      ...createVocabPair("बहन", "Sister", "Female sibling", ["Sister", "Brother", "Mother", "Aunt"], ["बहन", "भाई", "माँ", "चाची"]),
+    ]
+  },
+  22: {
+    title: "Colors: Part 1",
+    slides: [
+      ...createVocabPair("लाल", "Red", "Color red", ["Red", "Blue", "Green", "Yellow"], ["लाल", "नीला", "हरा", "पीला"]),
+      ...createVocabPair("नीला", "Blue", "Color blue", ["Blue", "Red", "Green", "Black"], ["नीला", "लाल", "हरा", "काला"]),
+      ...createVocabPair("हरा", "Green", "Color green", ["Green", "Yellow", "Blue", "Red"], ["हरा", "पीला", "नीला", "लाल"]),
+    ]
+  },
+  23: {
+    title: "Colors: Part 2",
+    slides: [
+      ...createVocabPair("पीला", "Yellow", "Color yellow", ["Yellow", "Green", "Orange", "Pink"], ["पीला", "हरा", "नारंगी", "गुलाबी"]),
+      ...createVocabPair("काला", "Black", "Color black", ["Black", "White", "Red", "Blue"], ["काला", "सफ़ेद", "लाल", "नीला"]),
+      ...createVocabPair("सफ़ेद", "White", "Color white", ["White", "Black", "Grey", "Brown"], ["सफ़ेद", "काला", "भूरा", "स्लेटी"]),
+    ]
+  },
+  24: {
+    title: "Food & Drink: Part 1",
+    slides: [
+      ...createVocabPair("पानी", "Water", "Drink water", ["Water", "Milk", "Tea", "Juice"], ["पानी", "दूध", "चाय", "जूस"]),
+      ...createVocabPair("दूध", "Milk", "Dairy drink", ["Milk", "Water", "Tea", "Coffee"], ["दूध", "पानी", "चाय", "कॉफ़ी"]),
+    ]
+  },
+  25: {
+    title: "Food & Drink: Part 2",
+    slides: [
+      ...createVocabPair("रोटी", "Bread", "Indian bread", ["Bread", "Rice", "Milk", "Water"], ["रोटी", "चावल", "दूध", "पानी"]),
+      ...createVocabPair("चाय", "Tea", "Hot beverage", ["Tea", "Coffee", "Milk", "Water"], ["चाय", "कॉफ़ी", "दूध", "पानी"]),
+    ]
+  },
+  26: {
+    title: "Fruits",
+    slides: [
+      ...createVocabPair("सेब", "Apple", "Red fruit", ["Apple", "Banana", "Mango", "Orange"], ["सेब", "केला", "आम", "संतरा"]),
+      ...createVocabPair("केला", "Banana", "Yellow fruit", ["Banana", "Apple", "Mango", "Grapes"], ["केला", "सेब", "आम", "अंगूर"]),
+      ...createVocabPair("आम", "Mango", "King of fruits", ["Mango", "Apple", "Banana", "Grapes"], ["आम", "सेब", "केला", "अंगूर"]),
+    ]
+  },
+  27: {
+    title: "Recap: Vocabulary (5-11)",
+    slides: [
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Mother'", audioText: "माँ", options: ["माँ", "पिता", "भाई", "बहन"], answer: "माँ" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Brother'", audioText: "भाई", options: ["बहन", "भाई", "माँ", "पिता"], answer: "भाई" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Red'", audioText: "लाल", options: ["नीला", "हरा", "लाल", "काला"], answer: "लाल" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Water'", audioText: "पानी", options: ["पानी", "दूध", "चाय", "रोटी"], answer: "पानी" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Mango'", audioText: "आम", options: ["सेब", "केला", "आम", "संतरा"], answer: "आम" },
+    ]
+  },
+  28: {
     title: "Pronunciation: Common Words",
     slides: [
       { type: 'pronounce', question: "Say 'Hello'", mainChar: "नमस्ते", answer: "namaste", hint: "Namaste" },
       { type: 'pronounce', question: "Say 'Yes'", mainChar: "हाँ", answer: "haan", hint: "Haan" },
-      { type: 'pronounce', question: "Say 'No'", mainChar: "नहीं", answer: "nahin", hint: "Nahin" },
       { type: 'pronounce', question: "Say 'Water'", mainChar: "पानी", answer: "pani", hint: "Pani" },
-      { type: 'pronounce', question: "Say 'Home'", mainChar: "घर", answer: "ghar", hint: "Ghar" },
+      { type: 'pronounce', question: "Say 'Thank you'", mainChar: "धन्यवाद", answer: "dhanyavaad", hint: "Dhanyavaad" },
     ]
   },
-  // --- SHIFTED CHAPTER 2 & 3 ---
-  16: { title: "Numbers 1-10", slides: consonantsL4 }, // Placeholder content for demo
-  17: { title: "Numbers 11-20", slides: consonantsL4 },
-  18: { title: "Family: Mom & Dad", slides: consonantsL4 },
-  19: { title: "Family: Siblings", slides: consonantsL4 },
-  20: { title: "Colors of Rainbow", slides: consonantsL4 },
-  21: { title: "Fruits & Veggies", slides: consonantsL4 },
-  22: { title: "Food & Drink", slides: consonantsL4 },
-  23: { title: "Days of the Week", slides: consonantsL4 },
-  24: { title: "Time of Day", slides: consonantsL4 },
-  25: { title: "Review: Daily Life", slides: consonantsL4 },
-  26: { title: "Pronouns (I, You)", slides: consonantsL4 },
-  27: { title: "Verbs: Eat, Sleep, Go", slides: consonantsL4 },
-  28: { title: "I am... (Hoon)", slides: consonantsL4 },
-  29: { title: "You are... (Ho/Hain)", slides: consonantsL4 },
-  30: { title: "Asking: What?", slides: consonantsL4 },
+  29: {
+    title: "Pronunciation: Numbers & Family",
+    slides: [
+      { type: 'pronounce', question: "Say 'One'", mainChar: "एक", answer: "ek", hint: "Ek" },
+      { type: 'pronounce', question: "Say 'Five'", mainChar: "पाँच", answer: "paanch", hint: "Paanch" },
+      { type: 'pronounce', question: "Say 'Mother'", mainChar: "माँ", answer: "maa", hint: "Maa" },
+      { type: 'pronounce', question: "Say 'Brother'", mainChar: "भाई", answer: "bhai", hint: "Bhai" },
+    ]
+  },
+  30: {
+    title: "Pronunciation: Colors & Food",
+    slides: [
+      { type: 'pronounce', question: "Say 'Red'", mainChar: "लाल", answer: "laal", hint: "Laal" },
+      { type: 'pronounce', question: "Say 'Blue'", mainChar: "नीला", answer: "neela", hint: "Neela" },
+      { type: 'pronounce', question: "Say 'Bread'", mainChar: "रोटी", answer: "roti", hint: "Roti" },
+      { type: 'pronounce', question: "Say 'Mango'", mainChar: "आम", answer: "aam", hint: "Aam" },
+    ]
+  },
+  // --- CHAPTER 3 ---
   31: { title: "Asking: Where?", slides: consonantsL4 },
   32: { title: "Adjectives (Big/Small)", slides: consonantsL4 },
   33: { title: "Possessives (My/Your)", slides: consonantsL4 },
@@ -371,6 +520,7 @@ const LearningScreen = () => {
   const handleNext = () => {
     setSelectedOption(null);
     setIsCorrect(null);
+    setListeningText(""); // Reset listening text
 
     if (currentSlideIndex < activeSlides.length - 1) {
       setCurrentSlideIndex(prev => prev + 1);
@@ -463,6 +613,27 @@ const LearningScreen = () => {
 
 
 
+        {/* --- TEACHING SLIDE (New Type) --- */}
+        {slide.type === 'teach' && (
+          <div className="card-container text-center fade-in">
+            <div className="card-display" onClick={() => playAudio(slide.audioText)} style={{ cursor: 'pointer' }}>
+              <h1 className="hindi-large">{slide.mainChar}</h1>
+              <p className="hint-text" style={{ marginTop: '20px', fontSize: '16px', fontWeight: '600' }}>{slide.hint}</p>
+              {slide.instruction && (
+                <p className="instruction-text" style={{ marginTop: '15px', fontSize: '14px', opacity: 0.8, maxWidth: '400px', margin: '15px auto 0' }}>
+                  {slide.instruction}
+                </p>
+              )}
+              <div className="pronunciation" style={{ marginTop: '30px' }}>
+                <button className="audio-btn-circle" onClick={(e) => { e.stopPropagation(); playAudio(slide.audioText); }}>
+                  <Volume2 size={24} />
+                </button>
+                <p style={{ marginTop: '10px', fontSize: '12px', opacity: 0.7 }}>Click to listen</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* --- PRONUNCIATION SLIDE --- */}
         {slide.type === 'pronounce' && (
           <div className="card-container text-center fade-in">
@@ -528,9 +699,9 @@ const LearningScreen = () => {
         <button
           className={`next-btn ${isCorrect === false ? 'btn-error' : ''}`}
           onClick={handleNext}
-          disabled={isCorrect === null}
+          disabled={slide.type !== 'teach' && isCorrect === null}
         >
-          {currentSlideIndex === activeSlides.length - 1 && mistakeQueue.length === 0 ? 'Finish' : (isCorrect === false ? 'Got it' : 'Next')}
+          {currentSlideIndex === activeSlides.length - 1 && mistakeQueue.length === 0 ? 'Finish' : (isCorrect === false ? 'Got it' : (slide.type === 'teach' ? 'Continue' : 'Next'))}
           <ChevronRight size={20} />
         </button>
       </div>
