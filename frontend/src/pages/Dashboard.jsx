@@ -9,7 +9,7 @@ import {
 import '../Dashboard.css';
 
 const Dashboard = () => {
-  const { user } = useUser();
+  const { user, preferences, todayProgress } = useUser();
   const navigate = useNavigate();
   const [showProfileTooltip, setShowProfileTooltip] = useState(false);
   const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
@@ -93,7 +93,7 @@ const Dashboard = () => {
               style={{ cursor: 'pointer' }}
             >
               <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
+                src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
                 alt="User avatar"
               />
             </div>
@@ -102,7 +102,7 @@ const Dashboard = () => {
               <div className="profile-tooltip">
                 <div className="tooltip-header">
                   <img
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
+                    src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
                     alt="User avatar"
                     className="tooltip-avatar"
                   />
@@ -164,11 +164,19 @@ const Dashboard = () => {
             <div className="progress-ring">
               <svg width="80" height="80">
                 <circle className="ring-bg" cx="40" cy="40" r="36" />
-                <circle className="ring-fill" cx="40" cy="40" r="36" />
+                <circle
+                  className="ring-fill"
+                  cx="40"
+                  cy="40"
+                  r="36"
+                  style={{
+                    strokeDashoffset: 226 - (226 * (todayProgress / preferences.dailyGoalMinutes))
+                  }}
+                />
               </svg>
-              <span className="percent" style={{ fontSize: '18px' }}>75%</span>
+              <span className="percent" style={{ fontSize: '18px' }}>{Math.round((todayProgress / preferences.dailyGoalMinutes) * 100)}%</span>
             </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '8px 0 0 0' }}>15/20 min today</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '8px 0 0 0' }}>{todayProgress}/{preferences.dailyGoalMinutes} min today</p>
           </div>
 
           {/* Word of Day */}
