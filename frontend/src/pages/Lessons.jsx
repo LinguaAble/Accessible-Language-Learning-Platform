@@ -91,16 +91,21 @@ const Lessons = () => {
             subtitle: "Grammar & Basic Verbs",
             color: "#9b59b6", // Purple
             lessons: [
-                { id: 26, title: "Pronouns (I, You)" },
-                { id: 27, title: "Verbs: Eat, Sleep, Go" },
-                { id: 28, title: "I am... (Hoon)" },
-                { id: 29, title: "You are... (Ho/Hain)" },
-                { id: 30, title: "Asking: What?" },
-                { id: 31, title: "Asking: Where?" },
-                { id: 32, title: "Adjectives (Big/Small)" },
-                { id: 33, title: "Possessives (My/Your)" },
-                { id: 34, title: "Feelings (Happy/Sad)" },
-                { id: 35, title: "Review: Sentences", isRecap: true }
+                { id: 31, title: "Pronouns: I & You" },
+                { id: 32, title: "Pronouns: He, She & We" },
+                { id: 33, title: "Verbs: Eat & Drink" },
+                { id: 34, title: "Verbs: Go & Come" },
+                { id: 35, title: "Verbs: Sleep & Wake" },
+                { id: 36, title: "I am / You are" },
+                { id: 37, title: "He/She is & We are" },
+                { id: 38, title: "Simple Sentences" },
+                { id: 39, title: "Questions: What & Where" },
+                { id: 40, title: "Recap: Grammar Mix", isRecap: true },
+                { id: 41, title: "Adjectives: Size" },
+                { id: 42, title: "Adjectives: Feelings" },
+                { id: 43, title: "Pronunciation: Pronouns & Verbs", isPronunciation: true },
+                { id: 44, title: "Pronunciation: Sentences", isPronunciation: true },
+                { id: 45, title: "Pronunciation: Questions & Adjectives", isPronunciation: true }
             ]
         }
     ];
