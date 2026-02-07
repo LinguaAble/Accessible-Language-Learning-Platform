@@ -59,7 +59,7 @@ const Lessons = () => {
                 { id: 12, title: "Recap: Rapid Fire Script", isRecap: true },
                 { id: 13, title: "Pronunciation: Basic Vowels", isPronunciation: true },
                 { id: 14, title: "Pronunciation: Tricky Consonants", isPronunciation: true },
-                { id: 15, title: "Pronunciation: Common Words", isPronunciation: true }
+                { id: 15, title: "Pronunciation: Script Review", isPronunciation: true }
             ]
         },
         {
@@ -68,16 +68,21 @@ const Lessons = () => {
             subtitle: "Family, Numbers & Colors",
             color: "#3498db", // Blue
             lessons: [
-                { id: 16, title: "Numbers 1-10" },
-                { id: 17, title: "Numbers 11-20" },
-                { id: 18, title: "Family: Mom & Dad" },
-                { id: 19, title: "Family: Siblings" },
-                { id: 20, title: "Colors of Rainbow" },
-                { id: 21, title: "Fruits & Veggies" },
-                { id: 22, title: "Food & Drink" },
-                { id: 23, title: "Days of the Week" },
-                { id: 24, title: "Time of Day" },
-                { id: 25, title: "Review: Daily Life", isRecap: true }
+                { id: 16, title: "Common Words" },
+                { id: 17, title: "Numbers 1-5" },
+                { id: 18, title: "Numbers 6-10" },
+                { id: 19, title: "Recap: Numbers", isRecap: true },
+                { id: 20, title: "Family: Parents" },
+                { id: 21, title: "Family: Siblings" },
+                { id: 22, title: "Colors: Part 1" },
+                { id: 23, title: "Colors: Part 2" },
+                { id: 24, title: "Food & Drink: Part 1" },
+                { id: 25, title: "Food & Drink: Part 2" },
+                { id: 26, title: "Fruits" },
+                { id: 27, title: "Recap: Vocabulary (5-11)", isRecap: true },
+                { id: 28, title: "Pronunciation: Common Words", isPronunciation: true },
+                { id: 29, title: "Pronunciation: Numbers & Family", isPronunciation: true },
+                { id: 30, title: "Pronunciation: Colors & Food", isPronunciation: true }
             ]
         },
         {
@@ -126,7 +131,7 @@ const Lessons = () => {
                                 <h3 style={{ margin: 0, fontSize: '20px' }}>{chapter.title}</h3>
                                 <p style={{ margin: '5px 0 0', opacity: 0.7, fontSize: '14px' }}>{chapter.subtitle}</p>
                             </div>
-                            <span className="chapter-badge">10 Lessons</span>
+                            <span className="chapter-badge">{chapter.lessons.length} Lessons</span>
                         </div>
 
                         <div className="lessons-grid">

@@ -440,25 +440,72 @@
   animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Chapter Header Strip */
+/* Chapter Header Strip - ENHANCED */
 .chapter-header {
-  background: var(--card-bg);
-  padding: 20px 25px;
-  border-radius: 15px;
+  background: linear-gradient(135deg,
+      rgba(230, 126, 34, 0.1),
+      rgba(230, 126, 34, 0.05));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 25px 30px;
+  border-radius: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 6px var(--shadow-color);
+  margin-bottom: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .chapter-header {
+  background: linear-gradient(135deg,
+      rgba(230, 126, 34, 0.15),
+      rgba(230, 126, 34, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animated gradient overlay */
+.chapter-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
+.chapter-header>* {
+  position: relative;
+  z-index: 1;
 }
 
 .chapter-badge {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 25px;
+  font-size: 13px;
   font-weight: 700;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Lesson Grid */
@@ -469,44 +516,119 @@
   gap: 15px;
 }
 
-/* Individual Lesson Card */
+/* Individual Lesson Card - ENHANCED */
 .lesson-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 20px;
-  border-radius: 16px;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
   gap: 15px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Glassmorphism effect for dark theme */
+[data-theme='dark'] .lesson-card {
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animated gradient overlay on hover */
+.lesson-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg,
+      rgba(230, 126, 34, 0.1),
+      rgba(230, 126, 34, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 20px;
+  z-index: 0;
+}
+
+.lesson-card:hover::before {
+  opacity: 1;
 }
 
 .lesson-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.02);
   border-color: var(--accent-color);
-  background: linear-gradient(135deg, var(--card-bg), rgba(230, 126, 34, 0.05));
+  box-shadow: 0 20px 60px 0 rgba(230, 126, 34, 0.3),
+    0 0 0 1px rgba(230, 126, 34, 0.2);
+}
+
+/* Ensure content stays above overlay */
+.lesson-card>* {
+  position: relative;
+  z-index: 1;
 }
 
 /* Locked State */
 .lesson-card.locked {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  background: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg,
+      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0.1));
+  backdrop-filter: blur(5px);
 }
 
 .lesson-card.locked:hover {
   transform: none;
   border-color: var(--border-color);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 }
 
-/* Completed State */
+.lesson-card.locked::before {
+  display: none;
+}
+
+/* Completed State - Premium glow */
 .lesson-card.completed {
   border-color: #2ecc71;
+  background: linear-gradient(135deg,
+      rgba(46, 204, 113, 0.15),
+      rgba(46, 204, 113, 0.05));
+  box-shadow: 0 8px 32px 0 rgba(46, 204, 113, 0.2);
+}
+
+.lesson-card.completed:hover {
+  box-shadow: 0 20px 60px 0 rgba(46, 204, 113, 0.3),
+    0 0 0 1px rgba(46, 204, 113, 0.3);
+}
+
+/* Icon pulse animation */
+.lesson-icon {
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .lesson-info {
