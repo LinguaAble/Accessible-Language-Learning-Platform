@@ -737,9 +737,9 @@ const LearningScreen = () => {
           <div className="card-container text-center fade-in">
             <div className="card-display" onClick={() => playAudio(slide.audioText)} style={{ cursor: 'pointer' }}>
               <h1 className="hindi-large">{slide.mainChar}</h1>
-              <p className="hint-text" style={{ marginTop: '20px', fontSize: '16px', fontWeight: '600' }}>{slide.hint}</p>
+              <p className="hint-text" style={{ marginTop: '20px', fontSize: '1rem', fontWeight: '600' }}>{slide.hint}</p>
               {slide.instruction && (
-                <p className="instruction-text" style={{ marginTop: '15px', fontSize: '14px', opacity: 0.8, maxWidth: '400px', margin: '15px auto 0' }}>
+                <p className="instruction-text" style={{ marginTop: '15px', fontSize: '0.875rem', opacity: 0.8, maxWidth: '400px', margin: '15px auto 0' }}>
                   {slide.instruction}
                 </p>
               )}
@@ -747,7 +747,7 @@ const LearningScreen = () => {
                 <button className="audio-btn-circle" onClick={(e) => { e.stopPropagation(); playAudio(slide.audioText); }}>
                   <Volume2 size={24} />
                 </button>
-                <p style={{ marginTop: '10px', fontSize: '12px', opacity: 0.7 }}>Click to listen</p>
+                <p style={{ marginTop: '10px', fontSize: '0.75rem', opacity: 0.7 }}>Click to listen</p>
               </div>
             </div>
           </div>
