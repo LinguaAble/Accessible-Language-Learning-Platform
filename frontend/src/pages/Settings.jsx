@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users } from 'lucide-react';
+import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users, Target } from 'lucide-react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import '../Dashboard.css';
 
 const Settings = () => {
-    const { user, preferences, updatePreferences, updateProfile } = useUser();
+    const { user, preferences, todayProgress, updatePreferences, updateProfile } = useUser();
 
     // Local state for profile inputs
     const [profileData, setProfileData] = useState({
@@ -13,7 +13,8 @@ const Settings = () => {
         fullName: user.fullName || '',
         age: user.age || '',
         gender: user.gender || '',
-        bio: user.bio || ''
+        bio: user.bio || '',
+        avatarUrl: user.avatarUrl || ''
     });
     const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -24,7 +25,8 @@ const Settings = () => {
             fullName: user.fullName || '',
             age: user.age || '',
             gender: user.gender || '',
-            bio: user.bio || ''
+            bio: user.bio || '',
+            avatarUrl: user.avatarUrl || ''
         });
     }, [user]);
 
@@ -80,6 +82,147 @@ const Settings = () => {
                     </div>
 
                     <div className="settings-row" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: '15px' }}>
+                        {/* Avatar Selection */}
+                        <div style={{ width: '100%' }}>
+                            <div className="setting-info" style={{ marginBottom: '12px' }}>
+                                <span className="setting-label">Profile Avatar</span>
+                                <span className="setting-desc">Choose a preset avatar or upload your own image.</span>
+                            </div>
+
+                            {/* Current Avatar Preview */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '15px' }}>
+                                <img
+                                    src={profileData.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username || 'default'}`}
+                                    alt="Current avatar"
+                                    style={{
+                                        width: '80px',
+                                        height: '80px',
+                                        borderRadius: '50%',
+                                        border: '3px solid var(--accent-color)',
+                                        objectFit: 'cover'
+                                    }}
+                                />
+                                <div>
+                                    <div style={{ fontWeight: 600, marginBottom: '4px' }}>Current Avatar</div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                        {profileData.avatarUrl?.startsWith('data:') ? 'Custom Upload' : 'Preset Avatar'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Preset Avatars */}
+                            <div style={{ marginBottom: '15px' }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '10px', color: 'var(--text-main)' }}>
+                                    Preset Avatars
+                                </div>
+
+                                {/* Male Avatars Row */}
+                                <div style={{ marginBottom: '15px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(3, ${preferences.fontSize === 'small' ? '80px' : preferences.fontSize === 'large' ? '120px' : '100px'})`, gap: '20px', justifyContent: 'start' }}>
+                                        {[
+                                            'https://api.dicebear.com/7.x/avataaars/svg?seed=John&backgroundColor=b6e3f4',
+                                            'https://api.dicebear.com/7.x/avataaars/svg?seed=Robert&backgroundColor=c0aede',
+                                            'https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=d1d4f9'
+                                        ].map((url, index) => (
+                                            <div
+                                                key={`male-${index}`}
+                                                onClick={() => handleProfileChange('avatarUrl', url)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    border: profileData.avatarUrl === url
+                                                        ? '3px solid var(--accent-color)'
+                                                        : '2px solid var(--border-color)',
+                                                    borderRadius: '50%',
+                                                    padding: '3px',
+                                                    transition: 'all 0.2s',
+                                                    background: 'var(--card-bg)',
+                                                    width: preferences.fontSize === 'small' ? '80px' : preferences.fontSize === 'large' ? '120px' : '100px',
+                                                    height: preferences.fontSize === 'small' ? '80px' : preferences.fontSize === 'large' ? '120px' : '100px'
+                                                }}
+                                            >
+                                                <img
+                                                    src={url}
+                                                    alt={`Male avatar ${index + 1}`}
+                                                    style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Female Avatars Row */}
+                                <div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(3, ${preferences.fontSize === 'small' ? '80px' : preferences.fontSize === 'large' ? '120px' : '100px'})`, gap: '20px', justifyContent: 'start' }}>
+                                        {[
+                                            'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah&backgroundColor=ffd5dc',
+                                            'https://api.dicebear.com/7.x/avataaars/svg?seed=Jessica&backgroundColor=ffdfbf',
+                                            'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily&backgroundColor=e4c1f9'
+                                        ].map((url, index) => (
+                                            <div
+                                                key={`female-${index}`}
+                                                onClick={() => handleProfileChange('avatarUrl', url)}
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    border: profileData.avatarUrl === url
+                                                        ? '3px solid var(--accent-color)'
+                                                        : '2px solid var(--border-color)',
+                                                    borderRadius: '50%',
+                                                    padding: '3px',
+                                                    transition: 'all 0.2s',
+                                                    background: 'var(--card-bg)',
+                                                    width: preferences.fontSize === 'small' ? '80px' : preferences.fontSize === 'large' ? '120px' : '100px',
+                                                    height: preferences.fontSize === 'small' ? '80px' : preferences.fontSize === 'large' ? '120px' : '100px'
+                                                }}
+                                            >
+                                                <img
+                                                    src={url}
+                                                    alt={`Female avatar ${index + 1}`}
+                                                    style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Custom Upload */}
+                            <div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '10px', color: 'var(--text-main)' }}>
+                                    Custom Upload
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/gif,image/webp"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            if (file.size > 2 * 1024 * 1024) {
+                                                alert('File size must be less than 2MB');
+                                                return;
+                                            }
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                handleProfileChange('avatarUrl', reader.result);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                    style={{
+                                        padding: '10px',
+                                        borderRadius: '8px',
+                                        border: '1px solid var(--border-color)',
+                                        background: 'var(--input-bg)',
+                                        color: 'var(--text-main)',
+                                        width: '100%',
+                                        cursor: 'pointer'
+                                    }}
+                                />
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+                                    Max file size: 2MB. Supported formats: JPG, PNG, GIF, WEBP
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Display Name */}
                         <div style={{ width: '100%' }}>
                             <div className="setting-info" style={{ marginBottom: '8px' }}>
@@ -249,6 +392,47 @@ const Settings = () => {
                         <button className={`toggle-btn ${preferences.animationReduced ? 'active' : ''}`} onClick={toggleAnimation}>
                             {preferences.animationReduced ? 'ON' : 'OFF'}
                         </button>
+                    </div>
+                </div>
+
+                {/* --- LEARNING GOALS --- */}
+                <div className="stat-card" style={{ gridColumn: 'span 2' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                        <Target size={24} color="#e67e22" />
+                        <h3>Learning Goals</h3>
+                    </div>
+
+                    <div className="settings-row" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: '15px' }}>
+                        <div style={{ width: '100%' }}>
+                            <div className="setting-info" style={{ marginBottom: '8px' }}>
+                                <span className="setting-label">Daily Goal (Minutes)</span>
+                                <span className="setting-desc">Set how many minutes you want to learn each day.</span>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '15px' }}>
+                                <input
+                                    type="range"
+                                    min="5"
+                                    max="120"
+                                    step="5"
+                                    value={preferences.dailyGoalMinutes}
+                                    onChange={(e) => updatePreferences({ dailyGoalMinutes: parseInt(e.target.value) })}
+                                    style={{ flex: 1, cursor: 'pointer' }}
+                                />
+                                <div style={{
+                                    minWidth: '80px',
+                                    textAlign: 'center',
+                                    padding: '8px 16px',
+                                    background: 'var(--accent-color)',
+                                    color: 'white',
+                                    borderRadius: '12px',
+                                    fontWeight: 700,
+                                    fontSize: '1.1rem'
+                                }}>
+                                    {preferences.dailyGoalMinutes} min
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

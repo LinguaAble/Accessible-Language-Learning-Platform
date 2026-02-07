@@ -11,8 +11,41 @@ export const UserProvider = ({ children }) => {
         theme: 'dark',
         soundEffects: false,
         animationReduced: false,
-        fontSize: 'medium' // 'small', 'medium', 'large'
+        fontSize: 'medium', // 'small', 'medium', 'large'
+        dailyGoalMinutes: 20 // Default daily goal in minutes
     });
+
+    // Track today's progress (minutes completed)
+    const [todayProgress, setTodayProgress] = useState(() => {
+        const saved = localStorage.getItem('todayProgress');
+        const savedDate = localStorage.getItem('progressDate');
+        const today = new Date().toDateString();
+
+        // Reset if it's a new day or no date is saved
+        if (!savedDate || savedDate !== today) {
+            localStorage.setItem('progressDate', today);
+            localStorage.setItem('todayProgress', '0');
+            return 0;
+        }
+
+        return 0; // Always start at 0
+    });
+
+    // Ensure progress resets daily
+    useEffect(() => {
+        const checkAndResetProgress = () => {
+            const savedDate = localStorage.getItem('progressDate');
+            const today = new Date().toDateString();
+
+            if (!savedDate || savedDate !== today) {
+                localStorage.setItem('progressDate', today);
+                localStorage.setItem('todayProgress', '0');
+                setTodayProgress(0);
+            }
+        };
+
+        checkAndResetProgress();
+    }, []);
 
     // Initialize state from user object or defaults
     useEffect(() => {
@@ -111,6 +144,20 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const updateProgress = (minutesToAdd) => {
+        const newProgress = todayProgress + minutesToAdd;
+        setTodayProgress(newProgress);
+        localStorage.setItem('todayProgress', newProgress.toString());
+
+        // Optionally sync with backend
+        if (user.email) {
+            axios.put('http://localhost:5000/api/auth/update-progress', {
+                email: user.email,
+                todayProgress: newProgress
+            }).catch(err => console.error("Failed to sync progress", err));
+        }
+    };
+
     const logout = () => {
         setUser({});
         setPreferences({
@@ -125,7 +172,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ user, preferences, updatePreferences, updateProfile, login, logout }}>
+        <UserContext.Provider value={{ user, preferences, todayProgress, updatePreferences, updateProfile, updateProgress, login, logout }}>
             {children}
         </UserContext.Provider>
     );
