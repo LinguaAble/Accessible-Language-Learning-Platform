@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User } from 'lucide-react';
+import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users } from 'lucide-react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import '../Dashboard.css';
@@ -8,16 +7,26 @@ import '../Dashboard.css';
 const Settings = () => {
     const { user, preferences, updatePreferences, updateProfile } = useUser();
 
-    // Local state for username input to allow typing before saving
-    const [usernameInput, setUsernameInput] = useState(user.username || '');
+    // Local state for profile inputs
+    const [profileData, setProfileData] = useState({
+        username: user.username || '',
+        fullName: user.fullName || '',
+        age: user.age || '',
+        gender: user.gender || '',
+        bio: user.bio || ''
+    });
     const [isSavingProfile, setIsSavingProfile] = useState(false);
 
-    // Update local input when user context changes (e.g. initial load)
+    // Update local input when user context changes
     React.useEffect(() => {
-        if (user.username) {
-            setUsernameInput(user.username);
-        }
-    }, [user.username]);
+        setProfileData({
+            username: user.username || '',
+            fullName: user.fullName || '',
+            age: user.age || '',
+            gender: user.gender || '',
+            bio: user.bio || ''
+        });
+    }, [user]);
 
     const toggleTheme = () => {
         const newTheme = preferences.theme === 'dark' ? 'minimalist' : 'dark';
@@ -36,10 +45,14 @@ const Settings = () => {
         updatePreferences({ fontSize: size });
     };
 
+    const handleProfileChange = (field, value) => {
+        setProfileData(prev => ({ ...prev, [field]: value }));
+    };
+
     const handleSaveProfile = async () => {
         setIsSavingProfile(true);
         try {
-            await updateProfile({ username: usernameInput });
+            await updateProfile(profileData);
             // Optional: Show success toast
         } catch (error) {
             console.error("Failed to update profile", error);
@@ -63,31 +76,107 @@ const Settings = () => {
                 <div className="stat-card" style={{ gridColumn: 'span 2' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                         <User size={24} color="#e67e22" />
-                        <h3>Profile</h3>
+                        <h3>Profile Information</h3>
                     </div>
 
                     <div className="settings-row" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: '15px' }}>
-                        <div className="setting-info" style={{ width: '100%' }}>
-                            <span className="setting-label">Display Name</span>
-                            <span className="setting-desc">This name will be displayed on your dashboard.</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                        {/* Display Name */}
+                        <div style={{ width: '100%' }}>
+                            <div className="setting-info" style={{ marginBottom: '8px' }}>
+                                <span className="setting-label">Display Name</span>
+                                <span className="setting-desc">This name will be displayed on your dashboard.</span>
+                            </div>
                             <input
                                 type="text"
-                                value={usernameInput}
-                                onChange={(e) => setUsernameInput(e.target.value)}
+                                value={profileData.username}
+                                onChange={(e) => handleProfileChange('username', e.target.value)}
                                 placeholder="Enter your display name"
-                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)' }}
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)' }}
                             />
-                            <button
-                                className="toggle-btn active"
-                                onClick={handleSaveProfile}
-                                disabled={isSavingProfile}
-                                style={{ padding: '10px 20px' }}
-                            >
-                                {isSavingProfile ? 'Saving...' : 'Save'}
-                            </button>
                         </div>
+
+                        {/* Full Name */}
+                        <div style={{ width: '100%' }}>
+                            <div className="setting-info" style={{ marginBottom: '8px' }}>
+                                <span className="setting-label">Full Name</span>
+                                <span className="setting-desc">Your complete name.</span>
+                            </div>
+                            <input
+                                type="text"
+                                value={profileData.fullName}
+                                onChange={(e) => handleProfileChange('fullName', e.target.value)}
+                                placeholder="Enter your full name"
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)' }}
+                            />
+                        </div>
+
+                        {/* Age and Gender Row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', width: '100%' }}>
+                            {/* Age */}
+                            <div>
+                                <div className="setting-info" style={{ marginBottom: '8px' }}>
+                                    <span className="setting-label">Age</span>
+                                    <span className="setting-desc">Your age in years.</span>
+                                </div>
+                                <input
+                                    type="number"
+                                    value={profileData.age}
+                                    onChange={(e) => handleProfileChange('age', e.target.value)}
+                                    placeholder="Age"
+                                    min="1"
+                                    max="120"
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)' }}
+                                />
+                            </div>
+
+                            {/* Gender */}
+                            <div>
+                                <div className="setting-info" style={{ marginBottom: '8px' }}>
+                                    <span className="setting-label">Gender</span>
+                                    <span className="setting-desc">Select your gender.</span>
+                                </div>
+                                <select
+                                    value={profileData.gender}
+                                    onChange={(e) => handleProfileChange('gender', e.target.value)}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)' }}
+                                >
+                                    <option value="">Select gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                    <option value="prefer-not-to-say">Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Bio */}
+                        <div style={{ width: '100%' }}>
+                            <div className="setting-info" style={{ marginBottom: '8px' }}>
+                                <span className="setting-label">Bio</span>
+                                <span className="setting-desc">Tell us a bit about yourself (max 500 characters).</span>
+                            </div>
+                            <textarea
+                                value={profileData.bio}
+                                onChange={(e) => handleProfileChange('bio', e.target.value)}
+                                placeholder="Write something about yourself..."
+                                maxLength="500"
+                                rows="4"
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)', resize: 'vertical', fontFamily: 'inherit' }}
+                            />
+                            <div style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                {profileData.bio.length}/500
+                            </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <button
+                            className="toggle-btn active"
+                            onClick={handleSaveProfile}
+                            disabled={isSavingProfile}
+                            style={{ padding: '12px 30px', alignSelf: 'flex-start' }}
+                        >
+                            {isSavingProfile ? 'Saving...' : 'Save Profile'}
+                        </button>
                     </div>
                 </div>
 
@@ -178,7 +267,14 @@ const Settings = () => {
                                 <span className="history-device">{entry.device}</span>
                             </div>
                         ))}
-                        {(!user.loginHistory || user.loginHistory.length === 0) && <p style={{ opacity: 0.6 }}>No history available.</p>}
+                        {(!user.loginHistory || user.loginHistory.length === 0) && (
+                            <div style={{ padding: '20px', textAlign: 'center', opacity: 0.7 }}>
+                                <p style={{ marginBottom: '8px', fontSize: '0.95rem' }}>No login history available yet.</p>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                    Login history is recorded each time you sign in. Try logging out and logging back in to see your history here.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -55,10 +55,19 @@ const Dashboard = () => {
             <Flame size={18} fill="currentColor" />
             5 Day Streak
           </div>
-          <button className="notif-btn" aria-label="Notifications">
+          <button
+            className="notif-btn"
+            aria-label="Notifications"
+            onClick={() => navigate('/settings')}
+            style={{ cursor: 'pointer' }}
+          >
             <Bell size={20} />
           </button>
-          <div className="profile-avatar">
+          <div
+            className="profile-avatar"
+            onClick={() => navigate('/settings')}
+            style={{ cursor: 'pointer' }}
+          >
             <img
               src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
               alt="User avatar"
@@ -74,7 +83,7 @@ const Dashboard = () => {
           <div className="focus-info">
             <span className="badge">→ CONTINUE LEARNING</span>
             <h3>Common Phrases</h3>
-            <p className="hindi-text">आम वाक्यांश</p>
+            <p className="hindi-text" style={{ fontSize: '18px', fontWeight: 600 }}>आम वाक्यांश</p>
             <p style={{ opacity: 0.9, marginTop: '10px' }}>
               Master 10 essential greetings for daily conversation
             </p>
@@ -112,43 +121,32 @@ const Dashboard = () => {
       {/* Quick Stats Row */}
       <section style={{ marginTop: '30px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-          <div className="progress-card" style={{ padding: '20px', textAlign: 'center' }}>
+          <div
+            className="progress-card"
+            style={{ padding: '20px', textAlign: 'center', cursor: 'pointer' }}
+            onClick={() => navigate('/lessons')}
+          >
             <Award size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
             <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>47</h4>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Words Learned</p>
           </div>
-          <div className="progress-card" style={{ padding: '20px', textAlign: 'center' }}>
+          <div
+            className="progress-card"
+            style={{ padding: '20px', textAlign: 'center', cursor: 'pointer' }}
+            onClick={() => navigate('/practice')}
+          >
             <Target size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
             <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>82%</h4>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Accuracy</p>
           </div>
-          <div className="progress-card" style={{ padding: '20px', textAlign: 'center' }}>
+          <div
+            className="progress-card"
+            style={{ padding: '20px', textAlign: 'center', cursor: 'pointer' }}
+            onClick={() => navigate('/lessons')}
+          >
             <TrendingUp size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
             <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>12</h4>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Lessons Completed</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Activities */}
-      <section style={{ marginTop: '30px' }}>
-        <h3 style={{ marginBottom: '20px', fontSize: '20px' }}>Practice Your Skills</h3>
-        <div className="activities-grid">
-          <div className="activity-item" onClick={() => handleNavigation('/lessons')}>
-            <BookOpen size={32} color="var(--accent-color)" />
-            <span style={{ display: 'block', marginTop: '10px' }}>Vocabulary</span>
-          </div>
-          <div className="activity-item" onClick={() => handleNavigation('/practice')}>
-            <Zap size={32} color="var(--accent-color)" />
-            <span style={{ display: 'block', marginTop: '10px' }}>Listening</span>
-          </div>
-          <div className="activity-item" onClick={() => handleNavigation('/lessons')}>
-            <BookOpen size={32} color="var(--accent-color)" />
-            <span style={{ display: 'block', marginTop: '10px' }}>Grammar</span>
-          </div>
-          <div className="activity-item" onClick={() => handleNavigation('/practice')}>
-            <Target size={32} color="var(--accent-color)" />
-            <span style={{ display: 'block', marginTop: '10px' }}>Speaking</span>
           </div>
         </div>
       </section>
