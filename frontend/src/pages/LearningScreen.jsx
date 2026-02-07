@@ -335,12 +335,124 @@ const lessonDatabase = {
       { type: 'pronounce', question: "Say 'Mango'", mainChar: "आम", answer: "aam", hint: "Aam" },
     ]
   },
-  // --- CHAPTER 3 ---
-  31: { title: "Asking: Where?", slides: consonantsL4 },
-  32: { title: "Adjectives (Big/Small)", slides: consonantsL4 },
-  33: { title: "Possessives (My/Your)", slides: consonantsL4 },
-  34: { title: "Feelings (Happy/Sad)", slides: consonantsL4 },
-  35: { title: "Review: Sentences", slides: consonantsL4 }
+  // --- CHAPTER 3: FIRST SENTENCES ---
+  31: {
+    title: "Pronouns: I & You",
+    slides: [
+      ...createVocabPair("मैं", "I", "First person", ["I", "You", "He", "She"], ["मैं", "तुम", "वह", "वह"]),
+      ...createVocabPair("तुम", "You (informal)", "Second person informal", ["You", "I", "We", "They"], ["तुम", "मैं", "हम", "वे"]),
+      ...createVocabPair("आप", "You (formal)", "Second person formal", ["You (formal)", "You (informal)", "I", "We"], ["आप", "तुम", "मैं", "हम"]),
+    ]
+  },
+  32: {
+    title: "Pronouns: He, She & We",
+    slides: [
+      ...createVocabPair("वह", "He/She", "Third person", ["He/She", "I", "You", "We"], ["वह", "मैं", "तुम", "हम"]),
+      ...createVocabPair("हम", "We", "First person plural", ["We", "They", "You", "I"], ["हम", "वे", "तुम", "मैं"]),
+      ...createVocabPair("वे", "They", "Third person plural", ["They", "We", "You", "He/She"], ["वे", "हम", "तुम", "वह"]),
+    ]
+  },
+  33: {
+    title: "Verbs: Eat & Drink",
+    slides: [
+      ...createVocabPair("खाना", "To eat", "Eating action", ["To eat", "To drink", "To sleep", "To go"], ["खाना", "पीना", "सोना", "जाना"]),
+      ...createVocabPair("पीना", "To drink", "Drinking action", ["To drink", "To eat", "To come", "To sit"], ["पीना", "खाना", "आना", "बैठना"]),
+    ]
+  },
+  34: {
+    title: "Verbs: Go & Come",
+    slides: [
+      ...createVocabPair("जाना", "To go", "Going action", ["To go", "To come", "To eat", "To sleep"], ["जाना", "आना", "खाना", "सोना"]),
+      ...createVocabPair("आना", "To come", "Coming action", ["To come", "To go", "To sit", "To stand"], ["आना", "जाना", "बैठना", "खड़ा होना"]),
+    ]
+  },
+  35: {
+    title: "Verbs: Sleep & Wake",
+    slides: [
+      ...createVocabPair("सोना", "To sleep", "Sleeping action", ["To sleep", "To wake", "To eat", "To drink"], ["सोना", "जागना", "खाना", "पीना"]),
+      ...createVocabPair("जागना", "To wake", "Waking action", ["To wake", "To sleep", "To sit", "To stand"], ["जागना", "सोना", "बैठना", "खड़ा होना"]),
+    ]
+  },
+  36: {
+    title: "I am / You are",
+    slides: [
+      ...createVocabPair("मैं हूँ", "I am", "I am statement", ["I am", "You are", "He is", "We are"], ["मैं हूँ", "तुम हो", "वह है", "हम हैं"]),
+      ...createVocabPair("तुम हो", "You are", "You are statement", ["You are", "I am", "He is", "They are"], ["तुम हो", "मैं हूँ", "वह है", "वे हैं"]),
+    ]
+  },
+  37: {
+    title: "He/She is & We are",
+    slides: [
+      ...createVocabPair("वह है", "He/She is", "Third person is", ["He/She is", "I am", "You are", "We are"], ["वह है", "मैं हूँ", "तुम हो", "हम हैं"]),
+      ...createVocabPair("हम हैं", "We are", "We are statement", ["We are", "They are", "I am", "You are"], ["हम हैं", "वे हैं", "मैं हूँ", "तुम हो"]),
+    ]
+  },
+  38: {
+    title: "Simple Sentences",
+    slides: [
+      ...createVocabPair("मैं खाता हूँ", "I eat", "I eat sentence", ["I eat", "You eat", "He eats", "We eat"], ["मैं खाता हूँ", "तुम खाते हो", "वह खाता है", "हम खाते हैं"]),
+      ...createVocabPair("मैं जाता हूँ", "I go", "I go sentence", ["I go", "You go", "I come", "I eat"], ["मैं जाता हूँ", "तुम जाते हो", "मैं आता हूँ", "मैं खाता हूँ"]),
+    ]
+  },
+  39: {
+    title: "Questions: What & Where",
+    slides: [
+      ...createVocabPair("क्या", "What", "Question word", ["What", "Where", "When", "Who"], ["क्या", "कहाँ", "कब", "कौन"]),
+      ...createVocabPair("कहाँ", "Where", "Location question", ["Where", "What", "When", "Why"], ["कहाँ", "क्या", "कब", "क्यों"]),
+      ...createVocabPair("कब", "When", "Time question", ["When", "Where", "What", "Who"], ["कब", "कहाँ", "क्या", "कौन"]),
+    ]
+  },
+  40: {
+    title: "Recap: Grammar Mix",
+    slides: [
+      { type: 'quiz', subtype: 'intro', badge: "Review", title: "Grammar Review", question: "What does this mean?", mainChar: "मैं", audioText: "मैं", hint: "Pronoun", options: ["I", "You", "He", "We"], answer: "I" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'I'", audioText: null, options: ["मैं", "तुम", "वह", "हम"], answer: "मैं" },
+      { type: 'quiz', subtype: 'intro', badge: "Review", title: "Grammar Review", question: "What does this mean?", mainChar: "खाना", audioText: "खाना", hint: "Verb", options: ["To eat", "To drink", "To sleep", "To go"], answer: "To eat" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'To eat'", audioText: null, options: ["खाना", "पीना", "सोना", "जाना"], answer: "खाना" },
+      { type: 'quiz', subtype: 'intro', badge: "Review", title: "Grammar Review", question: "What does this mean?", mainChar: "क्या", audioText: "क्या", hint: "Question", options: ["What", "Where", "When", "Who"], answer: "What" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'What'", audioText: null, options: ["क्या", "कहाँ", "कब", "कौन"], answer: "क्या" },
+    ]
+  },
+  41: {
+    title: "Adjectives: Size",
+    slides: [
+      ...createVocabPair("बड़ा", "Big", "Large size", ["Big", "Small", "Long", "Short"], ["बड़ा", "छोटा", "लंबा", "छोटा"]),
+      ...createVocabPair("छोटा", "Small", "Small size", ["Small", "Big", "Tall", "Short"], ["छोटा", "बड़ा", "लंबा", "नाटा"]),
+    ]
+  },
+  42: {
+    title: "Adjectives: Feelings",
+    slides: [
+      ...createVocabPair("खुश", "Happy", "Happy feeling", ["Happy", "Sad", "Angry", "Tired"], ["खुश", "उदास", "गुस्सा", "थका"]),
+      ...createVocabPair("उदास", "Sad", "Sad feeling", ["Sad", "Happy", "Angry", "Scared"], ["उदास", "खुश", "गुस्सा", "डरा"]),
+    ]
+  },
+  43: {
+    title: "Pronunciation: Pronouns & Verbs",
+    slides: [
+      { type: 'pronounce', question: "Say 'I'", mainChar: "मैं", answer: "main", hint: "Main" },
+      { type: 'pronounce', question: "Say 'You'", mainChar: "तुम", answer: "tum", hint: "Tum" },
+      { type: 'pronounce', question: "Say 'To eat'", mainChar: "खाना", answer: "khaana", hint: "Khaana" },
+      { type: 'pronounce', question: "Say 'To go'", mainChar: "जाना", answer: "jaana", hint: "Jaana" },
+    ]
+  },
+  44: {
+    title: "Pronunciation: Sentences",
+    slides: [
+      { type: 'pronounce', question: "Say 'I am'", mainChar: "मैं हूँ", answer: "main hoon", hint: "Main hoon" },
+      { type: 'pronounce', question: "Say 'You are'", mainChar: "तुम हो", answer: "tum ho", hint: "Tum ho" },
+      { type: 'pronounce', question: "Say 'I eat'", mainChar: "मैं खाता हूँ", answer: "main khaata hoon", hint: "Main khaata hoon" },
+    ]
+  },
+  45: {
+    title: "Pronunciation: Questions & Adjectives",
+    slides: [
+      { type: 'pronounce', question: "Say 'What'", mainChar: "क्या", answer: "kya", hint: "Kya" },
+      { type: 'pronounce', question: "Say 'Where'", mainChar: "कहाँ", answer: "kahaan", hint: "Kahaan" },
+      { type: 'pronounce', question: "Say 'Big'", mainChar: "बड़ा", answer: "bada", hint: "Bada" },
+      { type: 'pronounce', question: "Say 'Happy'", mainChar: "खुश", answer: "khush", hint: "Khush" },
+    ]
+  },
 };
 
 const LearningScreen = () => {
@@ -440,9 +552,16 @@ const LearningScreen = () => {
   const checkPronunciation = (transcript) => {
     const currentSlide = activeSlides[currentSlideIndex];
 
-    // Strict Hindi Matching: Validates if the transcript contains the exact Hindi character/word
-    // We trim whitespace to handle potential leading/trailing spaces
-    const correct = transcript.trim().includes(currentSlide.mainChar.trim());
+    // Normalize function to handle chandrabindu (ँ) vs anusvar (ं) variations
+    const normalizeHindi = (text) => {
+      return text.trim().replace(/ँ/g, 'ं'); // Replace chandrabindu with anusvar for comparison
+    };
+
+    // Strict Hindi Matching with normalization
+    const normalizedTranscript = normalizeHindi(transcript);
+    const normalizedMainChar = normalizeHindi(currentSlide.mainChar);
+
+    const correct = normalizedTranscript.includes(normalizedMainChar);
 
     if (correct) {
       setIsCorrect(true);
