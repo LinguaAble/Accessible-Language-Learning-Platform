@@ -92,7 +92,7 @@
 }
 
 .feedback-text {
-    font-size: 20px;
+    font-size: 1.25rem;
     font-weight: 800;
 }
 
@@ -114,7 +114,7 @@
 
 .feedback-subtext {
     display: block;
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #ef4444;
     font-weight: 600;
 }
@@ -131,7 +131,7 @@
     color: white;
     border: none;
     padding: 15px 40px;
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 700;
     border-radius: 12px;
     cursor: pointer;
@@ -163,7 +163,7 @@
     color: white;
     padding: 6px 12px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
@@ -201,7 +201,7 @@
 }
 
 .hindi-large {
-    font-size: 90px;
+    font-size: 5.625rem;
     margin: 0;
     background: linear-gradient(135deg, var(--accent-color), #d35400);
     -webkit-background-clip: text;
@@ -253,7 +253,7 @@
     border-bottom-width: 4px;
     padding: 22px;
     border-radius: 18px;
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 700;
     cursor: pointer;
     color: var(--text-main);
@@ -391,7 +391,7 @@
     border: 1px solid #fcd34d;
     padding: 5px 10px;
     border-radius: 15px;
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 700;
     display: flex;
     align-items: center;
