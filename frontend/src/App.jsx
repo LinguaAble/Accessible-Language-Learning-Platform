@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -10,33 +10,15 @@ import Practice from './pages/Practice';
 import Leaderboard from './pages/Leaderboard';
 import Settings from './pages/Settings';
 import Layout from './components/Layout';
-import LearningScreen from './pages/LearningScreen'; // <--- 1. Import Added
-
+import LearningScreen from './pages/LearningScreen';
+import { UserProvider, useUser } from './context/UserContext';
 import './App.css';
-
 import { playClickSound, playNavigationSound } from './utils/soundUtils';
 
-function App() {
-  // 1. Initialize Theme (Default to 'dark' to fix the white flash)
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-
+function AppContent() {
+  const { preferences } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // 2. Apply Theme & Motion to Body
-  useEffect(() => {
-    // Theme
-    document.body.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-
-    // Motion & Sound (Load from user object)
-    const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    if (savedUser.preferences?.animationReduced) {
-      document.body.classList.add('reduce-motion');
-    } else {
-      document.body.classList.remove('reduce-motion');
-    }
-  }, [theme]);
 
   // 3. Auto-Login Logic
   useEffect(() => {
@@ -49,8 +31,10 @@ function App() {
 
   // 4. Global Sound Effects (Navigation & Clicks)
   useEffect(() => {
-    playNavigationSound();
-  }, [location.pathname]);
+    if (preferences.soundEffects) {
+      playNavigationSound();
+    }
+  }, [location.pathname, preferences.soundEffects]);
 
   useEffect(() => {
     const handleGlobalClick = (e) => {
@@ -62,13 +46,15 @@ function App() {
       const closestInteractive = target.closest('button, a, [role="button"], [role="link"]');
 
       if (interactiveTag || isRole || isClass || closestInteractive) {
-        playClickSound();
+        if (preferences.soundEffects) {
+          playClickSound();
+        }
       }
     };
 
     window.addEventListener('click', handleGlobalClick);
     return () => window.removeEventListener('click', handleGlobalClick);
-  }, []);
+  }, [preferences.soundEffects]);
 
   return (
     <div className="app-container">
@@ -94,6 +80,14 @@ function App() {
 
       </Routes>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <UserProvider>
+      <AppContent />
+    </UserProvider>
   );
 }
 

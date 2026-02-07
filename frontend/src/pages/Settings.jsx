@@ -1,89 +1,50 @@
 
-
-import React, { useState, useEffect } from 'react';
-import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, EyeOff, Shield, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User } from 'lucide-react';
 import axios from 'axios';
+import { useUser } from '../context/UserContext';
 import '../Dashboard.css';
 
 const Settings = () => {
-    const [preferences, setPreferences] = useState({
-        theme: 'minimalist',
-        soundEffects: false,
-        animationReduced: true
-    });
-    const [loginHistory, setLoginHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { user, preferences, updatePreferences, updateProfile } = useUser();
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // Local state for username input to allow typing before saving
+    const [usernameInput, setUsernameInput] = useState(user.username || '');
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
 
-    // Fetch Settings & History
-    useEffect(() => {
-        if (user.email) {
-            axios.post('http://localhost:5000/api/auth/get-user-data', { email: user.email })
-                .then(res => {
-                    const fetchedPrefs = res.data.preferences;
-                    setPreferences(fetchedPrefs);
-                    setLoginHistory(res.data.loginHistory);
-                    setLoading(false);
-
-                    // Sync to localStorage
-                    const updatedUser = { ...user, preferences: fetchedPrefs };
-                    localStorage.setItem('user', JSON.stringify(updatedUser)); // Update full user object
-                    localStorage.setItem('theme', fetchedPrefs.theme === 'dark' ? 'dark' : 'light'); // Keep simple key for App.jsx
-
-                    // Apply initial theme
-                    const initialTheme = fetchedPrefs.theme === 'dark' ? 'dark' : 'light';
-                    document.body.setAttribute('data-theme', initialTheme);
-
-                    // Apply initial motion
-                    if (fetchedPrefs.animationReduced) {
-                        document.body.classList.add('reduce-motion');
-                    } else {
-                        document.body.classList.remove('reduce-motion');
-                    }
-                })
-                .catch(err => console.error(err));
-        } else {
-            setLoading(false);
+    // Update local input when user context changes (e.g. initial load)
+    React.useEffect(() => {
+        if (user.username) {
+            setUsernameInput(user.username);
         }
-    }, []);
+    }, [user.username]);
 
     const toggleTheme = () => {
         const newTheme = preferences.theme === 'dark' ? 'minimalist' : 'dark';
-        updatePreference('theme', newTheme);
-
-        const themeAttr = newTheme === 'dark' ? 'dark' : 'light';
-        document.body.setAttribute('data-theme', themeAttr);
+        updatePreferences({ theme: newTheme });
     };
 
     const toggleSound = () => {
-        updatePreference('soundEffects', !preferences.soundEffects);
+        updatePreferences({ soundEffects: !preferences.soundEffects });
     };
 
     const toggleAnimation = () => {
-        const newValue = !preferences.animationReduced;
-        updatePreference('animationReduced', newValue);
-
-        if (newValue) {
-            document.body.classList.add('reduce-motion');
-        } else {
-            document.body.classList.remove('reduce-motion');
-        }
+        updatePreferences({ animationReduced: !preferences.animationReduced });
     };
 
-    const updatePreference = (key, value) => {
-        const newPrefs = { ...preferences, [key]: value };
-        setPreferences(newPrefs);
+    const changeFontSize = (size) => {
+        updatePreferences({ fontSize: size });
+    };
 
-        // Update localStorage strictly
-        const updatedUser = { ...user, preferences: newPrefs };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-
-        if (user.email) {
-            axios.put('http://localhost:5000/api/auth/update-settings', {
-                email: user.email,
-                preferences: newPrefs
-            }).catch(err => console.error("Failed to save settings", err));
+    const handleSaveProfile = async () => {
+        setIsSavingProfile(true);
+        try {
+            await updateProfile({ username: usernameInput });
+            // Optional: Show success toast
+        } catch (error) {
+            console.error("Failed to update profile", error);
+        } finally {
+            setIsSavingProfile(false);
         }
     };
 
@@ -92,16 +53,83 @@ const Settings = () => {
             <header className="content-header">
                 <div className="greeting">
                     <h2>Settings</h2>
-                    <p>Manage your experience and security.</p>
+                    <p>Manage your experience, profile, and preferences.</p>
                 </div>
             </header>
 
             <div className="dashboard-grid">
+
+                {/* --- PROFILE SETTINGS --- */}
+                <div className="stat-card" style={{ gridColumn: 'span 2' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                        <User size={24} color="#e67e22" />
+                        <h3>Profile</h3>
+                    </div>
+
+                    <div className="settings-row" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: '15px' }}>
+                        <div className="setting-info" style={{ width: '100%' }}>
+                            <span className="setting-label">Display Name</span>
+                            <span className="setting-desc">This name will be displayed on your dashboard.</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                            <input
+                                type="text"
+                                value={usernameInput}
+                                onChange={(e) => setUsernameInput(e.target.value)}
+                                placeholder="Enter your display name"
+                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)' }}
+                            />
+                            <button
+                                className="toggle-btn active"
+                                onClick={handleSaveProfile}
+                                disabled={isSavingProfile}
+                                style={{ padding: '10px 20px' }}
+                            >
+                                {isSavingProfile ? 'Saving...' : 'Save'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 {/* --- DISPLAY SETTINGS --- */}
                 <div className="stat-card" style={{ gridColumn: 'span 2' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
                         <Eye size={24} color="#3498db" />
                         <h3>Display & Accessibility</h3>
+                    </div>
+
+                    {/* FONT SIZE */}
+                    <div className="settings-row">
+                        <div className="setting-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Type size={18} />
+                                <span className="setting-label">Font Size</span>
+                            </div>
+                            <span className="setting-desc">Adjust the text size for better readability.</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                            <button
+                                className={`toggle-btn ${preferences.fontSize === 'small' ? 'active' : ''}`}
+                                onClick={() => changeFontSize('small')}
+                                style={{ fontSize: '0.8rem', padding: '5px 10px' }}
+                            >
+                                A
+                            </button>
+                            <button
+                                className={`toggle-btn ${preferences.fontSize === 'medium' ? 'active' : ''}`}
+                                onClick={() => changeFontSize('medium')}
+                                style={{ fontSize: '1rem', padding: '5px 12px' }}
+                            >
+                                A
+                            </button>
+                            <button
+                                className={`toggle-btn ${preferences.fontSize === 'large' ? 'active' : ''}`}
+                                onClick={() => changeFontSize('large')}
+                                style={{ fontSize: '1.2rem', padding: '5px 14px' }}
+                            >
+                                A
+                            </button>
+                        </div>
                     </div>
 
                     <div className="settings-row">
@@ -143,14 +171,14 @@ const Settings = () => {
                     </div>
 
                     <div className="history-list">
-                        {loginHistory.slice().reverse().map((entry, idx) => (
+                        {(user.loginHistory || []).slice().reverse().map((entry, idx) => (
                             <div key={idx} className="history-item">
                                 <Clock size={16} color="#95a5a6" />
                                 <span className="history-time">{new Date(entry.timestamp).toLocaleString()}</span>
                                 <span className="history-device">{entry.device}</span>
                             </div>
                         ))}
-                        {loginHistory.length === 0 && <p style={{ opacity: 0.6 }}>No history available.</p>}
+                        {(!user.loginHistory || user.loginHistory.length === 0) && <p style={{ opacity: 0.6 }}>No history available.</p>}
                     </div>
                 </div>
             </div>

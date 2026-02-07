@@ -20,6 +20,19 @@
   --input-bg: #ffffff;
 }
 
+/* Accessibility: Font Size Scaling */
+html[data-font-size='small'] {
+  font-size: 14px;
+}
+
+html[data-font-size='medium'] {
+  font-size: 16px;
+}
+
+html[data-font-size='large'] {
+  font-size: 20px;
+}
+
 /* Dark Theme (Navy Blue) */
 [data-theme='dark'] {
   --primary-color: #ecf0f1;
@@ -115,7 +128,8 @@ body {
 .brand-title {
   text-align: center;
   color: var(--text-main);
-  font-size: 36px;
+  color: var(--text-main);
+  font-size: 2.25rem;
   margin-bottom: 5px;
   margin-top: -5px;
   /* Pull closer to 'Welcome to' */
@@ -209,7 +223,8 @@ input {
   border: 2px solid var(--border-color);
   /* Thick, clear boundaries */
   border-radius: 10px;
-  font-size: 16px;
+  border-radius: 10px;
+  font-size: 1rem;
   box-sizing: border-box;
   background-color: var(--input-bg);
   color: var(--text-main);
@@ -287,7 +302,9 @@ input:focus {
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.125rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
@@ -325,6 +342,7 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: white !important;
   caret-color: white;
 }
+
 /* --- FIX: Remove Default Browser Password Eye --- */
 input::-ms-reveal,
 input::-ms-clear {

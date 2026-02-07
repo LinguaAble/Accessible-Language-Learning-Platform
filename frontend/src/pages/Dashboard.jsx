@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 import {
-  BookOpen, Flame, PlayCircle, BarChart3, Bell, Award, Target, TrendingUp, 
+  BookOpen, Flame, PlayCircle, BarChart3, Bell, Award, Target, TrendingUp,
   Zap, ChevronRight, Star, Clock
 } from 'lucide-react';
 
 const Dashboard = () => {
+  const { user } = useUser();
   const navigate = useNavigate();
-  const [user] = useState(JSON.parse(localStorage.getItem('user')) || {});
 
   useEffect(() => {
     if (user.email) {
@@ -26,6 +27,7 @@ const Dashboard = () => {
   }, [user.email]);
 
   const getDisplayName = () => {
+    if (user.username) return user.username;
     if (!user.email) return "Learner";
     const namePart = user.email.split('@')[0];
     return namePart.charAt(0).toUpperCase() + namePart.slice(1);
@@ -50,7 +52,7 @@ const Dashboard = () => {
           </div>
           <p style={styles.greetingSubtitle}>You're doing amazing — keep the momentum going!</p>
         </div>
-        
+
         <div style={styles.headerMeta}>
           <div style={styles.streakContainer}>
             <div style={styles.streakIconWrapper}>
@@ -61,15 +63,15 @@ const Dashboard = () => {
               <span style={styles.streakLabel}>day streak</span>
             </div>
           </div>
-          
+
           <button style={styles.headerIconBtn} aria-label="Notifications">
             <Bell size={20} />
             <span style={styles.notificationBadge}></span>
           </button>
-          
+
           <div style={styles.userAvatarWrapper}>
-            <img 
-              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`} 
+            <img
+              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
               alt="User avatar"
               style={styles.userAvatarImg}
             />
@@ -79,7 +81,7 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div style={styles.dashboardLayout}>
-        
+
         {/* Primary Focus Card */}
         <section style={styles.focusSection}>
           <div style={styles.focusCard}>
@@ -87,14 +89,14 @@ const Dashboard = () => {
               <div style={styles.pulseIndicator}></div>
               <span style={styles.focusBadgeText}>Continue Learning</span>
             </div>
-            
+
             <div style={styles.focusContent}>
               <h2 style={styles.focusLessonTitle}>Common Phrases</h2>
               <p style={styles.focusLessonHindi}>आम वाक्यांश</p>
               <p style={styles.focusLessonDesc}>
                 Master 10 essential greetings for daily conversation
               </p>
-              
+
               <div style={styles.focusProgressInfo}>
                 <div style={styles.progressStat}>
                   <Clock size={16} color="#4a7c6f" />
@@ -121,7 +123,7 @@ const Dashboard = () => {
         {/* Stats Row */}
         <section style={styles.statsSection}>
           <div style={styles.statCard}>
-            <div style={{...styles.statIconBox, ...styles.statIconPrimary}}>
+            <div style={{ ...styles.statIconBox, ...styles.statIconPrimary }}>
               <Target size={20} />
             </div>
             <div style={styles.statInfo}>
@@ -129,12 +131,12 @@ const Dashboard = () => {
               <p style={styles.statValue}>15<span style={styles.statUnit}>/20 min</span></p>
             </div>
             <div style={styles.statProgressBar}>
-              <div style={{...styles.statProgressFill, width: '75%'}}></div>
+              <div style={{ ...styles.statProgressFill, width: '75%' }}></div>
             </div>
           </div>
 
           <div style={styles.statCard}>
-            <div style={{...styles.statIconBox, ...styles.statIconSuccess}}>
+            <div style={{ ...styles.statIconBox, ...styles.statIconSuccess }}>
               <Award size={20} />
             </div>
             <div style={styles.statInfo}>
@@ -144,7 +146,7 @@ const Dashboard = () => {
           </div>
 
           <div style={styles.statCard}>
-            <div style={{...styles.statIconBox, ...styles.statIconAccent}}>
+            <div style={{ ...styles.statIconBox, ...styles.statIconAccent }}>
               <TrendingUp size={20} />
             </div>
             <div style={styles.statInfo}>
@@ -157,10 +159,10 @@ const Dashboard = () => {
         {/* Learning Modes */}
         <section style={styles.modesSection}>
           <h3 style={styles.sectionHeading}>Practice Your Skills</h3>
-          
+
           <div style={styles.modesGrid}>
             <button style={styles.modeCard} onClick={() => handleNavigation('/lessons')}>
-              <div style={{...styles.modeIcon, backgroundColor: 'rgba(74, 124, 111, 0.1)', color: '#4a7c6f'}}>
+              <div style={{ ...styles.modeIcon, backgroundColor: 'rgba(74, 124, 111, 0.1)', color: '#4a7c6f' }}>
                 <BookOpen size={24} strokeWidth={1.8} />
               </div>
               <div style={styles.modeText}>
@@ -171,7 +173,7 @@ const Dashboard = () => {
             </button>
 
             <button style={styles.modeCard} onClick={() => handleNavigation('/practice')}>
-              <div style={{...styles.modeIcon, backgroundColor: 'rgba(224, 159, 62, 0.1)', color: '#e09f3e'}}>
+              <div style={{ ...styles.modeIcon, backgroundColor: 'rgba(224, 159, 62, 0.1)', color: '#e09f3e' }}>
                 <Zap size={24} strokeWidth={1.8} />
               </div>
               <div style={styles.modeText}>
@@ -182,7 +184,7 @@ const Dashboard = () => {
             </button>
 
             <button style={styles.modeCard} onClick={() => handleNavigation('/lessons')}>
-              <div style={{...styles.modeIcon, backgroundColor: 'rgba(106, 153, 78, 0.1)', color: '#6a994e'}}>
+              <div style={{ ...styles.modeIcon, backgroundColor: 'rgba(106, 153, 78, 0.1)', color: '#6a994e' }}>
                 <BookOpen size={24} strokeWidth={1.8} />
               </div>
               <div style={styles.modeText}>
@@ -193,7 +195,7 @@ const Dashboard = () => {
             </button>
 
             <button style={styles.modeCard} onClick={() => handleNavigation('/practice')}>
-              <div style={{...styles.modeIcon, backgroundColor: 'rgba(74, 124, 111, 0.1)', color: '#4a7c6f'}}>
+              <div style={{ ...styles.modeIcon, backgroundColor: 'rgba(74, 124, 111, 0.1)', color: '#4a7c6f' }}>
                 <Target size={24} strokeWidth={1.8} />
               </div>
               <div style={styles.modeText}>
@@ -213,7 +215,7 @@ const Dashboard = () => {
               <h3 style={styles.sectionHeading}>This Week</h3>
               <BarChart3 size={18} color="#6b7c8c" />
             </div>
-            
+
             <div style={styles.chartBarsContainer}>
               {[
                 { day: 'M', value: 40 },
@@ -225,7 +227,7 @@ const Dashboard = () => {
                 { day: 'S', value: 80 }
               ].map((item, i) => (
                 <div key={i} style={styles.chartBarWrapper}>
-                  <div style={{...styles.chartBar, height: `${item.value}%`}}>
+                  <div style={{ ...styles.chartBar, height: `${item.value}%` }}>
                     <span style={styles.chartBarTooltip}>{item.value}%</span>
                   </div>
                   <span style={styles.chartBarLabel}>{item.day}</span>

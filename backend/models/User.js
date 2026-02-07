@@ -8,6 +8,11 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     validate: [validator.isEmail, 'Please provide a valid email']
   },
+  username: {
+    type: String,
+    required: false,
+    default: ''
+  },
   password: {
     type: String,
     required: true,
@@ -24,6 +29,7 @@ const UserSchema = new mongoose.Schema({
     theme: { type: String, default: 'minimalist' },
     soundEffects: { type: Boolean, default: false },
     animationReduced: { type: Boolean, default: true },
+    fontSize: { type: String, default: 'medium' }, // medium, small, large
     sessionDuration: { type: Number, default: 15 }
   },
 
