@@ -197,11 +197,11 @@ const Settings = () => {
                 }
                 .setting-label {
                     font-weight: 600;
-                    font-size: 16px;
+                    font-size: 1rem;
                     color: var(--text-main);
                 }
                 .setting-desc {
-                    font-size: 13px;
+                    font-size: 0.8125rem;
                     opacity: 0.7;
                     color: var(--text-muted);
                 }

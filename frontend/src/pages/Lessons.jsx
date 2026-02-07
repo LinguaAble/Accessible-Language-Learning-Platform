@@ -133,8 +133,8 @@ const Lessons = () => {
                     <div key={chapter.id} className="chapter-section">
                         <div className="chapter-header" style={{ borderLeft: `5px solid ${chapter.color}` }}>
                             <div>
-                                <h3 style={{ margin: 0, fontSize: '20px' }}>{chapter.title}</h3>
-                                <p style={{ margin: '5px 0 0', opacity: 0.7, fontSize: '14px' }}>{chapter.subtitle}</p>
+                                <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{chapter.title}</h3>
+                                <p style={{ margin: '5px 0 0', opacity: 0.7, fontSize: '0.875rem' }}>{chapter.subtitle}</p>
                             </div>
                             <span className="chapter-badge">{chapter.lessons.length} Lessons</span>
                         </div>
