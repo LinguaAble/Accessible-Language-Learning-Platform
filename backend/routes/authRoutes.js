@@ -10,7 +10,7 @@ const nodemailer = require('nodemailer');
 // 1. REGISTER USER
 router.post('/register', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, username } = req.body;
 
     // Check if user exists
     let user = await User.findOne({ email });
@@ -25,6 +25,7 @@ router.post('/register', async (req, res) => {
     // Create User
     user = new User({
       email,
+      username: username || email.split('@')[0],
       password: hashedPassword,
       loginHistory: [{ timestamp: new Date(), device: 'Web Browser' }]
     });
@@ -38,6 +39,7 @@ router.post('/register', async (req, res) => {
       token,
       user: {
         email: user.email,
+        username: user.username,
         preferences: user.preferences,
         completedLessons: user.completedLessons
       }
@@ -80,6 +82,7 @@ router.post('/login', async (req, res) => {
       token,
       user: {
         email: user.email,
+        username: user.username,
         preferences: user.preferences,
         completedLessons: user.completedLessons
       }
@@ -218,9 +221,12 @@ router.post('/get-user-data', async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     res.json({
-      preferences: user.preferences,
-      loginHistory: user.loginHistory,
-      completedLessons: user.completedLessons
+      user: {
+        preferences: user.preferences,
+        username: user.username,
+        loginHistory: user.loginHistory,
+        completedLessons: user.completedLessons
+      }
     });
   } catch (err) {
     console.error(err);
@@ -241,6 +247,27 @@ router.put('/update-settings', async (req, res) => {
     );
 
     res.json({ success: true, preferences: user.preferences });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 8. UPDATE PROFILE (Username)
+router.put('/update-profile', async (req, res) => {
+  try {
+    const { email, username } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { $set: { username } },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ success: true, username: user.username });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });

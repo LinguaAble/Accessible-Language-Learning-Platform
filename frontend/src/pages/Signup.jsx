@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import '../App.css';
 import logo from '../assets/logo.png';
 import { Eye, EyeOff } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { login } = useUser();
 
   const { email, password, confirmPassword } = formData;
 
@@ -45,7 +47,10 @@ const Signup = () => {
       });
 
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      // Update persistent user state via Context
+      login(res.data.user);
+
       if (res.data.user.completedLessons) {
         localStorage.setItem('completedLessons', JSON.stringify(res.data.user.completedLessons));
       }

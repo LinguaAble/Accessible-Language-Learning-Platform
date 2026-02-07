@@ -5,7 +5,8 @@ import logo from '../assets/logo.png';
 import '../App.css';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from "jwt-decode";
-import { Eye, EyeOff } from 'lucide-react'; // <--- Using the clean icons
+import { Eye, EyeOff } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -14,6 +15,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useUser();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,13 +30,12 @@ const Login = () => {
 
       if (rememberMe) {
         localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user)); // Save user data
-        localStorage.setItem('completedLessons', JSON.stringify(res.data.user.completedLessons || [])); // Save progress
       } else {
         sessionStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user)); // Save to local for Dashboard access
-        localStorage.setItem('completedLessons', JSON.stringify(res.data.user.completedLessons || [])); // Save progress
       }
+
+      // Update persistent user state via Context
+      login(res.data.user);
 
       // Sync progress from backend to local storage
       if (res.data.user.completedLessons) {
@@ -65,7 +66,9 @@ const Login = () => {
       name: decoded.name,
       picture: decoded.picture
     };
-    localStorage.setItem('user', JSON.stringify(googleUser));
+
+    // Update persistent user state via Context
+    login(googleUser);
 
     navigate('/dashboard');
   };
