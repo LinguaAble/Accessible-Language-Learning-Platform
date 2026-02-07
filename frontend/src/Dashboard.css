@@ -96,7 +96,7 @@
 /* Main Content Layout */
 .main-content {
   flex: 1;
-  padding: 40px;
+  padding: 30px;
   overflow-y: auto;
 }
 
@@ -153,7 +153,7 @@
 /* Dashboard Grid */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1.5fr 1fr;
   gap: 30px;
 }
 
@@ -162,13 +162,15 @@
   grid-column: 1 / 2;
   background: var(--primary-color);
   border-radius: 24px;
-  padding: 40px;
+  padding: 30px;
   color: white;
   display: flex;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
   box-shadow: 0 20px 40px var(--shadow-color);
+  min-height: 200px;
+  max-height: 280px;
 }
 
 [data-theme='dark'] .focus-card {
@@ -294,15 +296,20 @@
 .stats-column {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 20px;
+  height: 100%;
 }
 
 .goal-circle-card {
   background: var(--card-bg);
   border-radius: 24px;
-  padding: 30px;
+  padding: 15px 20px;
   text-align: center;
   border: 1px solid var(--border-color);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .progress-ring {
@@ -310,7 +317,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
 .ring-bg {
@@ -338,8 +345,12 @@
 .word-card {
   background: linear-gradient(135deg, var(--accent-color), #d35400);
   border-radius: 24px;
-  padding: 25px;
+  padding: 15px 20px;
   color: white;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .word-card .label {
