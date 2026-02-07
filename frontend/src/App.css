@@ -141,7 +141,7 @@ body {
 .page-title {
   text-align: center;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
   margin-bottom: 30px;
   margin-top: 0;
@@ -151,7 +151,7 @@ body {
 .welcome-text {
   text-align: center;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
   margin-bottom: 0px;
   /* Removed spacing */
@@ -182,7 +182,7 @@ body {
   border: none;
   cursor: pointer;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   padding: 0;
   display: flex;
   align-items: center;
@@ -203,11 +203,11 @@ label {
   display: block;
   color: var(--text-main);
   font-weight: 600;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .forgot-link {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--accent-color);
   text-decoration: none;
   font-weight: 500;
@@ -249,7 +249,7 @@ input:focus {
   padding: 8px 12px;
   border-radius: 20px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 1.25rem;
   box-shadow: 0 2px 5px var(--shadow-color);
   transition: all 0.3s;
   z-index: 1000;
@@ -268,7 +268,7 @@ input:focus {
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 24px;
-  font-size: 14px;
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
   border: 1px solid #fca5a5;
@@ -318,7 +318,7 @@ input:focus {
   text-align: center;
   margin-top: 25px;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .signup-text a {
