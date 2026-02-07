@@ -11,6 +11,8 @@ import '../Dashboard.css';
 const Dashboard = () => {
   const { user } = useUser();
   const navigate = useNavigate();
+  const [showProfileTooltip, setShowProfileTooltip] = useState(false);
+  const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
 
   useEffect(() => {
     if (user.email) {
@@ -55,23 +57,83 @@ const Dashboard = () => {
             <Flame size={18} fill="currentColor" />
             5 Day Streak
           </div>
-          <button
-            className="notif-btn"
-            aria-label="Notifications"
-            onClick={() => navigate('/settings')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Bell size={20} />
-          </button>
           <div
-            className="profile-avatar"
-            onClick={() => navigate('/settings')}
-            style={{ cursor: 'pointer' }}
+            className="notification-container"
+            onMouseEnter={() => setShowNotificationTooltip(true)}
+            onMouseLeave={() => setShowNotificationTooltip(false)}
+            style={{ position: 'relative' }}
           >
-            <img
-              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
-              alt="User avatar"
-            />
+            <button
+              className="notif-btn"
+              aria-label="Notifications"
+              onClick={() => navigate('/settings')}
+              style={{ cursor: 'pointer' }}
+            >
+              <Bell size={20} />
+            </button>
+
+            {showNotificationTooltip && (
+              <div className="notification-tooltip">
+                <div className="notification-tooltip-content">
+                  <Bell size={24} style={{ color: 'var(--text-muted)', opacity: 0.5 }} />
+                  <p>No notifications</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div
+            className="profile-avatar-container"
+            onMouseEnter={() => setShowProfileTooltip(true)}
+            onMouseLeave={() => setShowProfileTooltip(false)}
+            style={{ position: 'relative' }}
+          >
+            <div
+              className="profile-avatar"
+              onClick={() => navigate('/settings')}
+              style={{ cursor: 'pointer' }}
+            >
+              <img
+                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
+                alt="User avatar"
+              />
+            </div>
+
+            {showProfileTooltip && (
+              <div className="profile-tooltip">
+                <div className="tooltip-header">
+                  <img
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
+                    alt="User avatar"
+                    className="tooltip-avatar"
+                  />
+                  <div className="tooltip-user-info">
+                    <h4>{displayName}</h4>
+                    <p>{user.email || 'No email provided'}</p>
+                  </div>
+                </div>
+                <div className="tooltip-divider"></div>
+                <div className="tooltip-stats">
+                  <div className="tooltip-stat">
+                    <Flame size={16} fill="currentColor" style={{ color: 'var(--accent-color)' }} />
+                    <span>5 Day Streak</span>
+                  </div>
+                  <div className="tooltip-stat">
+                    <Award size={16} style={{ color: 'var(--accent-color)' }} />
+                    <span>47 Words Learned</span>
+                  </div>
+                  <div className="tooltip-stat">
+                    <Target size={16} style={{ color: 'var(--accent-color)' }} />
+                    <span>82% Accuracy</span>
+                  </div>
+                </div>
+                <button
+                  className="tooltip-settings-btn"
+                  onClick={() => navigate('/settings')}
+                >
+                  View Profile Settings
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
