@@ -40,8 +40,13 @@ router.post('/register', async (req, res) => {
       user: {
         email: user.email,
         username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
         preferences: user.preferences,
-        completedLessons: user.completedLessons
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory
       }
     });
   } catch (err) {
@@ -83,8 +88,13 @@ router.post('/login', async (req, res) => {
       user: {
         email: user.email,
         username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
         preferences: user.preferences,
-        completedLessons: user.completedLessons
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory
       }
     });
   } catch (err) {
@@ -224,6 +234,10 @@ router.post('/get-user-data', async (req, res) => {
       user: {
         preferences: user.preferences,
         username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
         loginHistory: user.loginHistory,
         completedLessons: user.completedLessons
       }
@@ -253,21 +267,35 @@ router.put('/update-settings', async (req, res) => {
   }
 });
 
-// 8. UPDATE PROFILE (Username)
+// 8. UPDATE PROFILE (Username and other profile fields)
 router.put('/update-profile', async (req, res) => {
   try {
-    const { email, username } = req.body;
+    const { email, username, fullName, age, gender, bio } = req.body;
     if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const updateData = {};
+    if (username !== undefined) updateData.username = username;
+    if (fullName !== undefined) updateData.fullName = fullName;
+    if (age !== undefined) updateData.age = age;
+    if (gender !== undefined) updateData.gender = gender;
+    if (bio !== undefined) updateData.bio = bio;
 
     const user = await User.findOneAndUpdate(
       { email },
-      { $set: { username } },
+      { $set: updateData },
       { new: true }
     );
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json({ success: true, username: user.username });
+    res.json({
+      success: true,
+      username: user.username,
+      fullName: user.fullName,
+      age: user.age,
+      gender: user.gender,
+      bio: user.bio
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
