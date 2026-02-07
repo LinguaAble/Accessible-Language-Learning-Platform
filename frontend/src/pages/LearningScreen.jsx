@@ -53,7 +53,7 @@ const createVocabPair = (hindiWord, englishMeaning, hintText, optionsEnglish, op
       type: 'quiz',
       subtype: 'char_select',
       question: `Select the Hindi word for '${englishMeaning}'`,
-      audioText: hindiWord,
+      audioText: null,
       options: optionsHindi,
       answer: hindiWord
     }
@@ -241,9 +241,9 @@ const lessonDatabase = {
   19: {
     title: "Recap: Numbers",
     slides: [
-      { type: 'quiz', subtype: 'char_select', question: "Select 'One'", audioText: "एक", options: ["एक", "दो", "तीन", "चार"], answer: "एक" },
-      { type: 'quiz', subtype: 'char_select', question: "Select 'Five'", audioText: "पाँच", options: ["तीन", "चार", "पाँच", "छह"], answer: "पाँच" },
-      { type: 'quiz', subtype: 'char_select', question: "Select 'Ten'", audioText: "दस", options: ["सात", "आठ", "नौ", "दस"], answer: "दस" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'One'", audioText: null, options: ["एक", "दो", "तीन", "चार"], answer: "एक" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Five'", audioText: null, options: ["तीन", "चार", "पाँच", "छह"], answer: "पाँच" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Ten'", audioText: null, options: ["सात", "आठ", "नौ", "दस"], answer: "दस" },
     ]
   },
   20: {
@@ -301,11 +301,11 @@ const lessonDatabase = {
   27: {
     title: "Recap: Vocabulary (5-11)",
     slides: [
-      { type: 'quiz', subtype: 'char_select', question: "Select 'Mother'", audioText: "माँ", options: ["माँ", "पिता", "भाई", "बहन"], answer: "माँ" },
-      { type: 'quiz', subtype: 'char_select', question: "Select 'Brother'", audioText: "भाई", options: ["बहन", "भाई", "माँ", "पिता"], answer: "भाई" },
-      { type: 'quiz', subtype: 'char_select', question: "Select 'Red'", audioText: "लाल", options: ["नीला", "हरा", "लाल", "काला"], answer: "लाल" },
-      { type: 'quiz', subtype: 'char_select', question: "Select 'Water'", audioText: "पानी", options: ["पानी", "दूध", "चाय", "रोटी"], answer: "पानी" },
-      { type: 'quiz', subtype: 'char_select', question: "Select 'Mango'", audioText: "आम", options: ["सेब", "केला", "आम", "संतरा"], answer: "आम" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Mother'", audioText: null, options: ["माँ", "पिता", "भाई", "बहन"], answer: "माँ" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Brother'", audioText: null, options: ["बहन", "भाई", "माँ", "पिता"], answer: "भाई" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Red'", audioText: null, options: ["नीला", "हरा", "लाल", "काला"], answer: "लाल" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Water'", audioText: null, options: ["पानी", "दूध", "चाय", "रोटी"], answer: "पानी" },
+      { type: 'quiz', subtype: 'char_select', question: "Select 'Mango'", audioText: null, options: ["सेब", "केला", "आम", "संतरा"], answer: "आम" },
     ]
   },
   28: {
