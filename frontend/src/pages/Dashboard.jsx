@@ -32,33 +32,61 @@ const Dashboard = () => {
   // Initialize or update daily progress tracking
   useEffect(() => {
     const today = formatDate(new Date());
-    const dailyProgress = JSON.parse(localStorage.getItem('dailyProgress') || '{}');
+    const now = new Date();
     
-    // Get today's completed lessons
+    // Get current week info
+    const startOfWeek = getStartOfWeek(now);
+    const weekKey = formatDate(startOfWeek); // Use Monday's date as week identifier
+    
+    // Get or initialize weekly progress
+    let weeklyProgress = JSON.parse(localStorage.getItem('weeklyProgress') || '{}');
+    const currentWeekKey = localStorage.getItem('currentWeekKey');
+    
+    // Check if we're in a new week (Monday changed)
+    if (currentWeekKey !== weekKey) {
+      // New week started, reset weekly progress
+      console.log('🔄 New week detected! Resetting weekly progress.');
+      weeklyProgress = {};
+      localStorage.setItem('currentWeekKey', weekKey);
+      localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
+      
+      // Clear all the daily tracking keys from previous weeks
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('completedOn_')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      console.log('🧹 Cleaned up old daily tracking data');
+    }
+    
+    // Get total completed lessons
     const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
     setTotalLessonsCompleted(completedLessons.length);
     
+    // Track which lessons were counted on which day
     const todayCompletedKey = `completedOn_${today}`;
     const previousCompleted = JSON.parse(localStorage.getItem(todayCompletedKey) || '[]');
     
-    // Calculate lessons completed today
+    // Calculate NEW lessons completed today (not counted before)
     const newLessonsToday = completedLessons.filter(id => !previousCompleted.includes(id));
     
     if (newLessonsToday.length > 0) {
-      // Update today's count
-      dailyProgress[today] = (dailyProgress[today] || 0) + newLessonsToday.length;
-      localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
+      // Update today's count with ONLY new lessons
+      weeklyProgress[today] = (weeklyProgress[today] || 0) + newLessonsToday.length;
+      localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
       localStorage.setItem(todayCompletedKey, JSON.stringify(completedLessons));
-    } else if (!dailyProgress[today]) {
+      console.log(`✅ Added ${newLessonsToday.length} new lesson(s) to ${today}. Total today: ${weeklyProgress[today]}`);
+    } else if (!weeklyProgress[today]) {
       // Initialize today with 0 if not exists
-      dailyProgress[today] = 0;
-      localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
+      weeklyProgress[today] = 0;
+      localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
     }
 
     // Build weekly data for chart
     const buildWeeklyData = () => {
-      const now = new Date();
-      const startOfWeek = getStartOfWeek(now);
       const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
       const data = [];
 
@@ -66,7 +94,7 @@ const Dashboard = () => {
         const currentDate = new Date(startOfWeek);
         currentDate.setDate(startOfWeek.getDate() + i);
         const dateStr = formatDate(currentDate);
-        const lessonsCompleted = dailyProgress[dateStr] || 0;
+        const lessonsCompleted = weeklyProgress[dateStr] || 0;
         
         data.push({
           day: days[i],
@@ -84,8 +112,11 @@ const Dashboard = () => {
     // Set up an interval to refresh the chart every minute (in case day changes)
     const interval = setInterval(() => {
       const newToday = formatDate(new Date());
-      if (newToday !== today) {
-        window.location.reload(); // Refresh when day changes
+      const newWeekKey = formatDate(getStartOfWeek(new Date()));
+      
+      if (newToday !== today || newWeekKey !== weekKey) {
+        console.log('📅 Day or week changed, refreshing...');
+        window.location.reload(); // Refresh when day or week changes
       }
     }, 60000); // Check every minute
 
