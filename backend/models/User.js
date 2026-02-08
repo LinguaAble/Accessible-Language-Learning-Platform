@@ -64,16 +64,6 @@ const UserSchema = new mongoose.Schema({
     default: []
   },
 
-  // Daily progress tracking
-  todayProgress: {
-    type: Number,
-    default: 0
-  },
-  progressDate: {
-    type: String,
-    default: () => new Date().toDateString()
-  },
-
   // Story: Login History
   loginHistory: [{
     timestamp: { type: Date, default: Date.now },
