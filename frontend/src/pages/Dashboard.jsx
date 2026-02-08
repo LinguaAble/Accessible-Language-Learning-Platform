@@ -54,7 +54,7 @@ const Dashboard = () => {
       const keysToRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('completedOn_')) {
+        if (key && (key.startsWith('completedOn_') || key.startsWith('dailySnapshot_') || key.startsWith('startOfDay_'))) {
           keysToRemove.push(key);
         }
       }
@@ -66,24 +66,33 @@ const Dashboard = () => {
     const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
     setTotalLessonsCompleted(completedLessons.length);
     
-    // Track which lessons were counted on which day
-    const todayCompletedKey = `completedOn_${today}`;
-    const previousCompleted = JSON.parse(localStorage.getItem(todayCompletedKey) || '[]');
     
-    // Calculate NEW lessons completed today (not counted before)
-    const newLessonsToday = completedLessons.filter(id => !previousCompleted.includes(id));
+    // Track lessons completed each day using snapshots
+    const dailySnapshotKey = `dailySnapshot_${today}`;
+    const startOfDayKey = `startOfDay_${today}`;
     
-    if (newLessonsToday.length > 0) {
-      // Update today's count with ONLY new lessons
-      weeklyProgress[today] = (weeklyProgress[today] || 0) + newLessonsToday.length;
-      localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
-      localStorage.setItem(todayCompletedKey, JSON.stringify(completedLessons));
-      console.log(`✅ Added ${newLessonsToday.length} new lesson(s) to ${today}. Total today: ${weeklyProgress[today]}`);
-    } else if (!weeklyProgress[today]) {
-      // Initialize today with 0 if not exists
-      weeklyProgress[today] = 0;
-      localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
+    // Get or set the snapshot from the start of today
+    let startOfDaySnapshot = JSON.parse(localStorage.getItem(startOfDayKey) || 'null');
+    
+    if (startOfDaySnapshot === null) {
+      // First time loading today - save current state as start of day
+      // This means lessons were completed before today
+      startOfDaySnapshot = completedLessons;
+      localStorage.setItem(startOfDayKey, JSON.stringify(startOfDaySnapshot));
+      console.log(`🌅 Start of day snapshot saved: ${startOfDaySnapshot.length} lessons already completed`);
     }
+    
+    // Calculate lessons completed TODAY ONLY (new ones since start of day)
+    const lessonsCompletedToday = completedLessons.filter(id => !startOfDaySnapshot.includes(id)).length;
+    
+    // Update today's count in weekly progress
+    weeklyProgress[today] = lessonsCompletedToday;
+    localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
+    
+    // Save current snapshot for real-time updates
+    localStorage.setItem(dailySnapshotKey, JSON.stringify(completedLessons));
+    
+    console.log(`📊 Today (${today}): ${lessonsCompletedToday} new lessons completed`);
 
     // Build weekly data for chart
     const buildWeeklyData = () => {
@@ -94,6 +103,8 @@ const Dashboard = () => {
         const currentDate = new Date(startOfWeek);
         currentDate.setDate(startOfWeek.getDate() + i);
         const dateStr = formatDate(currentDate);
+        
+        // For each day, use the value stored in weeklyProgress
         const lessonsCompleted = weeklyProgress[dateStr] || 0;
         
         data.push({
