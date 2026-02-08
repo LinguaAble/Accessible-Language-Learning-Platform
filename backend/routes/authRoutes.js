@@ -96,7 +96,9 @@ router.post('/login', async (req, res) => {
         avatarUrl: user.avatarUrl,
         preferences: user.preferences,
         completedLessons: user.completedLessons,
-        loginHistory: user.loginHistory
+        loginHistory: user.loginHistory,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate
       }
     });
   } catch (err) {
@@ -307,6 +309,39 @@ router.put('/update-profile', async (req, res) => {
         completedLessons: user.completedLessons,
         loginHistory: user.loginHistory
       }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 10. UPDATE PROGRESS
+router.put('/update-progress', async (req, res) => {
+  try {
+    const { email, todayProgress } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email required' });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const today = new Date().toDateString();
+
+    // Reset progress if it's a new day
+    if (user.progressDate !== today) {
+      user.todayProgress = todayProgress || 0;
+      user.progressDate = today;
+    } else {
+      // Same day, update progress
+      user.todayProgress = todayProgress;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      todayProgress: user.todayProgress,
+      progressDate: user.progressDate
     });
   } catch (err) {
     console.error(err);
