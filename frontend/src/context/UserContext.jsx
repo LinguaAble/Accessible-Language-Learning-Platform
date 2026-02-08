@@ -129,6 +129,14 @@ export const UserProvider = ({ children }) => {
             setPreferences(userData.preferences);
             document.body.setAttribute('data-theme', userData.preferences.theme === 'dark' ? 'dark' : 'light');
         }
+
+        // Load progress from backend
+        const today = new Date().toDateString();
+        if (userData.progressDate === today && userData.todayProgress !== undefined) {
+            setTodayProgress(userData.todayProgress);
+        } else {
+            setTodayProgress(0);
+        }
     };
 
     const updateProgress = (minutesToAdd) => {
