@@ -13,7 +13,87 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [showProfileTooltip, setShowProfileTooltip] = useState(false);
   const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [totalLessonsCompleted, setTotalLessonsCompleted] = useState(0);
 
+  // Helper function to get start of week (Monday)
+  const getStartOfWeek = (date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when Sunday
+    return new Date(d.setDate(diff));
+  };
+
+  // Helper function to format date as YYYY-MM-DD
+  const formatDate = (date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  // Initialize or update daily progress tracking
+  useEffect(() => {
+    const today = formatDate(new Date());
+    const dailyProgress = JSON.parse(localStorage.getItem('dailyProgress') || '{}');
+    
+    // Get today's completed lessons
+    const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+    setTotalLessonsCompleted(completedLessons.length);
+    
+    const todayCompletedKey = `completedOn_${today}`;
+    const previousCompleted = JSON.parse(localStorage.getItem(todayCompletedKey) || '[]');
+    
+    // Calculate lessons completed today
+    const newLessonsToday = completedLessons.filter(id => !previousCompleted.includes(id));
+    
+    if (newLessonsToday.length > 0) {
+      // Update today's count
+      dailyProgress[today] = (dailyProgress[today] || 0) + newLessonsToday.length;
+      localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
+      localStorage.setItem(todayCompletedKey, JSON.stringify(completedLessons));
+    } else if (!dailyProgress[today]) {
+      // Initialize today with 0 if not exists
+      dailyProgress[today] = 0;
+      localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress));
+    }
+
+    // Build weekly data for chart
+    const buildWeeklyData = () => {
+      const now = new Date();
+      const startOfWeek = getStartOfWeek(now);
+      const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      const data = [];
+
+      for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(startOfWeek);
+        currentDate.setDate(startOfWeek.getDate() + i);
+        const dateStr = formatDate(currentDate);
+        const lessonsCompleted = dailyProgress[dateStr] || 0;
+        
+        data.push({
+          day: days[i],
+          value: lessonsCompleted,
+          date: dateStr,
+          isToday: dateStr === today
+        });
+      }
+
+      return data;
+    };
+
+    setWeeklyData(buildWeeklyData());
+
+    // Set up an interval to refresh the chart every minute (in case day changes)
+    const interval = setInterval(() => {
+      const newToday = formatDate(new Date());
+      if (newToday !== today) {
+        window.location.reload(); // Refresh when day changes
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+
+  }, []);
+
+  // Sync progress with backend
   useEffect(() => {
     if (user.email) {
       const localLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
@@ -42,6 +122,9 @@ const Dashboard = () => {
     navigate(path);
   };
 
+  // Calculate max value for chart scaling
+  const maxValue = Math.max(...weeklyData.map(d => d.value), 1);
+
   return (
     <div className="main-content">
       {/* Header */}
@@ -55,7 +138,7 @@ const Dashboard = () => {
         <div className="header-stats">
           <div className="stat-pill streak">
             <Flame size={18} fill="currentColor" />
-            5 Day Streak
+            {totalLessonsCompleted > 0 ? '1' : '0'} Day Streak
           </div>
           <div
             className="notification-container"
@@ -115,7 +198,7 @@ const Dashboard = () => {
                 <div className="tooltip-stats">
                   <div className="tooltip-stat">
                     <Flame size={16} fill="currentColor" style={{ color: 'var(--accent-color)' }} />
-                    <span>5 Day Streak</span>
+                    <span>{totalLessonsCompleted > 0 ? '1' : '0'} Day Streak</span>
                   </div>
                   <div className="tooltip-stat">
                     <Award size={16} style={{ color: 'var(--accent-color)' }} />
@@ -215,7 +298,7 @@ const Dashboard = () => {
             onClick={() => navigate('/lessons')}
           >
             <TrendingUp size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>12</h4>
+            <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>{totalLessonsCompleted}</h4>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Lessons Completed</p>
           </div>
         </div>
@@ -229,517 +312,65 @@ const Dashboard = () => {
             <BarChart3 size={18} color="var(--text-muted)" />
           </div>
           <div className="weekly-chart">
-            {[
-              { day: 'M', value: 40 },
-              { day: 'T', value: 70 },
-              { day: 'W', value: 45 },
-              { day: 'T', value: 90 },
-              { day: 'F', value: 65 },
-              { day: 'S', value: 30 },
-              { day: 'S', value: 80 }
-            ].map((item, i) => (
+            {weeklyData.map((item, i) => (
               <div key={i} className="bar-wrapper">
-                <div className="bar" style={{ height: `${item.value}%` }}></div>
-                <span className="day-label">{item.day}</span>
+                <div 
+                  className="bar" 
+                  style={{ 
+                    height: `${(item.value / Math.max(maxValue, 5)) * 100}%`,
+                    opacity: item.isToday ? 1 : 0.7,
+                    position: 'relative',
+                    boxShadow: item.isToday ? '0 0 10px rgba(230, 126, 34, 0.5)' : '0 4px 6px rgba(0, 0, 0, 0.1)'
+                  }}
+                  title={`${item.date}: ${item.value} lesson${item.value !== 1 ? 's' : ''}`}
+                >
+                  {item.value > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-20px',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      color: 'var(--accent-color)'
+                    }}>
+                      {item.value}
+                    </span>
+                  )}
+                </div>
+                <span className="day-label" style={{ fontWeight: item.isToday ? 800 : 700, color: item.isToday ? 'var(--accent-color)' : 'var(--text-muted)' }}>
+                  {item.day}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Quick Actions */}
+      <section style={{ marginTop: '30px' }}>
+        <h3 style={{ marginBottom: '20px' }}>Quick Actions</h3>
+        <div className="activities-grid">
+          <div className="activity-item" onClick={() => handleNavigation('/lessons')}>
+            <BookOpen size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
+            <p style={{ margin: 0, fontWeight: 600 }}>Learn</p>
+          </div>
+          <div className="activity-item" onClick={() => handleNavigation('/practice')}>
+            <Zap size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
+            <p style={{ margin: 0, fontWeight: 600 }}>Practice</p>
+          </div>
+          <div className="activity-item" onClick={() => handleNavigation('/leaderboard')}>
+            <Star size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
+            <p style={{ margin: 0, fontWeight: 600 }}>Leaderboard</p>
+          </div>
+          <div className="activity-item" onClick={() => handleNavigation('/settings')}>
+            <Clock size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
+            <p style={{ margin: 0, fontWeight: 600 }}>Settings</p>
+          </div>
+        </div>
+      </section>
     </div>
   );
-};
-
-const styles = {
-  mainContent: {
-    position: 'relative',
-    flex: 1,
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    padding: '48px 64px',
-    background: '#0f1419',
-    fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
-    lineHeight: 1.6,
-    minHeight: '100vh',
-  },
-  bgPattern: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    pointerEvents: 'none',
-    zIndex: 0,
-    opacity: 0.05,
-    backgroundImage: 'radial-gradient(circle at 20% 30%, #ff6b35 0%, transparent 50%), radial-gradient(circle at 80% 70%, #4ecdc4 0%, transparent 50%)',
-  },
-  header: {
-    position: 'relative',
-    zIndex: 1,
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '48px',
-  },
-  greetingWrapper: {
-    flex: 1,
-  },
-  greetingMain: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '16px',
-    marginBottom: '4px',
-    flexWrap: 'wrap',
-  },
-  greetingHindi: {
-    fontFamily: "'Lexend', sans-serif",
-    fontSize: '18px',
-    fontWeight: 500,
-    color: '#ff6b35',
-    letterSpacing: '0.3px',
-  },
-  greetingName: {
-    fontFamily: "'Lexend', sans-serif",
-    fontSize: '36px',
-    fontWeight: 800,
-    color: '#ffffff',
-    letterSpacing: '-0.5px',
-    lineHeight: 1.1,
-    margin: 0,
-  },
-  greetingSubtitle: {
-    fontSize: '15px',
-    fontWeight: 500,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginTop: '4px',
-  },
-  headerMeta: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  },
-  streakContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    background: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    padding: '12px 20px',
-    borderRadius: '9999px',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-  },
-  streakIconWrapper: {
-    width: '40px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 107, 53, 0.1))',
-    borderRadius: '50%',
-  },
-  streakFlame: {
-    color: '#ff6b35',
-  },
-  streakText: {
-    display: 'flex',
-    flexDirection: 'column',
-    lineHeight: 1.2,
-  },
-  streakCount: {
-    fontSize: '20px',
-    fontWeight: 800,
-    color: '#ffffff',
-    fontFamily: "'Lexend', sans-serif",
-  },
-  streakLabel: {
-    fontSize: '11px',
-    fontWeight: 600,
-    color: 'rgba(255, 255, 255, 0.6)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-  headerIconBtn: {
-    position: 'relative',
-    width: '48px',
-    height: '48px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '50%',
-    color: 'rgba(255, 255, 255, 0.7)',
-    cursor: 'pointer',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: '12px',
-    right: '12px',
-    width: '8px',
-    height: '8px',
-    background: '#e09f3e',
-    border: '2px solid rgba(255, 255, 255, 0.8)',
-    borderRadius: '50%',
-  },
-  userAvatarWrapper: {
-    width: '48px',
-    height: '48px',
-    borderRadius: '50%',
-    overflow: 'hidden',
-    border: '2px solid #e09f3e',
-    boxShadow: '0 0 0 4px rgba(224, 159, 62, 0.1)',
-  },
-  userAvatarImg: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-  dashboardLayout: {
-    position: 'relative',
-    zIndex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '32px',
-  },
-  focusSection: {
-    marginBottom: '8px',
-  },
-  focusCard: {
-    position: 'relative',
-    background: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '24px',
-    padding: '48px',
-    overflow: 'hidden',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-  },
-  focusBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    background: 'rgba(255, 107, 53, 0.15)',
-    border: '1px solid rgba(255, 107, 53, 0.3)',
-    padding: '8px 16px',
-    borderRadius: '9999px',
-    marginBottom: '24px',
-  },
-  pulseIndicator: {
-    width: '6px',
-    height: '6px',
-    background: '#ff6b35',
-    borderRadius: '50%',
-  },
-  focusBadgeText: {
-    fontSize: '12px',
-    fontWeight: 700,
-    color: '#ff6b35',
-    textTransform: 'uppercase',
-    letterSpacing: '0.8px',
-  },
-  focusContent: {
-    position: 'relative',
-    zIndex: 2,
-    marginBottom: '32px',
-    maxWidth: '600px',
-  },
-  focusLessonTitle: {
-    fontFamily: "'Lexend', sans-serif",
-    fontSize: '42px',
-    fontWeight: 800,
-    color: '#ffffff',
-    lineHeight: 1.1,
-    letterSpacing: '-1px',
-    marginBottom: '8px',
-  },
-  focusLessonHindi: {
-    fontSize: '24px',
-    fontWeight: 600,
-    color: '#4ecdc4',
-    marginBottom: '16px',
-    letterSpacing: '0.3px',
-  },
-  focusLessonDesc: {
-    fontSize: '16px',
-    color: 'rgba(255, 255, 255, 0.7)',
-    lineHeight: 1.6,
-    marginBottom: '24px',
-  },
-  focusProgressInfo: {
-    display: 'flex',
-    gap: '24px',
-    flexWrap: 'wrap',
-  },
-  progressStat: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: '#6b7c8c',
-  },
-  focusCtaBtn: {
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '16px',
-    padding: '18px 36px',
-    background: '#ff6b35',
-    color: 'white',
-    border: 'none',
-    borderRadius: '16px',
-    fontSize: '16px',
-    fontWeight: 700,
-    fontFamily: "'Lexend', sans-serif",
-    cursor: 'pointer',
-    boxShadow: '0 8px 32px rgba(255, 107, 53, 0.4)',
-    zIndex: 2,
-  },
-  focusDecoration: {
-    position: 'absolute',
-    bottom: '20px',
-    right: '40px',
-    pointerEvents: 'none',
-  },
-  statsSection: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '24px',
-  },
-  statCard: {
-    position: 'relative',
-    background: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '20px',
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-  },
-  statIconBox: {
-    width: '48px',
-    height: '48px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '16px',
-  },
-  statIconPrimary: {
-    background: 'rgba(74, 124, 111, 0.1)',
-    color: '#4a7c6f',
-  },
-  statIconSuccess: {
-    background: 'rgba(106, 153, 78, 0.1)',
-    color: '#6a994e',
-  },
-  statIconAccent: {
-    background: 'rgba(224, 159, 62, 0.1)',
-    color: '#e09f3e',
-  },
-  statInfo: {
-    flex: 1,
-  },
-  statLabel: {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: 'rgba(255, 255, 255, 0.6)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginBottom: '4px',
-  },
-  statValue: {
-    fontFamily: "'Lexend', sans-serif",
-    fontSize: '28px',
-    fontWeight: 800,
-    color: '#ffffff',
-    lineHeight: 1,
-  },
-  statUnit: {
-    fontSize: '16px',
-    fontWeight: 600,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginLeft: '2px',
-  },
-  statProgressBar: {
-    width: '100%',
-    height: '4px',
-    background: 'rgba(74, 124, 111, 0.1)',
-    borderRadius: '9999px',
-    overflow: 'hidden',
-  },
-  statProgressFill: {
-    height: '100%',
-    background: 'linear-gradient(90deg, #4a7c6f, #e09f3e)',
-    borderRadius: '9999px',
-  },
-  modesSection: {
-    marginTop: '8px',
-  },
-  sectionHeading: {
-    fontFamily: "'Lexend', sans-serif",
-    fontSize: '20px',
-    fontWeight: 700,
-    color: '#ffffff',
-    marginBottom: '24px',
-    letterSpacing: '-0.3px',
-  },
-  modesGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '16px',
-  },
-  modeCard: {
-    position: 'relative',
-    background: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '20px',
-    padding: '24px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    cursor: 'pointer',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-    textAlign: 'left',
-  },
-  modeIcon: {
-    width: '56px',
-    height: '56px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '16px',
-  },
-  modeText: {
-    flex: 1,
-  },
-  modeTitle: {
-    fontSize: '16px',
-    fontWeight: 700,
-    color: '#ffffff',
-    marginBottom: '4px',
-  },
-  modeDesc: {
-    fontSize: '13px',
-    color: 'rgba(255, 255, 255, 0.7)',
-    lineHeight: 1.4,
-  },
-  modeArrow: {
-    color: 'rgba(255, 255, 255, 0.6)',
-    alignSelf: 'flex-end',
-  },
-  bottomSection: {
-    display: 'grid',
-    gridTemplateColumns: '2fr 1fr',
-    gap: '24px',
-  },
-  chartCard: {
-    background: 'rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
-    borderRadius: '24px',
-    padding: '32px',
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-  },
-  chartHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '32px',
-  },
-  chartBarsContainer: {
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    height: '200px',
-    gap: '8px',
-  },
-  chartBarWrapper: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '16px',
-    height: '100%',
-    justifyContent: 'flex-end',
-  },
-  chartBar: {
-    position: 'relative',
-    width: '100%',
-    maxWidth: '40px',
-    background: 'linear-gradient(180deg, #ff6b35, #e85a25)',
-    borderRadius: '8px 8px 4px 4px',
-    minHeight: '20px',
-    boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
-  },
-  chartBarTooltip: {
-    position: 'absolute',
-    top: '-32px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    fontSize: '11px',
-    fontWeight: 700,
-    color: '#2c3e3d',
-    background: 'rgba(255, 255, 255, 0.8)',
-    padding: '4px 10px',
-    borderRadius: '10px',
-    border: '1px solid rgba(74, 124, 111, 0.15)',
-    boxShadow: '0 1px 3px rgba(74, 124, 111, 0.08)',
-    whiteSpace: 'nowrap',
-    opacity: 0,
-    pointerEvents: 'none',
-  },
-  chartBarLabel: {
-    fontSize: '12px',
-    fontWeight: 700,
-    color: 'rgba(255, 255, 255, 0.7)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-  wordCard: {
-    position: 'relative',
-    background: 'linear-gradient(135deg, #ff6b35 0%, #e85a25 100%)',
-    borderRadius: '24px',
-    padding: '48px',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    boxShadow: '0 8px 32px rgba(255, 107, 53, 0.4)',
-  },
-  wordLabel: {
-    position: 'relative',
-    zIndex: 1,
-    fontSize: '11px',
-    fontWeight: 700,
-    color: 'rgba(255,255,255,0.8)',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    marginBottom: '24px',
-  },
-  wordContent: {
-    position: 'relative',
-    zIndex: 1,
-  },
-  wordHindi: {
-    fontFamily: "'Lexend', sans-serif",
-    fontSize: '48px',
-    fontWeight: 800,
-    color: 'white',
-    lineHeight: 1,
-    marginBottom: '8px',
-    textShadow: '0 2px 12px rgba(0,0,0,0.1)',
-  },
-  wordTranslation: {
-    fontSize: '16px',
-    fontWeight: 600,
-    color: 'rgba(255,255,255,0.9)',
-    letterSpacing: '0.5px',
-  },
 };
 
 export default Dashboard;
