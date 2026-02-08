@@ -44,6 +44,7 @@ router.post('/register', async (req, res) => {
         age: user.age,
         gender: user.gender,
         bio: user.bio,
+        avatarUrl: user.avatarUrl,
         preferences: user.preferences,
         completedLessons: user.completedLessons,
         loginHistory: user.loginHistory
@@ -92,6 +93,7 @@ router.post('/login', async (req, res) => {
         age: user.age,
         gender: user.gender,
         bio: user.bio,
+        avatarUrl: user.avatarUrl,
         preferences: user.preferences,
         completedLessons: user.completedLessons,
         loginHistory: user.loginHistory
@@ -238,6 +240,7 @@ router.post('/get-user-data', async (req, res) => {
         age: user.age,
         gender: user.gender,
         bio: user.bio,
+        avatarUrl: user.avatarUrl,
         loginHistory: user.loginHistory,
         completedLessons: user.completedLessons
       }
@@ -270,7 +273,7 @@ router.put('/update-settings', async (req, res) => {
 // 8. UPDATE PROFILE (Username and other profile fields)
 router.put('/update-profile', async (req, res) => {
   try {
-    const { email, username, fullName, age, gender, bio } = req.body;
+    const { email, username, fullName, age, gender, bio, avatarUrl } = req.body;
     if (!email) return res.status(400).json({ message: "Email is required" });
 
     const updateData = {};
@@ -279,6 +282,7 @@ router.put('/update-profile', async (req, res) => {
     if (age !== undefined) updateData.age = age;
     if (gender !== undefined) updateData.gender = gender;
     if (bio !== undefined) updateData.bio = bio;
+    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
 
     const user = await User.findOneAndUpdate(
       { email },
@@ -294,7 +298,8 @@ router.put('/update-profile', async (req, res) => {
       fullName: user.fullName,
       age: user.age,
       gender: user.gender,
-      bio: user.bio
+      bio: user.bio,
+      avatarUrl: user.avatarUrl
     });
   } catch (err) {
     console.error(err);
