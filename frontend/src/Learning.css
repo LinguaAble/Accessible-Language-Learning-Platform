@@ -35,19 +35,15 @@
 /* --- FOOTER & FEEDBACK STYLES --- */
 .learning-footer {
     padding: 20px 30px;
-    /* Bigger padding */
     border-top: 2px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* Space between Feedback and Next Button */
     background: var(--card-bg);
     min-height: 100px;
-    /* Ensure space for feedback */
     transition: background-color 0.3s;
 }
 
-/* Success Footer (Green) */
 .learning-footer.footer-success {
     background-color: #dcfce7;
     border-color: #bbf7d0;
@@ -58,7 +54,6 @@
     border-color: #065f46;
 }
 
-/* Error Footer (Red) */
 .learning-footer.footer-error {
     background-color: #fee2e2;
     border-color: #fecaca;
@@ -123,11 +118,9 @@
     color: #fca5a5;
 }
 
-
 /* NEXT BUTTON */
 .next-btn {
     background: #58cc02;
-    /* Duolingo Green */
     color: white;
     border: none;
     padding: 15px 40px;
@@ -136,8 +129,10 @@
     border-radius: 12px;
     cursor: pointer;
     box-shadow: 0 4px 0 #46a302;
-    /* 3D effect */
     transition: 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .next-btn:active {
@@ -157,7 +152,499 @@
     box-shadow: 0 4px 0 #b91c1c;
 }
 
-/* --- OTHER UI ELEMENTS --- */
+/* ===================================== */
+/* SUCCESS SCREEN - ADHD-FRIENDLY DESIGN */
+/* ===================================== */
+
+/* 
+ADHD-FRIENDLY PRINCIPLES:
+- High contrast for easy readability
+- Clear visual hierarchy
+- Reduced visual noise
+- Calming colors with energizing accents
+- Bold, easy-to-read fonts
+- Ample white space
+- Clear action buttons
+*/
+
+.success-screen {
+    background: linear-gradient(135deg, #fef9e7 0%, #fef5e7 50%, #fcf3cf 100%);
+    justify-content: flex-start;
+    align-items: center;
+    padding: 30px 20px 30px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+[data-theme='dark'] .success-screen {
+    background: linear-gradient(135deg, #1a1f2e 0%, #252d3d 50%, #2d3748 100%);
+}
+
+.success-content {
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    animation: fadeInScaleAdhd 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding-bottom: 40px;
+}
+
+@keyframes fadeInScaleAdhd {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* === CELEBRATION HEADER === */
+.celebration-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-top: 10px;
+}
+
+.trophy-wrapper {
+    margin-bottom: 10px;
+}
+
+.trophy-icon {
+    width: 70px;
+    height: 70px;
+    color: #f59e0b;
+    filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.4));
+    animation: bounceGentle 2s ease-in-out infinite;
+}
+
+@keyframes bounceGentle {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.success-title-big {
+    font-size: 48px;
+    font-weight: 900;
+    color: #7c3aed;
+    margin: 10px 0;
+    text-shadow: 0 3px 8px rgba(124, 58, 237, 0.3);
+    line-height: 1.1;
+}
+
+[data-theme='dark'] .success-title-big {
+    color: #a78bfa;
+    text-shadow: 0 3px 12px rgba(167, 139, 250, 0.5);
+}
+
+.stars-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 8px;
+}
+
+.stars-row svg {
+    color: #fbbf24;
+    fill: #fbbf24;
+    filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.5));
+}
+
+.star-1 {
+    animation: twinkleAdhd 2s ease-in-out infinite;
+}
+
+.star-2 {
+    animation: twinkleAdhd 2s ease-in-out 0.4s infinite;
+}
+
+.star-3 {
+    animation: twinkleAdhd 2s ease-in-out 0.8s infinite;
+}
+
+@keyframes twinkleAdhd {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.6;
+        transform: scale(0.9) rotate(15deg);
+    }
+}
+
+/* === SUCCESS MESSAGE === */
+.success-message-big {
+    font-size: 22px;
+    font-weight: 700;
+    color: #059669;
+    text-align: center;
+    margin-bottom: 25px;
+    padding: 0 20px;
+    line-height: 1.4;
+}
+
+[data-theme='dark'] .success-message-big {
+    color: #34d399;
+}
+
+/* === SCORE DISPLAY - ADHD OPTIMIZED === */
+.score-display-adhd {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.score-circle-large {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-theme='dark'] .score-circle-large {
+    background: #1f2937;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.score-progress-animated {
+    transition: stroke-dasharray 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-text-large {
+    position: absolute;
+    text-align: center;
+}
+
+.score-grade-big {
+    font-size: 56px;
+    font-weight: 900;
+    color: #58cc02;
+    line-height: 1;
+    text-shadow: 0 2px 8px rgba(88, 204, 2, 0.3);
+}
+
+.score-percentage-big {
+    font-size: 24px;
+    font-weight: 800;
+    color: #7c3aed;
+    margin-top: 6px;
+}
+
+[data-theme='dark'] .score-percentage-big {
+    color: #a78bfa;
+}
+
+/* === STATS GRID - ADHD FRIENDLY === */
+.stats-grid-adhd {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 0 10px;
+}
+
+.stat-card-adhd {
+    background: white;
+    border-radius: 20px;
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 3px solid transparent;
+}
+
+.stat-card-adhd:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme='dark'] .stat-card-adhd {
+    background: #1f2937;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Color-coded cards for quick recognition */
+.positive-card {
+    border-color: #58cc02;
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+[data-theme='dark'] .positive-card {
+    background: linear-gradient(135deg, #1f2937 0%, #064e3b 100%);
+}
+
+.xp-card {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+}
+
+[data-theme='dark'] .xp-card {
+    background: linear-gradient(135deg, #1f2937 0%, #1e3a8a 100%);
+}
+
+.growth-card {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+}
+
+[data-theme='dark'] .growth-card {
+    background: linear-gradient(135deg, #1f2937 0%, #78350f 100%);
+}
+
+.accuracy-card {
+    border-color: #a855f7;
+    background: linear-gradient(135deg, #ffffff 0%, #faf5ff 100%);
+}
+
+[data-theme='dark'] .accuracy-card {
+    background: linear-gradient(135deg, #1f2937 0%, #581c87 100%);
+}
+
+.stat-icon-large {
+    margin-bottom: 10px;
+}
+
+.positive-card .stat-icon-large {
+    color: #58cc02;
+}
+
+.xp-card .stat-icon-large {
+    color: #3b82f6;
+}
+
+.growth-card .stat-icon-large {
+    color: #f59e0b;
+}
+
+.accuracy-card .stat-icon-large {
+    color: #a855f7;
+}
+
+.stat-label-adhd {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+[data-theme='dark'] .stat-label-adhd {
+    color: #9ca3af;
+}
+
+.stat-value-adhd {
+    font-size: 36px;
+    font-weight: 900;
+    color: #1f2937;
+    line-height: 1;
+}
+
+[data-theme='dark'] .stat-value-adhd {
+    color: #f3f4f6;
+}
+
+.stat-total {
+    font-size: 20px;
+    opacity: 0.5;
+}
+
+/* === ACHIEVEMENT BANNER === */
+.achievement-banner {
+    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+    margin-bottom: 25px;
+    border: 3px solid #ddd6fe;
+}
+
+[data-theme='dark'] .achievement-banner {
+    background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);
+    border-color: #6d28d9;
+}
+
+.banner-icon {
+    background: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.banner-icon svg {
+    color: #7c3aed;
+    width: 36px;
+    height: 36px;
+}
+
+.banner-content {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    flex: 1;
+}
+
+.banner-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.3;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.banner-subtitle {
+    font-size: 15px;
+    color: #e9d5ff;
+    font-weight: 600;
+}
+
+/* === CONTINUE BUTTON - ADHD OPTIMIZED === */
+.continue-btn-adhd {
+    width: 100%;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    border: none;
+    padding: 18px 30px;
+    font-size: 20px;
+    font-weight: 900;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #15803d, 0 8px 20px rgba(34, 197, 94, 0.4);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.continue-btn-adhd:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 #15803d, 0 10px 25px rgba(34, 197, 94, 0.5);
+}
+
+.continue-btn-adhd:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 #15803d, 0 2px 10px rgba(34, 197, 94, 0.3);
+}
+
+.btn-text {
+    font-size: 20px;
+}
+
+/* === ENCOURAGEMENT BOX === */
+.encouragement-box {
+    background: white;
+    border: 3px solid #fbbf24;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] .encouragement-box {
+    background: #1f2937;
+    border-color: #f59e0b;
+}
+
+.encouragement-text-adhd {
+    font-size: 16px;
+    font-weight: 700;
+    color: #7c3aed;
+    margin: 0;
+    line-height: 1.5;
+}
+
+[data-theme='dark'] .encouragement-text-adhd {
+    color: #a78bfa;
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 768px) {
+    .success-title-big {
+        font-size: 42px;
+    }
+    
+    .success-message-big {
+        font-size: 20px;
+    }
+    
+    .score-circle-large {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .score-grade-big {
+        font-size: 52px;
+    }
+    
+    .score-percentage-big {
+        font-size: 22px;
+    }
+    
+    .stats-grid-adhd {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat-value-adhd {
+        font-size: 36px;
+    }
+    
+    .banner-title {
+        font-size: 18px;
+    }
+    
+    .banner-subtitle {
+        font-size: 14px;
+    }
+    
+    .continue-btn-adhd {
+        font-size: 18px;
+        padding: 18px 28px;
+    }
+    
+    .btn-text {
+        font-size: 18px;
+    }
+}
+
+/* === ACCESSIBILITY === */
+@media (prefers-reduced-motion: reduce) {
+    .trophy-icon,
+    .star-1, .star-2, .star-3 {
+        animation: none !important;
+    }
+    
+    .score-progress-animated {
+        transition: none !important;
+    }
+}
+
+/* ===================================== */
+/* OTHER UI ELEMENTS */
+/* ===================================== */
+
 .badge-new {
     background: #a855f7;
     color: white;
@@ -296,6 +783,11 @@
     transform: translateY(2px);
 }
 
+.option-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .option-btn.selected {
     border-color: var(--primary-color);
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
@@ -319,28 +811,21 @@
 }
 
 @keyframes correctPulse {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: scale(1);
     }
-
     50% {
         transform: scale(1.05);
     }
 }
 
 @keyframes shake {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: translateX(0);
     }
-
     25% {
         transform: translateX(-10px);
     }
-
     75% {
         transform: translateX(10px);
     }
@@ -373,14 +858,12 @@
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* Add this to src/Learning.css */
 .mb-10 {
     margin-bottom: 10px;
 }
@@ -398,29 +881,102 @@
     gap: 5px;
 }
 
+.fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Mic Button Styles */
+.mic-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mic-btn {
+    background: var(--accent-color);
+    border: none;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+    transition: all 0.3s;
+}
+
+.mic-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(230, 126, 34, 0.5);
+}
+
+.mic-btn.listening {
+    animation: pulse 1.5s ease-in-out infinite;
+    background: #ef4444;
+}
+
+.mic-btn.processing {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.listening-status {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
 /* --- DESKTOP RESPONSIVE LAYOUT --- */
 @media (min-width: 1024px) {
     .slide-content {
         max-width: 1000px;
-        /* Increase width for desktop */
         flex-direction: row;
-        /* Side-by-side layout */
         flex-wrap: wrap;
-        /* Allow wrapping */
         align-items: flex-start;
         align-content: center;
         gap: 40px;
-        /* Space between card and options */
     }
 
-    /* Full width for Header elements */
     .badge-container,
     .quiz-question {
         width: 100%;
         margin-bottom: 20px;
     }
 
-    /* Left Column: Visual Card */
     .card-container {
         flex: 1;
         min-width: 300px;
@@ -430,20 +986,15 @@
         justify-content: center;
     }
 
-    /* Right Column: Options */
     .options-grid {
         flex: 1;
         min-width: 300px;
         margin-top: 0 !important;
-        /* Override inline margin */
         align-self: center;
-        /* Vertically align with card */
     }
 
-    /* Ensure Options don't look too stretched if Card is missing */
     .slide-content:not(:has(.card-container)) .options-grid {
         flex: 0 1 600px;
-        /* Don't grow beyond 600px */
         margin: 0 auto;
     }
 }
