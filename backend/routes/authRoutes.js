@@ -270,36 +270,43 @@ router.put('/update-settings', async (req, res) => {
   }
 });
 
-// 8. UPDATE PROFILE (Username and other profile fields)
+// 9. UPDATE PROFILE
 router.put('/update-profile', async (req, res) => {
   try {
-    const { email, username, fullName, age, gender, bio, avatarUrl } = req.body;
-    if (!email) return res.status(400).json({ message: "Email is required" });
+    const { email, username, fullName, age, gender, bio, avatarUrl, preferences } = req.body;
 
-    const updateData = {};
-    if (username !== undefined) updateData.username = username;
-    if (fullName !== undefined) updateData.fullName = fullName;
-    if (age !== undefined) updateData.age = age;
-    if (gender !== undefined) updateData.gender = gender;
-    if (bio !== undefined) updateData.bio = bio;
-    if (avatarUrl !== undefined) updateData.avatarUrl = avatarUrl;
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const user = await User.findOneAndUpdate(
-      { email },
-      { $set: updateData },
-      { new: true }
-    );
+    // Update fields if provided
+    if (username !== undefined) user.username = username;
+    if (fullName !== undefined) user.fullName = fullName;
+    if (age !== undefined) user.age = age;
+    if (gender !== undefined) user.gender = gender;
+    if (bio !== undefined) user.bio = bio;
+    if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    // Update preferences if provided
+    if (preferences !== undefined) {
+      user.preferences = { ...user.preferences, ...preferences };
+    }
+
+    await user.save();
 
     res.json({
-      success: true,
-      username: user.username,
-      fullName: user.fullName,
-      age: user.age,
-      gender: user.gender,
-      bio: user.bio,
-      avatarUrl: user.avatarUrl
+      message: 'Profile updated successfully',
+      user: {
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory
+      }
     });
   } catch (err) {
     console.error(err);

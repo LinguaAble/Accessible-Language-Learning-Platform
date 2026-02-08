@@ -51,11 +51,11 @@ const UserSchema = new mongoose.Schema({
 
   // Story 8: Default ADHD-friendly settings applied automatically
   preferences: {
-    theme: { type: String, default: 'minimalist' },
+    theme: { type: String, default: 'dark' },
     soundEffects: { type: Boolean, default: false },
-    animationReduced: { type: Boolean, default: true },
-    fontSize: { type: String, default: 'medium' }, // medium, small, large
-    sessionDuration: { type: Number, default: 15 }
+    animationReduced: { type: Boolean, default: false },
+    fontSize: { type: String, default: 'medium' },
+    dailyGoalMinutes: { type: Number, default: 5 }
   },
 
   // Story: Track User Progress
