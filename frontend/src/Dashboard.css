@@ -486,9 +486,10 @@
   stroke: var(--accent-color);
   stroke-width: 8;
   stroke-linecap: round;
-  stroke-dasharray: 339;
-  stroke-dashoffset: 120;
-  /* Dynamic offset */
+  stroke-dasharray: 226;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.5s ease;
 }
 
 .percent {

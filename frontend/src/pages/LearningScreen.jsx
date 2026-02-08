@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic, Trophy, Star, Target } from 'lucide-react';
 import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
 import { transcribeAudio } from '../utils/googleSpeechService';
+import { useUser } from '../context/UserContext';
 
 import '../Learning.css';
 
@@ -458,9 +459,13 @@ const lessonDatabase = {
 const LearningScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { updateProgress } = useUser();
 
   const lessonId = location.state?.lessonId || 1;
   const initialLessonData = lessonDatabase[lessonId] || lessonDatabase[1];
+
+  // Track session time
+  const [sessionStartTime] = useState(Date.now());
 
   const [activeSlides, setActiveSlides] = useState(initialLessonData.slides);
   const [originalCount] = useState(initialLessonData.slides.length);
@@ -573,7 +578,7 @@ const LearningScreen = () => {
     if (correct) {
       setIsCorrect(true);
       playSoundEffect('correct');
-      
+
       // Track score
       if (!currentSlide.isReview) {
         setScoreData(prev => ({
@@ -603,9 +608,9 @@ const LearningScreen = () => {
     const lesson = lessonDatabase[lessonId];
     if (lesson) {
       setActiveSlides(lesson.slides);
-      setScoreData(prev => ({ 
-        ...prev, 
-        totalQuestions: lesson.slides.filter(s => s.type === 'quiz' || s.type === 'pronounce').length 
+      setScoreData(prev => ({
+        ...prev,
+        totalQuestions: lesson.slides.filter(s => s.type === 'quiz' || s.type === 'pronounce').length
       }));
     }
   }, [lessonId]);
@@ -665,7 +670,7 @@ const LearningScreen = () => {
     if (option === currentSlide.answer) {
       setIsCorrect(true);
       playSoundEffect('correct');
-      
+
       // Track score
       if (!currentSlide.isReview) {
         setScoreData(prev => ({
@@ -720,6 +725,10 @@ const LearningScreen = () => {
           }
         }
 
+        // Calculate and update progress
+        const minutesLearned = Math.ceil((Date.now() - sessionStartTime) / 60000);
+        updateProgress(minutesLearned);
+
         setProgress(100);
         setShowSuccess(true);
       }
@@ -730,13 +739,13 @@ const LearningScreen = () => {
   const calculateScore = () => {
     const { totalQuestions, firstAttemptCorrect } = scoreData;
     if (totalQuestions === 0) return { percentage: 100, grade: 'A+', message: 'Perfect!' };
-    
+
     // Calculate percentage based on first attempts
     const percentage = Math.round((firstAttemptCorrect / totalQuestions) * 100);
-    
+
     let grade = 'A+';
     let message = 'Outstanding!';
-    
+
     if (percentage >= 90) {
       grade = 'A+';
       message = 'Outstanding! You\'re a natural!';
@@ -753,14 +762,14 @@ const LearningScreen = () => {
       grade = 'B-';
       message = 'You\'re learning! Keep going!';
     }
-    
+
     return { percentage, grade, message };
   };
   if (showSuccess) {
     const { percentage, grade, message } = calculateScore();
     const { totalQuestions, firstAttemptCorrect, reviewedAndCorrected } = scoreData;
     const xpEarned = Math.max(10, firstAttemptCorrect * 2);
-    
+
     return (
       <div className="learning-container success-screen">
         <div className="success-content">
@@ -776,10 +785,10 @@ const LearningScreen = () => {
               <Star size={35} className="star-3" />
             </div>
           </div>
-          
+
           {/* Success Message */}
           <p className="success-message-big">{message}</p>
-          
+
           {/* Score Circle - ADHD Optimized */}
           <div className="score-display-adhd">
             <div className="score-circle-large">
@@ -869,13 +878,13 @@ const LearningScreen = () => {
           {/* Encouragement */}
           <div className="encouragement-box">
             <p className="encouragement-text-adhd">
-              {percentage >= 90 
-                ? "🌟 WOW! You're absolutely amazing! Ready for more?" 
+              {percentage >= 90
+                ? "🌟 WOW! You're absolutely amazing! Ready for more?"
                 : percentage >= 80
-                ? "💪 Fantastic work! You're getting stronger every day!"
-                : percentage >= 70
-                ? "🎯 Great progress! You're on the right track!"
-                : "🌱 You're learning and growing! That's what matters!"}
+                  ? "💪 Fantastic work! You're getting stronger every day!"
+                  : percentage >= 70
+                    ? "🎯 Great progress! You're on the right track!"
+                    : "🌱 You're learning and growing! That's what matters!"}
             </p>
           </div>
         </div>

@@ -11,8 +11,8 @@ export const UserProvider = ({ children }) => {
         theme: 'dark',
         soundEffects: false,
         animationReduced: false,
-        fontSize: 'medium', // 'small', 'medium', 'large'
-        dailyGoalMinutes: 20 // Default daily goal in minutes
+        fontSize: 'medium',
+        dailyGoalMinutes: 5
     });
 
     // Track today's progress (minutes completed)
@@ -21,14 +21,13 @@ export const UserProvider = ({ children }) => {
         const savedDate = localStorage.getItem('progressDate');
         const today = new Date().toDateString();
 
-        // Reset if it's a new day or no date is saved
         if (!savedDate || savedDate !== today) {
             localStorage.setItem('progressDate', today);
             localStorage.setItem('todayProgress', '0');
             return 0;
         }
 
-        return 0; // Always start at 0
+        return parseInt(saved) || 0;
     });
 
     // Ensure progress resets daily
@@ -51,31 +50,24 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
 
-        // 1. Load from LocalStorage (Instant)
         if (savedUser.preferences) {
             setPreferences(prev => ({ ...prev, ...savedUser.preferences }));
         }
         setUser(savedUser);
 
-        // 2. Background Sync: Fetch latest data from DB (Fixes cross-device sync)
+        // Background Sync: Fetch latest data from DB
         if (savedUser.email) {
             axios.post('http://localhost:5000/api/auth/get-user-data', { email: savedUser.email })
                 .then(res => {
-                    const freshData = res.data.user || res.data; // Handle both structures just in case
+                    const freshData = res.data.user || res.data;
 
                     if (freshData) {
-                        // Merge fresh data with existing (preserving token if it was in user obj, though usually token is separate)
                         const updatedUser = { ...savedUser, ...freshData };
-
-                        // Update State
                         setUser(updatedUser);
                         if (freshData.preferences) {
                             setPreferences(prev => ({ ...prev, ...freshData.preferences }));
                         }
-
-                        // Update LocalStorage
                         localStorage.setItem('user', JSON.stringify(updatedUser));
-                        // console.log("User data synced from server:", freshData);
                     }
                 })
                 .catch(err => console.error("Failed to sync user data", err));
@@ -84,22 +76,16 @@ export const UserProvider = ({ children }) => {
 
     // Apply global side effects (theme, font size, motion)
     useEffect(() => {
-        // Theme
         document.body.setAttribute('data-theme', preferences.theme === 'dark' ? 'dark' : 'light');
-
-        // Font Size
         document.documentElement.setAttribute('data-font-size', preferences.fontSize);
 
-        // Motion
         if (preferences.animationReduced) {
             document.body.classList.add('reduce-motion');
         } else {
             document.body.classList.remove('reduce-motion');
         }
 
-        // Persist to localStorage (simplified)
         localStorage.setItem('theme', preferences.theme === 'dark' ? 'dark' : 'light');
-
     }, [preferences]);
 
     const updatePreferences = (newPrefs) => {
@@ -111,26 +97,28 @@ export const UserProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(updatedUser));
 
         if (user.email) {
-            axios.put('http://localhost:5000/api/auth/update-settings', {
+            axios.put('http://localhost:5000/api/auth/update-profile', {
                 email: user.email,
                 preferences: updatedPrefs
-            }).catch(err => console.error("Failed to save settings", err));
+            }).catch(err => console.error("Failed to sync preferences", err));
         }
     };
 
-    const updateProfile = (profileData) => {
-        const updatedUser = { ...user, ...profileData };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-
-        // Make API call to update user profile if backend supports it
-        if (user.email) {
-            axios.put('http://localhost:5000/api/auth/update-profile', {
+    const updateProfile = async (profileData) => {
+        try {
+            const response = await axios.put('http://localhost:5000/api/auth/update-profile', {
                 email: user.email,
                 ...profileData
-            }).catch(err => {
-                console.error("Failed to save profile", err);
             });
+
+            const updatedUser = { ...user, ...response.data.user };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+
+            return response.data;
+        } catch (error) {
+            console.error('Profile update failed:', error);
+            throw error;
         }
     };
 
@@ -139,7 +127,6 @@ export const UserProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
         if (userData.preferences) {
             setPreferences(userData.preferences);
-            // Ensure theme is applied immediately
             document.body.setAttribute('data-theme', userData.preferences.theme === 'dark' ? 'dark' : 'light');
         }
     };
@@ -149,7 +136,6 @@ export const UserProvider = ({ children }) => {
         setTodayProgress(newProgress);
         localStorage.setItem('todayProgress', newProgress.toString());
 
-        // Optionally sync with backend
         if (user.email) {
             axios.put('http://localhost:5000/api/auth/update-progress', {
                 email: user.email,
@@ -164,7 +150,8 @@ export const UserProvider = ({ children }) => {
             theme: 'dark',
             soundEffects: false,
             animationReduced: false,
-            fontSize: 'medium'
+            fontSize: 'medium',
+            dailyGoalMinutes: 5
         });
         localStorage.removeItem('user');
         localStorage.removeItem('token');

@@ -453,28 +453,22 @@ const Settings = () => {
                                 <span className="setting-desc">Set how many minutes you want to learn each day.</span>
                             </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '15px' }}>
-                                <input
-                                    type="range"
-                                    min="5"
-                                    max="120"
-                                    step="5"
-                                    value={preferences.dailyGoalMinutes}
-                                    onChange={(e) => updatePreferences({ dailyGoalMinutes: parseInt(e.target.value) })}
-                                    style={{ flex: 1, cursor: 'pointer' }}
-                                />
-                                <div style={{
-                                    minWidth: '80px',
-                                    textAlign: 'center',
-                                    padding: '8px 16px',
-                                    background: 'var(--accent-color)',
-                                    color: 'white',
-                                    borderRadius: '12px',
-                                    fontWeight: 700,
-                                    fontSize: '1.1rem'
-                                }}>
-                                    {preferences.dailyGoalMinutes} min
-                                </div>
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                                {[3, 5, 10, 15].map((minutes) => (
+                                    <button
+                                        key={minutes}
+                                        className={`toggle-btn ${preferences.dailyGoalMinutes === minutes ? 'active' : ''}`}
+                                        onClick={() => updatePreferences({ dailyGoalMinutes: minutes })}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 20px',
+                                            fontSize: '1rem',
+                                            fontWeight: 600
+                                        }}
+                                    >
+                                        {minutes} min
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>
