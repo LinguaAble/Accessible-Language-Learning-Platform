@@ -22,90 +22,89 @@ const LandingPage = () => {
         {
             icon: '🧠',
             title: 'Dyslexia-Friendly Design',
-            description: 'Clear fonts, high contrast, and customizable text spacing for easier reading'
+            description: 'Clear fonts, high contrast, and customizable text spacing'
         },
         {
             icon: '⏱️',
             title: 'ADHD-Optimized Learning',
-            description: 'Short, focused lessons with frequent breaks and engaging interactions'
+            description: 'Short, focused lessons with frequent breaks'
         },
         {
             icon: '🎤',
             title: 'Interactive Speech Practice',
-            description: 'Practice Hindi pronunciation with real-time feedback and voice recognition'
+            description: 'Real-time pronunciation feedback and voice recognition'
         },
         {
             icon: '📖',
             title: 'Multi-Sensory Approach',
-            description: 'Visual, auditory, and kinesthetic learning methods combined for better retention'
+            description: 'Visual, auditory, and kinesthetic learning methods'
         },
         {
             icon: '🎯',
             title: 'Adaptive Difficulty',
-            description: 'Lessons automatically adjust to your learning pace and comprehension level'
+            description: 'Lessons adjust to your learning pace automatically'
         },
         {
             icon: '🏆',
             title: 'Motivational Rewards',
-            description: 'Positive reinforcement with achievements, streaks, and progress celebrations'
+            description: 'Achievements, streaks, and progress celebrations'
         }
     ];
 
     return (
         <div className="landing-page">
+            {/* Animated Background Elements */}
+            <div className="floating-shapes">
+                <div className="shape shape-1"></div>
+                <div className="shape shape-2"></div>
+                <div className="shape shape-3"></div>
+                <div className="shape shape-4"></div>
+            </div>
+
             <div className="landing-container">
-                {/* Left Side - Hero Content */}
-                <div className="hero-side">
-                    <div className="hero-content">
-                        <div className="logo-wrapper">
-                            <img src={logo} alt="LinguaAble Mascot" className="landing-logo" />
-                        </div>
-
-                        <h1 className="hero-title">
-                            <span className="text-brand-blue">Lingua</span>
-                            <span className="text-brand-red">Able</span>
-                        </h1>
-
-                        <p className="hero-tagline">Built Around Learners, Not Limitations!</p>
-
-                        <p className="hero-description">
-                            Master Hindi with confidence! LinguaAble is specially designed for learners with dyslexia,
-                            ADHD, and other learning disabilities. Our accessible, multi-sensory approach makes
-                            learning Hindi engaging, effective, and stress-free.
-                        </p>
-
-                        <div className="cta-buttons">
-                            <button
-                                className="cta-btn primary-btn"
-                                onClick={() => navigate('/login')}
-                            >
-                                Sign In
-                            </button>
-                            <button
-                                className="cta-btn secondary-btn"
-                                onClick={() => navigate('/signup')}
-                            >
-                                Create Account
-                            </button>
-                        </div>
+                {/* Hero Section */}
+                <div className="hero-section">
+                    <div className="logo-wrapper">
+                        <img src={logo} alt="LinguaAble Mascot" className="landing-logo" />
                     </div>
 
-                    {/* Animated Background Elements */}
-                    <div className="floating-shapes">
-                        <div className="shape shape-1"></div>
-                        <div className="shape shape-2"></div>
-                        <div className="shape shape-3"></div>
+                    <h1 className="hero-title">
+                        <span className="text-brand-blue" style={{ color: 'white' }}>Lingua</span>
+                        <span className="text-brand-red" style={{ color: '#f79c42' }}>Able</span>
+                    </h1>
+
+                    <p className="hero-tagline">Built Around Learners, Not Limitations!</p>
+
+                    <p className="hero-description">
+                        Master Hindi with confidence! Specially designed for learners with dyslexia,
+                        ADHD, and other learning disabilities. Our accessible, multi-sensory approach makes
+                        learning Hindi engaging, effective, and stress-free.
+                    </p>
+
+                    <div className="cta-buttons">
+                        <button
+                            className="cta-btn primary-btn"
+                            onClick={() => navigate('/login')}
+                        >
+                            Sign In
+                        </button>
+                        <button
+                            className="cta-btn secondary-btn"
+                            onClick={() => navigate('/signup')}
+                        >
+                            Create Account
+                        </button>
                     </div>
                 </div>
 
-                {/* Right Side - Features Grid */}
-                <div className="features-side">
-                    <h2 className="features-title">Learning Hindi Made Accessible</h2>
+                {/* Features Section */}
+                <div className="features-section">
+                    <h2 className="features-title">Why Choose LinguaAble?</h2>
                     <div className="features-grid">
                         {features.map((feature, index) => (
                             <div
                                 key={index}
-                                className="feature-card"
+                                className={`feature-card ${isVisible ? 'visible' : ''}`}
                                 style={{ animationDelay: `${index * 0.1}s` }}
                             >
                                 <div className="feature-icon">{feature.icon}</div>
