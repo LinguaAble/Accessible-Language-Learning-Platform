@@ -143,8 +143,12 @@ export const UserProvider = ({ children }) => {
         const today = new Date().toDateString();
         if (userData.progressDate === today && userData.todayProgress !== undefined) {
             setTodayProgress(userData.todayProgress);
+            localStorage.setItem('todayProgress', userData.todayProgress.toString());
+            localStorage.setItem('progressDate', today);
         } else {
             setTodayProgress(0);
+            localStorage.setItem('todayProgress', '0');
+            localStorage.setItem('progressDate', today);
         }
     };
 
