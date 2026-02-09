@@ -90,9 +90,9 @@ graph LR
 │                         Data Layer                             │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │  MongoDB Database                                      │  │
-│  │   - Users Collection                                   │  │
-│  │   - Lessons Collection                                 │  │
-│  │   - Progress Collection                                │  │
+│  │   - Users Collection (Embeds Progress & History)       │  │
+│  │                                                        │  │
+│  │                                                        │  │
 │  └────────────────────────────────────────────────────────┘  │
 └───────────────────────────────────────────────────────────────┘
 ```
@@ -108,12 +108,12 @@ App
 │   ├── PrivateRoute
 │   │   ├── Dashboard
 │   │   ├── LearningScreen
-│   │   └── ProfileSettings
+│   │   └── Settings (Profile)
 │   │
 │   ├── PublicRoute
 │   │   ├── Login
-│   │   ├── Signup
-│   │   └── LandingPage
+│   │   └── Signup
+│   │
 │   │
 │   └── Navbar / Sidebar
 ```
@@ -130,16 +130,16 @@ App
 ### Authentication Flow (JWT)
 1. **User Login**: User submits email/password.
 2. **Verification**: Backend validates credentials via `bcryptjs`.
-3. **Token Issue**: Server signs a JWT and sends it back.
-4. **Storage**: Client stores JWT in `localStorage`.
-5. **Access**: Client attaches `Authorization: Bearer <token>` to subsequent requests.
+3. **Token Issue**: Server signs a JWT and sends it back with User object.
+4. **Storage**: Client stores JWT in `localStorage` and User in Context.
+5. **Access**: Client attaches `Authorization: Bearer <token>` to protected requests.
 
 ### Lesson Completion Flow
-1. **Interaction**: User answers a question in `LearningScreen`.
-2. **Validation**: Frontend checks the answer (or sends to backend if complex).
-3. **Update**: Frontend sends `POST /api/progress/update` with results.
-4. **Persistence**: Backend updates the `Progress` document for the user in MongoDB.
-5. **Feedback**: Backend returns new XP/Level; Frontend updates the UI.
+1. **Interaction**: User completes a lesson in `LearningScreen`.
+2. **Validation**: Frontend validates the answers locally.
+3. **Update**: Frontend sends `PUT /api/auth/update-progress` with updated stats.
+4. **Persistence**: Backend updates the `User` document (completedLessons, todayProgress).
+5. **Feedback**: UI updates to unlock next lessons or show achievements.
 
 ---
 
@@ -152,36 +152,22 @@ App
   username: String,
   email: String,
   password: String, // Hashed
-  xp: Number,
-  level: Number,
-  createdAt: Date
-}
-```
-
-### Lessons Collection
-```javascript
-{
-  _id: ObjectId,
-  title: String,
-  difficulty: "beginner" | "intermediate",
-  content: [
-    {
-      type: "mcq" | "text_input",
-      question: String,
-      correctAnswer: String
-    }
+  createdAt: Date,
+  // Progress & Gamification Analysis
+  completedLessons: [String], // Array of lesson IDs/names
+  todayProgress: Number,      // Minutes spent today
+  dailyLessonCounts: [        // Activity tracking
+    { date: String, count: Number }
+  ],
+  // Profile & Settings
+  preferences: {
+    theme: String,
+    notifications: Boolean
+  },
+  loginHistory: [
+    { timestamp: Date, device: String }
   ]
 }
 ```
 
-### Progress Collection
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId, // Reference to Users
-  lessonId: ObjectId, // Reference to Lessons
-  status: "completed" | "in-progress",
-  score: Number,
-  lastAccessed: Date
-}
-```
+> **Note:** Lesson content is currently managed statically within the frontend (`Lessons.jsx` / `LearningScreen.jsx`) and is not stored in a separate database collection.

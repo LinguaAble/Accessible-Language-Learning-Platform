@@ -39,37 +39,101 @@ Authenticate an existing user.
 
 ---
 
-## 📚 Lessons
+## 👤 User Data & Progress
 
-### Get All Lessons
-Retrieve a list of available lessons.
-`GET /lessons`
-
-### Get Lesson by ID
-Retrieve details for a specific lesson.
-`GET /lessons/:id`
-
----
-
-## 📈 Progress
-
-### Update Progress
-Save user progress for a specific lesson.
-`POST /progress/update`
-
-**Header:** `Authorization: Bearer <token>`
+### Get User Data
+Retrieve full user profile, settings, and progress.
+`POST /auth/get-user-data`
 
 **Body:**
 ```json
 {
-  "lessonId": "65a1b2c3d4e5f6g7h8i9j0k1",
-  "score": 85,
-  "completed": true
+  "email": "john@example.com"
 }
 ```
 
-### Get User Progress
-Retrieve progress statistics for the authenticated user.
-`GET /progress/me`
+**Response:**
+```json
+{
+  "user": {
+    "username": "johndoe",
+    "email": "john@example.com",
+    "completedLessons": ["lesson1", "lesson2"],
+    "todayProgress": 15,
+    "dailyLessonCounts": [{ "date": "2023-10-27", "count": 2 }]
+  }
+}
+```
 
-**Header:** `Authorization: Bearer <token>`
+### Update Progress
+Update lesson completion status and daily stats.
+`PUT /auth/update-progress`
+
+**Body:**
+```json
+{
+  "email": "john@example.com",
+  "completedLessons": ["lesson3"],
+  "todayProgress": 30,
+  "incrementLessonCount": 1
+}
+```
+
+### Update Profile
+Update user profile details.
+`PUT /auth/update-profile`
+
+**Body:**
+```json
+{
+  "email": "john@example.com",
+  "username": "newname",
+  "bio": "I love learning!",
+  "avatarUrl": "..."
+}
+```
+
+---
+
+## ⚙️ Settings
+
+### Update Settings
+Update user preferences.
+`PUT /auth/update-settings`
+
+**Body:**
+```json
+{
+  "email": "john@example.com",
+  "preferences": {
+    "theme": "dark",
+    "notifications": true
+  }
+}
+```
+
+---
+
+## 🔐 Password Management
+
+### Forgot Password
+Send a password reset OTP to email.
+`POST /auth/forgot-password`
+
+**Body:**
+```json
+{
+  "email": "john@example.com"
+}
+```
+
+### Reset Password
+Reset password using the received OTP.
+`PUT /auth/reset-password/:token`
+
+**Body:**
+```json
+{
+  "password": "NewSecurePassword123"
+}
+```
