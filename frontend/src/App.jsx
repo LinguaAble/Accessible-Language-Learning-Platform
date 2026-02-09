@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
@@ -23,8 +24,8 @@ function AppContent() {
   // 3. Auto-Login Logic
   useEffect(() => {
     const token = localStorage.getItem('token');
-    // If we have a token and are on the login page, go to dashboard
-    if (token && location.pathname === '/') {
+    // If we have a token and are on the landing/login page, go to dashboard
+    if (token && (location.pathname === '/' || location.pathname === '/login')) {
       navigate('/dashboard');
     }
   }, [navigate, location.pathname]);
@@ -60,7 +61,8 @@ function AppContent() {
     <div className="app-container">
       {/* Routes */}
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
