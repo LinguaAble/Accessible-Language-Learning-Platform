@@ -473,14 +473,14 @@ const LearningScreen = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [mistakeQueue, setMistakeQueue] = useState([]);
   const [isReviewMode, setIsReviewMode] = useState(false);
-  
+
   // --- BREAK NOTIFICATION SYSTEM ---
   const [studyStartTime, setStudyStartTime] = useState(Date.now());
   const [showBreakNotification, setShowBreakNotification] = useState(false);
   const [breakDismissed, setBreakDismissed] = useState(false);
-  const BREAK_INTERVAL = 20 *60* 1000; // 20 minutes in milliseconds
+  const BREAK_INTERVAL = 20 * 60 * 1000; // 20 minutes in milliseconds
   // For testing: const BREAK_INTERVAL = 10 * 1000; // 10 seconds
-  
+
   // --- NEW: Score Tracking ---
   const [scoreData, setScoreData] = useState({
     totalQuestions: 0,
@@ -489,7 +489,7 @@ const LearningScreen = () => {
     firstAttemptCorrect: 0,
     reviewedAndCorrected: 0,
   });
-  
+
   // Speech Recognition State
   const [isListening, setIsListening] = useState(false);
   const [listeningText, setListeningText] = useState("");
@@ -627,7 +627,7 @@ const LearningScreen = () => {
     const checkBreakTime = setInterval(() => {
       const currentTime = Date.now();
       const studyDuration = currentTime - studyStartTime;
-      
+
       // Show notification after 20 minutes if not dismissed
       if (studyDuration >= BREAK_INTERVAL && !breakDismissed && !showBreakNotification) {
         setShowBreakNotification(true);
@@ -733,13 +733,18 @@ const LearningScreen = () => {
           completedLessons.push(lessonId);
           localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
 
+
           // Sync with backend
           if (user.email) {
+            const today = new Date();
+            const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
             axios.put('http://localhost:5000/api/auth/update-progress', {
               email: user.email,
               completedLessons,
               todayProgress: (todayProgress || 0) + 5, // Add 5 minutes per lesson
-              incrementLessonCount: 1
+              incrementLessonCount: 1,
+              date: formattedDate
             })
               .then(res => {
                 if (res.data.success) {
@@ -816,13 +821,13 @@ const LearningScreen = () => {
             <div className="break-icon-container">
               <Clock size={60} color="var(--accent-color)" />
             </div>
-            
+
             <h2 className="break-title">Time for a Break! 🌟</h2>
-            
+
             <p className="break-message">
               You've been learning for 20 minutes. Taking regular breaks helps your brain absorb information better and prevents fatigue.
             </p>
-            
+
             <div className="break-benefits">
               <h3>Break Benefits:</h3>
               <ul>
@@ -832,12 +837,12 @@ const LearningScreen = () => {
                 <li>😊 Prevents learning burnout</li>
               </ul>
             </div>
-            
+
             <div className="break-suggestions">
               <p><strong>Suggested break activities:</strong></p>
               <p>Stretch, walk around, drink water, or rest your eyes</p>
             </div>
-            
+
             <div className="break-buttons">
               <button className="break-btn primary" onClick={handleTakeBreak}>
                 Take a 5 Min Break
@@ -846,7 +851,7 @@ const LearningScreen = () => {
                 Continue Learning
               </button>
             </div>
-            
+
             <button className="dismiss-break-btn" onClick={handleDismissBreak}>
               Remind me in 20 minutes
             </button>

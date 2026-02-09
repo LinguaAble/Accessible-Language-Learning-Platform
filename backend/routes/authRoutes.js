@@ -200,7 +200,7 @@ router.put('/reset-password/:token', async (req, res) => {
 // 5. UPDATE USER PROGRESS (Unified)
 router.put('/update-progress', async (req, res) => {
   try {
-    const { email, completedLessons, todayProgress, incrementLessonCount } = req.body;
+    const { email, completedLessons, todayProgress, incrementLessonCount, date } = req.body;
 
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
@@ -236,7 +236,8 @@ router.put('/update-progress', async (req, res) => {
 
     // C. Update Daily Lesson Count (for Chart)
     if (incrementLessonCount) {
-      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      // detailed fix: Use date from frontend if available (to match user's timezone), else fallback to server UTC
+      const today = date || new Date().toISOString().split('T')[0];
       const existingEntry = user.dailyLessonCounts.find(e => e.date === today);
 
       if (existingEntry) {
