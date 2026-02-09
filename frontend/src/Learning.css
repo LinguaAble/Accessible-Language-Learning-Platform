@@ -193,6 +193,7 @@ ADHD-FRIENDLY PRINCIPLES:
         opacity: 0;
         transform: scale(0.9) translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -219,9 +220,12 @@ ADHD-FRIENDLY PRINCIPLES:
 }
 
 @keyframes bounceGentle {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-15px);
     }
@@ -267,10 +271,13 @@ ADHD-FRIENDLY PRINCIPLES:
 }
 
 @keyframes twinkleAdhd {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
         transform: scale(1) rotate(0deg);
     }
+
     50% {
         opacity: 0.6;
         transform: scale(0.9) rotate(15deg);
@@ -410,6 +417,15 @@ ADHD-FRIENDLY PRINCIPLES:
     background: linear-gradient(135deg, #1f2937 0%, #581c87 100%);
 }
 
+.time-card {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #ffffff 0%, #ecfdf5 100%);
+}
+
+[data-theme='dark'] .time-card {
+    background: linear-gradient(135deg, #1f2937 0%, #065f46 100%);
+}
+
 .stat-icon-large {
     margin-bottom: 10px;
 }
@@ -428,6 +444,10 @@ ADHD-FRIENDLY PRINCIPLES:
 
 .accuracy-card .stat-icon-large {
     color: #a855f7;
+}
+
+.time-card .stat-icon-large {
+    color: #10b981;
 }
 
 .stat-label-adhd {
@@ -585,45 +605,45 @@ ADHD-FRIENDLY PRINCIPLES:
     .success-title-big {
         font-size: 42px;
     }
-    
+
     .success-message-big {
         font-size: 20px;
     }
-    
+
     .score-circle-large {
         width: 180px;
         height: 180px;
     }
-    
+
     .score-grade-big {
         font-size: 52px;
     }
-    
+
     .score-percentage-big {
         font-size: 22px;
     }
-    
+
     .stats-grid-adhd {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .stat-value-adhd {
         font-size: 36px;
     }
-    
+
     .banner-title {
         font-size: 18px;
     }
-    
+
     .banner-subtitle {
         font-size: 14px;
     }
-    
+
     .continue-btn-adhd {
         font-size: 18px;
         padding: 18px 28px;
     }
-    
+
     .btn-text {
         font-size: 18px;
     }
@@ -631,11 +651,14 @@ ADHD-FRIENDLY PRINCIPLES:
 
 /* === ACCESSIBILITY === */
 @media (prefers-reduced-motion: reduce) {
+
     .trophy-icon,
-    .star-1, .star-2, .star-3 {
+    .star-1,
+    .star-2,
+    .star-3 {
         animation: none !important;
     }
-    
+
     .score-progress-animated {
         transition: none !important;
     }
@@ -811,21 +834,28 @@ ADHD-FRIENDLY PRINCIPLES:
 }
 
 @keyframes correctPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
 }
 
 @keyframes shake {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateX(0);
     }
+
     25% {
         transform: translateX(-10px);
     }
+
     75% {
         transform: translateX(10px);
     }
@@ -858,6 +888,7 @@ ADHD-FRIENDLY PRINCIPLES:
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -890,6 +921,7 @@ ADHD-FRIENDLY PRINCIPLES:
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -937,9 +969,12 @@ ADHD-FRIENDLY PRINCIPLES:
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.1);
     }
@@ -949,6 +984,7 @@ ADHD-FRIENDLY PRINCIPLES:
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
