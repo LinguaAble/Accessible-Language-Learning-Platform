@@ -61,6 +61,40 @@ Key goals:
 
 ---
 
+## 🧩 System Diagrams
+
+The following diagrams illustrate the functional and structural design of the
+Accessible Language Learning Platform.
+
+### 📊 Activity Diagram
+Represents the overall user activity flow from login to lesson completion.
+
+![Activity Diagram](docs/activity-diagram.svg)
+
+---
+
+### 👤 Use Case Diagram
+Shows interactions between different user roles and the system.
+
+![Use Case Diagram](docs/use-case-diagram.svg)
+
+---
+
+### 🔁 Sequence Diagram
+Depicts the interaction sequence between frontend, backend, and database.
+
+![Sequence Diagram](docs/sequence-diagram.svg)
+
+---
+
+### 🧱 Class Diagram
+Illustrates the system’s core classes, attributes, and relationships.
+
+![Class Diagram](docs/class-diagram.svg)
+
+---
+
+
 ## ✨ Features
 
 ### 🎨 User Experience
