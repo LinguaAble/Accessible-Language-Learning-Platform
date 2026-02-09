@@ -64,6 +64,15 @@ export const UserProvider = ({ children }) => {
                     if (freshData) {
                         const updatedUser = { ...savedUser, ...freshData };
                         setUser(updatedUser);
+
+                        // Sync todayProgress if date matches
+                        const today = new Date().toDateString();
+                        if (freshData.progressDate === today && freshData.todayProgress !== undefined) {
+                            setTodayProgress(freshData.todayProgress);
+                            localStorage.setItem('todayProgress', freshData.todayProgress.toString());
+                            localStorage.setItem('progressDate', today);
+                        }
+
                         if (freshData.preferences) {
                             setPreferences(prev => ({ ...prev, ...freshData.preferences }));
                         }
