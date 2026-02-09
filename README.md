@@ -84,16 +84,39 @@ Key goals:
 
 ```bash
 Accessible-Language-Learning-Platform/
-├── frontend/                # React (Vite) Frontend Application
-│   ├── src/
-│   │   ├── pages/          # Application pages (Login, Dashboard, Lessons, etc.)
-│   │   ├── components/     # Reusable UI components
-│   │   └── context/        # State management (AuthToken, etc.)
-│   └── public/             # Static assets
-├── backend/                 # Node.js + Express Backend
+├── backend/                # Node.js + Express Backend
+│   ├── middleware/         # Custom Middlewares
 │   ├── models/             # Mongoose Database Models
 │   ├── routes/             # API Routes
-│   └── index.js            # Entry point
+│   ├── .env                # Environment variables
+│   ├── createAdmin.js      # Admin creation script
+│   ├── index.js            # Entry point
+│   └── TEST_GUIDE.md       # Backend testing guide
+├── frontend/               # React (Vite) Frontend Application
+│   ├── public/             # Static assets
+│   ├── src/
+│   │   ├── assets/         # Images and icons
+│   │   ├── components/     # Reusable UI components
+│   │   ├── context/        # State management (AuthToken, etc.)
+│   │   ├── pages/          # Application pages (Login, Dashboard, Lessons, etc.)
+│   │   ├── utils/          # Utility functions
+│   │   ├── App.css         # Main App styles
+│   │   ├── App.jsx         # Main App component
+│   │   ├── index.css       # Global styles
+│   │   └── main.jsx        # App entry point
+│   ├── .env                # Environment variables
+│   ├── eslint.config.js    # ESLint configuration
+│   ├── index.html          # HTML entry point
+│   ├── vite.config.js      # Vite configuration
+│   └── README.md           # Frontend Documentation
+├── API.md                  # API Documentation
+├── ARCHITECTURE.md         # System Architecture
+├── CONTRIBUTING.md         # Contribution Guidelines
+├── DEVELOPMENT.md          # Development Setup Guide
+├── QUICK_START.md          # Quick Start Guide
+├── SECURITY_CHECKLIST.md   # Security Checklist
+├── TEAM_SETUP_GUIDE.md     # Team Onboarding Guide
+├── TESTING.md              # Testing Strategy
 └── README.md               # Project Documentation
 ```
 
