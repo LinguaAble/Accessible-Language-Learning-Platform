@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic, Trophy, Star, Target } from 'lucide-react';
+import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic, Trophy, Star, Target, Clock } from 'lucide-react';
 import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
 import { transcribeAudio } from '../utils/googleSpeechService';
 
@@ -485,6 +485,10 @@ const LearningScreen = () => {
   const [isListening, setIsListening] = useState(false);
   const [listeningText, setListeningText] = useState("");
 
+  // --- NEW: Time Tracking ---
+  const [sessionStartTime] = useState(Date.now());
+  const [timeSpentMinutes, setTimeSpentMinutes] = useState(0);
+
   const mediaRecorderRef = React.useRef(null);
   const audioChunksRef = React.useRef([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -705,6 +709,11 @@ const LearningScreen = () => {
         setMistakeQueue([]);
         setCurrentSlideIndex(prev => prev + 1);
       } else {
+        // Calculate actual time spent on this lesson (in minutes) - do this FIRST
+        const elapsedTimeMs = Date.now() - sessionStartTime;
+        const elapsedMinutes = Math.max(1, Math.round(elapsedTimeMs / 60000)); // At least 1 minute
+        setTimeSpentMinutes(elapsedMinutes);
+
         const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
         if (!completedLessons.includes(lessonId)) {
           completedLessons.push(lessonId);
@@ -715,7 +724,7 @@ const LearningScreen = () => {
             axios.put('http://localhost:5000/api/auth/update-progress', {
               email: user.email,
               completedLessons,
-              todayProgress: (todayProgress || 0) + 5, // Add 5 minutes per lesson
+              todayProgress: (todayProgress || 0) + elapsedMinutes, // Add actual time spent
               incrementLessonCount: 1
             })
               .then(res => {
@@ -836,6 +845,14 @@ const LearningScreen = () => {
               </div>
               <div className="stat-label-adhd">XP Earned</div>
               <div className="stat-value-adhd">+{xpEarned}</div>
+            </div>
+
+            <div className="stat-card-adhd time-card">
+              <div className="stat-icon-large">
+                <Clock size={32} strokeWidth={3} />
+              </div>
+              <div className="stat-label-adhd">Time Spent</div>
+              <div className="stat-value-adhd">{timeSpentMinutes}<span className="stat-total"> min</span></div>
             </div>
 
             {reviewedAndCorrected > 0 && (
