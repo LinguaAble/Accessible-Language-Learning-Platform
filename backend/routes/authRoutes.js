@@ -47,7 +47,10 @@ router.post('/register', async (req, res) => {
         avatarUrl: user.avatarUrl,
         preferences: user.preferences,
         completedLessons: user.completedLessons,
-        loginHistory: user.loginHistory
+        loginHistory: user.loginHistory,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate,
+        dailyLessonCounts: user.dailyLessonCounts
       }
     });
   } catch (err) {
@@ -98,7 +101,8 @@ router.post('/login', async (req, res) => {
         completedLessons: user.completedLessons,
         loginHistory: user.loginHistory,
         todayProgress: user.todayProgress,
-        progressDate: user.progressDate
+        progressDate: user.progressDate,
+        dailyLessonCounts: user.dailyLessonCounts
       }
     });
   } catch (err) {
@@ -193,13 +197,13 @@ router.put('/reset-password/:token', async (req, res) => {
   }
 });
 
-// 5. UPDATE USER PROGRESS
+// 5. UPDATE USER PROGRESS (Unified)
 router.put('/update-progress', async (req, res) => {
   try {
-    const { email, completedLessons } = req.body;
+    const { email, completedLessons, todayProgress, incrementLessonCount } = req.body;
 
-    if (!email || !completedLessons) {
-      return res.status(400).json({ message: "Please provide email and completedLessons" });
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
     }
 
     const user = await User.findOne({ email });
@@ -207,18 +211,50 @@ router.put('/update-progress', async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Merge existing and new completed lessons to prevent data loss
-    // Ensure both are treated as arrays of numbers
-    const existing = user.completedLessons || [];
-    const incoming = completedLessons || [];
+    // A. Update Completed Lessons (if provided)
+    if (completedLessons) {
+      const existing = user.completedLessons || [];
+      const incoming = completedLessons || [];
+      // Merge and unique
+      user.completedLessons = [...new Set([...existing, ...incoming])];
+    }
 
-    // Create a Set from both arrays to ensure uniqueness
-    const mergedLessons = [...new Set([...existing, ...incoming])];
+    // B. Update Daily Progress (Minutes) (if provided)
+    if (todayProgress !== undefined) {
+      const today = new Date().toDateString();
 
-    user.completedLessons = mergedLessons;
+      // Check if day changed
+      if (user.progressDate !== today) {
+        // New day, update date and set progress
+        user.progressDate = today;
+        user.todayProgress = todayProgress;
+      } else {
+        // Same day, update progress
+        user.todayProgress = todayProgress;
+      }
+    }
+
+    // C. Update Daily Lesson Count (for Chart)
+    if (incrementLessonCount) {
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const existingEntry = user.dailyLessonCounts.find(e => e.date === today);
+
+      if (existingEntry) {
+        existingEntry.count += incrementLessonCount;
+      } else {
+        user.dailyLessonCounts.push({ date: today, count: incrementLessonCount });
+      }
+    }
+
     await user.save();
 
-    res.json({ success: true, completedLessons: user.completedLessons });
+    res.json({
+      success: true,
+      completedLessons: user.completedLessons,
+      todayProgress: user.todayProgress,
+      progressDate: user.progressDate,
+      dailyLessonCounts: user.dailyLessonCounts
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server Error" });
@@ -244,7 +280,10 @@ router.post('/get-user-data', async (req, res) => {
         bio: user.bio,
         avatarUrl: user.avatarUrl,
         loginHistory: user.loginHistory,
-        completedLessons: user.completedLessons
+        completedLessons: user.completedLessons,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate,
+        dailyLessonCounts: user.dailyLessonCounts
       }
     });
   } catch (err) {
@@ -316,37 +355,6 @@ router.put('/update-profile', async (req, res) => {
   }
 });
 
-// 10. UPDATE PROGRESS
-router.put('/update-progress', async (req, res) => {
-  try {
-    const { email, todayProgress } = req.body;
-    if (!email) return res.status(400).json({ message: 'Email required' });
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    const today = new Date().toDateString();
-
-    // Reset progress if it's a new day
-    if (user.progressDate !== today) {
-      user.todayProgress = todayProgress || 0;
-      user.progressDate = today;
-    } else {
-      // Same day, update progress
-      user.todayProgress = todayProgress;
-    }
-
-    await user.save();
-
-    res.json({
-      success: true,
-      todayProgress: user.todayProgress,
-      progressDate: user.progressDate
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
 
 module.exports = router;
