@@ -475,7 +475,7 @@ const LearningScreen = () => {
   const [isReviewMode, setIsReviewMode] = useState(false);
 
   // --- BREAK NOTIFICATION SYSTEM ---
-  const [studyStartTime, setStudyStartTime] = useState(Date.now());
+  const [lessonStartTime] = useState(Date.now()); // Track when lesson started
   const [showBreakNotification, setShowBreakNotification] = useState(false);
   const [breakDismissed, setBreakDismissed] = useState(false);
   const BREAK_INTERVAL = 20 * 60 * 1000; // 20 minutes in milliseconds
@@ -626,7 +626,7 @@ const LearningScreen = () => {
   useEffect(() => {
     const checkBreakTime = setInterval(() => {
       const currentTime = Date.now();
-      const studyDuration = currentTime - studyStartTime;
+      const studyDuration = currentTime - lessonStartTime;
 
       // Show notification after 20 minutes if not dismissed
       if (studyDuration >= BREAK_INTERVAL && !breakDismissed && !showBreakNotification) {
@@ -635,7 +635,7 @@ const LearningScreen = () => {
     }, 30000); // Check every 30 seconds
 
     return () => clearInterval(checkBreakTime);
-  }, [studyStartTime, breakDismissed, showBreakNotification, BREAK_INTERVAL]);
+  }, [lessonStartTime, breakDismissed, showBreakNotification, BREAK_INTERVAL]);
 
   useEffect(() => {
     if (currentSlideIndex >= originalCount) {
@@ -739,10 +739,15 @@ const LearningScreen = () => {
             const today = new Date();
             const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
+            // Calculate actual time spent on lesson (in minutes)
+            const lessonEndTime = Date.now();
+            const timeSpentMs = lessonEndTime - lessonStartTime;
+            const timeSpentMinutes = Math.round(timeSpentMs / 60000); // Convert to minutes and round
+
             axios.put('http://localhost:5000/api/auth/update-progress', {
               email: user.email,
               completedLessons,
-              todayProgress: (todayProgress || 0) + 5, // Add 5 minutes per lesson
+              todayProgress: (todayProgress || 0) + timeSpentMinutes, // Add actual time spent
               incrementLessonCount: 1,
               date: formattedDate
             })
@@ -772,13 +777,13 @@ const LearningScreen = () => {
   const handleContinueLearning = () => {
     setShowBreakNotification(false);
     setBreakDismissed(true);
-    setStudyStartTime(Date.now()); // Reset timer
+    // Note: We don't reset lessonStartTime as we want to track total lesson duration
   };
 
   const handleDismissBreak = () => {
     setShowBreakNotification(false);
     setBreakDismissed(true);
-    setStudyStartTime(Date.now()); // Reset timer for another 20 minutes
+    // Note: We don't reset lessonStartTime as we want to track total lesson duration
   };
 
   // Calculate performance metrics

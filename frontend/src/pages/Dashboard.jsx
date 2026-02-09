@@ -247,11 +247,11 @@ const Dashboard = () => {
                   cy="40"
                   r="36"
                   style={{
-                    strokeDashoffset: 226 - (226 * (todayProgress / preferences.dailyGoalMinutes))
+                    strokeDashoffset: 226 - (226 * Math.min(1, todayProgress / preferences.dailyGoalMinutes))
                   }}
                 />
               </svg>
-              <span className="percent" style={{ fontSize: '18px' }}>{Math.round((todayProgress / preferences.dailyGoalMinutes) * 100)}%</span>
+              <span className="percent" style={{ fontSize: '18px' }}>{Math.min(100, Math.round((todayProgress / preferences.dailyGoalMinutes) * 100))}%</span>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '8px 0 0 0' }}>{todayProgress}/{preferences.dailyGoalMinutes} min today</p>
           </div>
