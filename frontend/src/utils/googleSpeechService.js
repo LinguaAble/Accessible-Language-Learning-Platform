@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_KEY = 'AIzaSyDynztlgYVKEr67mfb_4LLsZCqIK6bShUA'; // Provided API Key
+const API_KEY = import.meta.env.VITE_GOOGLE_SPEECH_KEY; // Provided API Key
 const GOOGLE_SPEECH_URL = `https://speech.googleapis.com/v1/speech:recognize?key=${API_KEY}`;
 
 /**
