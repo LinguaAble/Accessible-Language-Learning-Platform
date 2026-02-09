@@ -730,7 +730,7 @@ const LearningScreen = () => {
               .then(res => {
                 if (res.data.success) {
                   // Update local context with new daily stats
-                  login({ ...user, completedLessons: res.data.completedLessons, dailyLessonCounts: res.data.dailyLessonCounts, todayProgress: res.data.todayProgress });
+                  login({ ...user, completedLessons: res.data.completedLessons, dailyLessonCounts: res.data.dailyLessonCounts, todayProgress: res.data.todayProgress, streak: res.data.streak });
                 }
               })
               .catch(err => console.error("Failed to sync progress", err));

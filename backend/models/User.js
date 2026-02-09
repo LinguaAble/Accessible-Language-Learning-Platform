@@ -58,6 +58,13 @@ const UserSchema = new mongoose.Schema({
     dailyGoalMinutes: { type: Number, default: 5 }
   },
 
+  // --- NEW: Streak Tracking ---
+  streak: {
+    current: { type: Number, default: 0 },
+    best: { type: Number, default: 0 },
+    lastActiveDate: { type: Date, default: null }
+  },
+
   // Story: Track User Progress
   completedLessons: {
     type: [Number],

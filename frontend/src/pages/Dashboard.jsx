@@ -129,7 +129,7 @@ const Dashboard = () => {
         <div className="header-stats">
           <div className="stat-pill streak">
             <Flame size={18} fill="currentColor" />
-            {totalLessonsCompleted > 0 ? '1' : '0'} Day Streak
+            {user.streak?.current || 0} Day Streak
           </div>
           <div
             className="notification-container"
@@ -189,7 +189,7 @@ const Dashboard = () => {
                 <div className="tooltip-stats">
                   <div className="tooltip-stat">
                     <Flame size={16} fill="currentColor" style={{ color: 'var(--accent-color)' }} />
-                    <span>{totalLessonsCompleted > 0 ? '1' : '0'} Day Streak</span>
+                    <span>{user.streak?.current || 0} Day Streak (Best: {user.streak?.best || 0})</span>
                   </div>
                   <div className="tooltip-stat">
                     <Award size={16} style={{ color: 'var(--accent-color)' }} />
