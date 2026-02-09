@@ -29,84 +29,36 @@ const Dashboard = () => {
     return date.toISOString().split('T')[0];
   };
 
-  // Initialize or update daily progress tracking
+  // Initialize or update chart data from backend
   useEffect(() => {
     const today = formatDate(new Date());
     const now = new Date();
-    
+
     // Get current week info
     const startOfWeek = getStartOfWeek(now);
-    const weekKey = formatDate(startOfWeek); // Use Monday's date as week identifier
-    
-    // Get or initialize weekly progress
-    let weeklyProgress = JSON.parse(localStorage.getItem('weeklyProgress') || '{}');
-    const currentWeekKey = localStorage.getItem('currentWeekKey');
-    
-    // Check if we're in a new week (Monday changed)
-    if (currentWeekKey !== weekKey) {
-      // New week started, reset weekly progress
-      console.log('🔄 New week detected! Resetting weekly progress.');
-      weeklyProgress = {};
-      localStorage.setItem('currentWeekKey', weekKey);
-      localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
-      
-      // Clear all the daily tracking keys from previous weeks
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('completedOn_') || key.startsWith('dailySnapshot_') || key.startsWith('startOfDay_'))) {
-          keysToRemove.push(key);
-        }
-      }
-      keysToRemove.forEach(key => localStorage.removeItem(key));
-      console.log('🧹 Cleaned up old daily tracking data');
-    }
-    
-    // Get total completed lessons
-    const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-    setTotalLessonsCompleted(completedLessons.length);
-    
-    
-    // Track lessons completed each day using snapshots
-    const dailySnapshotKey = `dailySnapshot_${today}`;
-    const startOfDayKey = `startOfDay_${today}`;
-    
-    // Get or set the snapshot from the start of today
-    let startOfDaySnapshot = JSON.parse(localStorage.getItem(startOfDayKey) || 'null');
-    
-    if (startOfDaySnapshot === null) {
-      // First time loading today - save current state as start of day
-      // This means lessons were completed before today
-      startOfDaySnapshot = completedLessons;
-      localStorage.setItem(startOfDayKey, JSON.stringify(startOfDaySnapshot));
-      console.log(`🌅 Start of day snapshot saved: ${startOfDaySnapshot.length} lessons already completed`);
-    }
-    
-    // Calculate lessons completed TODAY ONLY (new ones since start of day)
-    const lessonsCompletedToday = completedLessons.filter(id => !startOfDaySnapshot.includes(id)).length;
-    
-    // Update today's count in weekly progress
-    weeklyProgress[today] = lessonsCompletedToday;
-    localStorage.setItem('weeklyProgress', JSON.stringify(weeklyProgress));
-    
-    // Save current snapshot for real-time updates
-    localStorage.setItem(dailySnapshotKey, JSON.stringify(completedLessons));
-    
-    console.log(`📊 Today (${today}): ${lessonsCompletedToday} new lessons completed`);
 
-    // Build weekly data for chart
+    // Get total completed lessons
+    const completedLessons = (user.completedLessons && user.completedLessons.length > 0)
+      ? user.completedLessons
+      : JSON.parse(localStorage.getItem('completedLessons') || '[]');
+
+    setTotalLessonsCompleted(completedLessons.length);
+
+    // Build weekly data for chart using Backend Data
     const buildWeeklyData = () => {
       const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
       const data = [];
+      const dailyCounts = user.dailyLessonCounts || [];
 
       for (let i = 0; i < 7; i++) {
         const currentDate = new Date(startOfWeek);
         currentDate.setDate(startOfWeek.getDate() + i);
         const dateStr = formatDate(currentDate);
-        
-        // For each day, use the value stored in weeklyProgress
-        const lessonsCompleted = weeklyProgress[dateStr] || 0;
-        
+
+        // Find count for this date in backend data
+        const entry = dailyCounts.find(e => e.date === dateStr);
+        const lessonsCompleted = entry ? entry.count : 0;
+
         data.push({
           day: days[i],
           value: lessonsCompleted,
@@ -117,23 +69,20 @@ const Dashboard = () => {
 
       return data;
     };
-
     setWeeklyData(buildWeeklyData());
 
     // Set up an interval to refresh the chart every minute (in case day changes)
     const interval = setInterval(() => {
       const newToday = formatDate(new Date());
-      const newWeekKey = formatDate(getStartOfWeek(new Date()));
-      
-      if (newToday !== today || newWeekKey !== weekKey) {
-        console.log('📅 Day or week changed, refreshing...');
-        window.location.reload(); // Refresh when day or week changes
+      if (newToday !== today) {
+        console.log('📅 Day changed, refreshing...');
+        window.location.reload();
       }
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
 
-  }, []);
+  }, [user.completedLessons, user.dailyLessonCounts]);
 
   // Sync progress with backend
   useEffect(() => {
@@ -356,9 +305,9 @@ const Dashboard = () => {
           <div className="weekly-chart">
             {weeklyData.map((item, i) => (
               <div key={i} className="bar-wrapper">
-                <div 
-                  className="bar" 
-                  style={{ 
+                <div
+                  className="bar"
+                  style={{
                     height: `${(item.value / Math.max(maxValue, 5)) * 100}%`,
                     opacity: item.isToday ? 1 : 0.7,
                     position: 'relative',
