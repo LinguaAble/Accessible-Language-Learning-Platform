@@ -6,7 +6,7 @@
     background-color: var(--bg-color);
     display: flex;
     flex-direction: column;
-    position: fixed;
+    position: relative;
     top: 0;
     left: 0;
     z-index: 2000;
@@ -1033,4 +1033,217 @@ ADHD-FRIENDLY PRINCIPLES:
         flex: 0 1 600px;
         margin: 0 auto;
     }
+}
+/* ===== BREAK NOTIFICATION SYSTEM ===== */
+.break-notification-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+
+  display: block;          /* not flex */
+  padding: 60px 20px;
+
+  overflow-y: auto;        /* page scrolls */
+  z-index: 9999;
+}
+
+
+.break-notification-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--accent-color);
+  animation: slideUp 0.4s ease-out;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
+.break-icon-container {
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.break-title {
+  color: var(--text-main);
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 20px 0;
+}
+
+.break-message {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.break-benefits {
+  background: rgba(230, 126, 34, 0.1);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.break-benefits h3 {
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.break-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.break-benefits li {
+  color: var(--text-main);
+  font-size: 1rem;
+  padding: 8px 0;
+  line-height: 1.5;
+}
+
+.break-suggestions {
+  background: rgba(52, 152, 219, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 30px;
+}
+
+.break-suggestions p {
+  margin: 5px 0;
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+.break-suggestions strong {
+  color: var(--accent-color);
+}
+
+.break-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.break-btn {
+  padding: 16px 30px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.break-btn.primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.break-btn.primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4);
+}
+
+.break-btn.secondary {
+  background: transparent;
+  color: var(--text-main);
+  border: 2px solid var(--border-color);
+}
+
+.break-btn.secondary:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.dismiss-break-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.dismiss-break-btn:hover {
+  color: var(--accent-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .break-notification-card {
+    padding: 30px 20px;
+    max-width: 95%;
+  }
+
+  .break-title {
+    font-size: 1.5rem;
+  }
+
+  .break-message {
+    font-size: 1rem;
+  }
+
+  .break-benefits li {
+    font-size: 0.9rem;
+  }
+}
+
+/* Reduced Motion Support */
+body.reduce-motion .break-notification-overlay {
+  animation: none;
+}
+
+body.reduce-motion .break-notification-card {
+  animation: none;
+}
+
+body.reduce-motion .break-icon-container {
+  animation: none;
 }

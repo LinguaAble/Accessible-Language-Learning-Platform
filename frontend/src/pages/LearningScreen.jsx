@@ -473,6 +473,14 @@ const LearningScreen = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [mistakeQueue, setMistakeQueue] = useState([]);
   const [isReviewMode, setIsReviewMode] = useState(false);
+  
+  // --- BREAK NOTIFICATION SYSTEM ---
+  const [studyStartTime, setStudyStartTime] = useState(Date.now());
+  const [showBreakNotification, setShowBreakNotification] = useState(false);
+  const [breakDismissed, setBreakDismissed] = useState(false);
+  const BREAK_INTERVAL = 20 *60* 1000; // 20 minutes in milliseconds
+  // For testing: const BREAK_INTERVAL = 10 * 1000; // 10 seconds
+  
   // --- NEW: Score Tracking ---
   const [scoreData, setScoreData] = useState({
     totalQuestions: 0,
@@ -481,13 +489,10 @@ const LearningScreen = () => {
     firstAttemptCorrect: 0,
     reviewedAndCorrected: 0,
   });
+  
   // Speech Recognition State
   const [isListening, setIsListening] = useState(false);
   const [listeningText, setListeningText] = useState("");
-
-  // --- NEW: Time Tracking ---
-  const [sessionStartTime] = useState(Date.now());
-  const [timeSpentMinutes, setTimeSpentMinutes] = useState(0);
 
   const mediaRecorderRef = React.useRef(null);
   const audioChunksRef = React.useRef([]);
@@ -604,6 +609,7 @@ const LearningScreen = () => {
       setMistakeQueue((prev) => [...prev, { ...currentSlide, isReview: true }]);
     }
   };
+
   // Load lesson content and count questions
   useEffect(() => {
     const lesson = lessonDatabase[lessonId];
@@ -615,6 +621,22 @@ const LearningScreen = () => {
       }));
     }
   }, [lessonId]);
+
+  // Break Notification Timer
+  useEffect(() => {
+    const checkBreakTime = setInterval(() => {
+      const currentTime = Date.now();
+      const studyDuration = currentTime - studyStartTime;
+      
+      // Show notification after 20 minutes if not dismissed
+      if (studyDuration >= BREAK_INTERVAL && !breakDismissed && !showBreakNotification) {
+        setShowBreakNotification(true);
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(checkBreakTime);
+  }, [studyStartTime, breakDismissed, showBreakNotification, BREAK_INTERVAL]);
+
   useEffect(() => {
     if (currentSlideIndex >= originalCount) {
       setProgress(95);
@@ -625,10 +647,7 @@ const LearningScreen = () => {
 
   const playAudio = (text) => {
     // Check Sound Preference
-    const soundEnabled = user.preferences?.soundEffects ?? false; // Default off if not set? Or check logic.
-    // The user initialized preferences in Settings to: soundEffects: false.
-    // So by default sound is OFF? That seems wrong for a language app.
-    // But let's respect the preference.
+    const soundEnabled = user.preferences?.soundEffects ?? false;
     if (!soundEnabled) return;
 
     if ('speechSynthesis' in window) {
@@ -709,11 +728,6 @@ const LearningScreen = () => {
         setMistakeQueue([]);
         setCurrentSlideIndex(prev => prev + 1);
       } else {
-        // Calculate actual time spent on this lesson (in minutes) - do this FIRST
-        const elapsedTimeMs = Date.now() - sessionStartTime;
-        const elapsedMinutes = Math.max(1, Math.round(elapsedTimeMs / 60000)); // At least 1 minute
-        setTimeSpentMinutes(elapsedMinutes);
-
         const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
         if (!completedLessons.includes(lessonId)) {
           completedLessons.push(lessonId);
@@ -724,13 +738,13 @@ const LearningScreen = () => {
             axios.put('http://localhost:5000/api/auth/update-progress', {
               email: user.email,
               completedLessons,
-              todayProgress: (todayProgress || 0) + elapsedMinutes, // Add actual time spent
+              todayProgress: (todayProgress || 0) + 5, // Add 5 minutes per lesson
               incrementLessonCount: 1
             })
               .then(res => {
                 if (res.data.success) {
                   // Update local context with new daily stats
-                  login({ ...user, completedLessons: res.data.completedLessons, dailyLessonCounts: res.data.dailyLessonCounts, todayProgress: res.data.todayProgress, streak: res.data.streak });
+                  login({ ...user, completedLessons: res.data.completedLessons, dailyLessonCounts: res.data.dailyLessonCounts, todayProgress: res.data.todayProgress });
                 }
               })
               .catch(err => console.error("Failed to sync progress", err));
@@ -741,7 +755,26 @@ const LearningScreen = () => {
         setShowSuccess(true);
       }
     }
-  }
+  };
+
+  // Break Notification Handlers
+  const handleTakeBreak = () => {
+    setShowBreakNotification(false);
+    setBreakDismissed(true);
+    navigate('/dashboard');
+  };
+
+  const handleContinueLearning = () => {
+    setShowBreakNotification(false);
+    setBreakDismissed(true);
+    setStudyStartTime(Date.now()); // Reset timer
+  };
+
+  const handleDismissBreak = () => {
+    setShowBreakNotification(false);
+    setBreakDismissed(true);
+    setStudyStartTime(Date.now()); // Reset timer for another 20 minutes
+  };
 
   // Calculate performance metrics
   const calculateScore = () => {
@@ -773,6 +806,56 @@ const LearningScreen = () => {
 
     return { percentage, grade, message };
   };
+
+  // Break Notification Overlay
+  if (showBreakNotification) {
+    return (
+      <div className="learning-container">
+        <div className="break-notification-overlay">
+          <div className="break-notification-card">
+            <div className="break-icon-container">
+              <Clock size={60} color="var(--accent-color)" />
+            </div>
+            
+            <h2 className="break-title">Time for a Break! 🌟</h2>
+            
+            <p className="break-message">
+              You've been learning for 20 minutes. Taking regular breaks helps your brain absorb information better and prevents fatigue.
+            </p>
+            
+            <div className="break-benefits">
+              <h3>Break Benefits:</h3>
+              <ul>
+                <li>✨ Improves memory retention</li>
+                <li>🧠 Reduces mental fatigue</li>
+                <li>💪 Boosts focus when you return</li>
+                <li>😊 Prevents learning burnout</li>
+              </ul>
+            </div>
+            
+            <div className="break-suggestions">
+              <p><strong>Suggested break activities:</strong></p>
+              <p>Stretch, walk around, drink water, or rest your eyes</p>
+            </div>
+            
+            <div className="break-buttons">
+              <button className="break-btn primary" onClick={handleTakeBreak}>
+                Take a 5 Min Break
+              </button>
+              <button className="break-btn secondary" onClick={handleContinueLearning}>
+                Continue Learning
+              </button>
+            </div>
+            
+            <button className="dismiss-break-btn" onClick={handleDismissBreak}>
+              Remind me in 20 minutes
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (showSuccess) {
     const { percentage, grade, message } = calculateScore();
     const { totalQuestions, firstAttemptCorrect, reviewedAndCorrected } = scoreData;
@@ -845,14 +928,6 @@ const LearningScreen = () => {
               </div>
               <div className="stat-label-adhd">XP Earned</div>
               <div className="stat-value-adhd">+{xpEarned}</div>
-            </div>
-
-            <div className="stat-card-adhd time-card">
-              <div className="stat-icon-large">
-                <Clock size={32} strokeWidth={3} />
-              </div>
-              <div className="stat-label-adhd">Time Spent</div>
-              <div className="stat-value-adhd">{timeSpentMinutes}<span className="stat-total"> min</span></div>
             </div>
 
             {reviewedAndCorrected > 0 && (
@@ -946,8 +1021,6 @@ const LearningScreen = () => {
             </div>
           </div>
         )}
-
-
 
         {/* --- TEACHING SLIDE (New Type) --- */}
         {slide.type === 'teach' && (

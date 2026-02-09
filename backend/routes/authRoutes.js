@@ -46,7 +46,6 @@ router.post('/register', async (req, res) => {
         bio: user.bio,
         avatarUrl: user.avatarUrl,
         preferences: user.preferences,
-        streak: user.streak, // Include Streak
         completedLessons: user.completedLessons,
         loginHistory: user.loginHistory,
         todayProgress: user.todayProgress,
@@ -99,7 +98,6 @@ router.post('/login', async (req, res) => {
         bio: user.bio,
         avatarUrl: user.avatarUrl,
         preferences: user.preferences,
-        streak: user.streak, // Include Streak
         completedLessons: user.completedLessons,
         loginHistory: user.loginHistory,
         todayProgress: user.todayProgress,
@@ -248,67 +246,6 @@ router.put('/update-progress', async (req, res) => {
       }
     }
 
-    // D. Update Streak Logic
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Midnight today
-
-    // Initialize streak if missing
-    if (!user.streak) {
-      user.streak = { current: 0, best: 0, lastActiveDate: null };
-    }
-
-    const lastActive = user.streak.lastActiveDate ? new Date(user.streak.lastActiveDate) : null;
-    let streakUpdated = false;
-
-    if (!lastActive) {
-      // First ever lesson
-      user.streak.current = 1;
-      user.streak.best = 1;
-      user.streak.lastActiveDate = now;
-      streakUpdated = true;
-    } else {
-      const lastActiveDay = new Date(lastActive.getFullYear(), lastActive.getMonth(), lastActive.getDate());
-
-      const diffTime = Math.abs(today - lastActiveDay);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) {
-        // Already played today, do nothing to streak count, just update time
-        user.streak.lastActiveDate = now;
-      } else if (diffDays === 1) {
-        // Continued streak (played yesterday)
-        user.streak.current += 1;
-        if (user.streak.current > user.streak.best) {
-          user.streak.best = user.streak.current;
-        }
-        user.streak.lastActiveDate = now;
-        streakUpdated = true;
-      } else if (diffDays === 2) {
-        // Missed one day - Check Grace Period (until 12 PM)
-        const currentHour = now.getHours();
-        if (currentHour < 12) {
-          // Grace Period Active: Keep streak
-          user.streak.current += 1;
-          if (user.streak.current > user.streak.best) {
-            user.streak.best = user.streak.current;
-          }
-          user.streak.lastActiveDate = now;
-          streakUpdated = true;
-          console.log("Streak saved by Grace Period!");
-        } else {
-          // Grace Period Expired: Reset
-          user.streak.current = 1;
-          user.streak.lastActiveDate = now;
-          console.log("Streak broken (Grace period expired).");
-        }
-      } else {
-        // Missed more than 1 day: Reset
-        user.streak.current = 1;
-        user.streak.lastActiveDate = now;
-        console.log("Streak broken (More than 1 day missed).");
-      }
-    }
-
     await user.save();
 
     res.json({
@@ -316,8 +253,7 @@ router.put('/update-progress', async (req, res) => {
       completedLessons: user.completedLessons,
       todayProgress: user.todayProgress,
       progressDate: user.progressDate,
-      dailyLessonCounts: user.dailyLessonCounts,
-      streak: user.streak // Return updated streak
+      dailyLessonCounts: user.dailyLessonCounts
     });
   } catch (err) {
     console.error(err);
@@ -344,7 +280,6 @@ router.post('/get-user-data', async (req, res) => {
         bio: user.bio,
         avatarUrl: user.avatarUrl,
         loginHistory: user.loginHistory,
-        streak: user.streak, // Include Streak
         completedLessons: user.completedLessons,
         todayProgress: user.todayProgress,
         progressDate: user.progressDate,
@@ -410,7 +345,6 @@ router.put('/update-profile', async (req, res) => {
         bio: user.bio,
         avatarUrl: user.avatarUrl,
         preferences: user.preferences,
-        streak: user.streak, // Include Streak
         completedLessons: user.completedLessons,
         loginHistory: user.loginHistory
       }
