@@ -24,13 +24,30 @@
 
 ## 📚 Project Documentation
 
-| 🚀 Getting Started | 📖 Technical Reference | 👩‍💻 Developer Guides |
-|-------------------|----------------------|----------------------|
-| [**Quick Start**](QUICK_START.md)<br>_Zero to Hero setup_ | [**Architecture**](ARCHITECTURE.md)<br>_System design overview_ | [**Contributing**](CONTRIBUTING.md)<br>_workflow guidelines_ |
-| [**Team Setup**](TEAM_SETUP_GUIDE.md)<br>_Environment config_ | [**API Reference**](API.md)<br>_Backend endpoints_ | [**Development**](DEVELOPMENT.md)<br>_Local setup detailed_ |
-| | [**Frontend Docs**](frontend/README.md)<br>_React specific_ | [**Testing Guide**](TESTING.md)<br>_Overall strategy_ |
-| | [**Backend Testing**](backend/TEST_GUIDE.md)<br>_Jest & Supertest_ | |
-| | [**Security**](SECURITY_CHECKLIST.md)<br>_Best practices_ | |
+### For Contributors
+
+| Document | Description |
+|----------|-------------|
+| [**CONTRIBUTING.md**](CONTRIBUTING.md) | 📝 Complete guide to contributing code |
+| [**DEVELOPMENT.md**](DEVELOPMENT.md) | 🛠️ Development environment setup |
+| [**ARCHITECTURE.md**](ARCHITECTURE.md) | 🏛️ System architecture and design |
+| [**TESTING.md**](TESTING.md) | 🧪 Testing strategies and CI/CD |
+
+### For Users
+
+| Document | Description |
+|----------|-------------|
+| [**QUICK_START.md**](QUICK_START.md) | ⚡ Fast setup guide |
+| [**TEAM_SETUP_GUIDE.md**](TEAM_SETUP_GUIDE.md) | 👥 Team onboarding |
+
+### Technical Documentation
+
+| Document | Description |
+|----------|-------------|
+| [**frontend/README.md**](frontend/README.md) | Frontend-specific documentation |
+| [**API.md**](API.md) | Backend API documentation |
+| [**backend/TEST_GUIDE.md**](backend/TEST_GUIDE.md) | Backend testing guide |
+| [**SECURITY_CHECKLIST.md**](SECURITY_CHECKLIST.md) | 🔒 Security guidelines |
 
 ---
 
