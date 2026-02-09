@@ -340,8 +340,8 @@ const lessonDatabase = {
   31: {
     title: "Pronouns: I & You",
     slides: [
-      ...createVocabPair("मैं", "I", "First person", ["I", "You", "He", "She"], ["मैं", "तुम", "वह", "वह"]),
-      ...createVocabPair("तुम", "You (informal)", "Second person informal", ["You", "I", "We", "They"], ["तुम", "मैं", "हम", "वे"]),
+      ...createVocabPair("मैं", "I", "First person", ["I", "You (informal)", "He", "She"], ["मैं", "तुम", "वह", "वह"]),
+      ...createVocabPair("तुम", "You (informal)", "Second person informal", ["You (informal)", "I", "We", "They"], ["तुम", "मैं", "हम", "वे"]),
       ...createVocabPair("आप", "You (formal)", "Second person formal", ["You (formal)", "You (informal)", "I", "We"], ["आप", "तुम", "मैं", "हम"]),
     ]
   },
