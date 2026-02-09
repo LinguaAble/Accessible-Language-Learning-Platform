@@ -69,7 +69,7 @@ Accessible Language Learning Platform.
 ### 📊 Activity Diagram
 Represents the overall user activity flow from login to lesson completion.
 
-![Activity Diagram](docs/activity-diagram.svg)
+![Activity Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/ActivityDiagram.svg)
 
 ---
 
