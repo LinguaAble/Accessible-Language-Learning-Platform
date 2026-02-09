@@ -74,6 +74,12 @@ const UserSchema = new mongoose.Schema({
     default: () => new Date().toDateString()
   },
 
+  // Daily lesson counts (for weekly chart)
+  dailyLessonCounts: [{
+    date: { type: String, required: true },
+    count: { type: Number, default: 0 }
+  }],
+
   // Story: Login History
   loginHistory: [{
     timestamp: { type: Date, default: Date.now },
