@@ -61,29 +61,58 @@ Key goals:
 
 ---
 
-🧩 System Diagrams (StarUML)
+## 🧩 Design & Architecture Diagrams (StarUML)
 
-The following UML diagrams were created using StarUML to clearly represent the design and behavior of the Accessible Language Learning Platform.
-These diagrams help contributors and reviewers quickly understand the system flow, structure, and interactions.
+The following diagrams were created using StarUML and related design tools to represent the architecture, behavior, and data structure of the Accessible Language Learning Platform.  
+These diagrams help contributors and reviewers clearly understand the system design, interactions, and database structure.
 
-📊 Activity Diagram
+---
 
-Illustrates the overall workflow of the platform, showing how users move from authentication to lesson interaction, practice, and progress tracking.
+### 🏛️ Architecture Diagram
+
+Illustrates the high-level system architecture, showing how the frontend (React), backend (Node.js + Express), database (MongoDB), and external services interact.
+
+![Architecture Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/ARCHITECTURE%20DIAGRAM.jpeg)
+
+---
+
+### 📊 Activity Diagram
+
+Illustrates the overall workflow of the platform, from user authentication to lesson access, practice sessions, and progress tracking.
 
 ![Activity Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/ActivityDiagram.jpg)
 
-👤 Use Case Diagram
+---
 
-Depicts the interactions between different user roles (Learner, Admin) and the system, highlighting key functionalities such as login, lesson access, and progress management.
+### 🧱 Class Diagram
 
-🔁 Sequence Diagram
+Represents the static structure of the system, including core classes, their attributes, methods, and relationships used across backend models and frontend components.
 
-Shows the sequence of interactions between the frontend, backend, and database during core operations like login, lesson retrieval, and leaderboard updates.
+![Class Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/CLASSDIAGRAM.jpg)
 
-🧱 Class Diagram
+---
 
-Represents the static structure of the system, including core classes, their attributes, methods, and relationships used in both frontend and backend modules.
+### 🗄️ Schema Diagram
 
+Shows the database schema design, detailing collections, attributes, and relationships between entities such as users, lessons, progress, and leaderboard data.
+
+![Schema Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/SCHEME_PK_FK.png)
+
+---
+
+### 👤 Use Case Diagram
+
+Depicts the interactions between different user roles (Learner, Admin) and the system, highlighting key functionalities such as authentication, lesson management, and progress monitoring.
+
+![Use Case Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/UseCaseDiagram.jpg)
+
+---
+
+### 🔁 Sequence Diagram
+
+Shows the sequence of interactions between the frontend, backend, and database during key operations such as login, lesson retrieval, and leaderboard updates.
+
+![Sequence Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/SequenceDiagram.jpg)
 
 
 
