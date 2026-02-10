@@ -1,183 +1,120 @@
-# Testing Guide
+# LinguaAble – Testing Strategy Document
 
-This project does not currently have a pre-configured testing environment. This guide provides step-by-step instructions to set up testing for both the Frontend (Vitest) and Backend (Jest).
+## Testing Overview
 
-## 🎯 Testing Strategy
-- **Frontend**: Unit & Component tests using **Vitest** + **React Testing Library**.
-- **Backend**: API & Unit tests using **Jest** + **Supertest**.
-- **E2E**: End-to-End user journey tests using **Cypress**.
+Testing is conducted to ensure that the LinguaAble Accessible Language Learning Platform functions correctly, reliably, and securely before deployment. LinguaAble aims to provide an inclusive learning experience, necessitating rigorous testing of accessibility features alongside core functionality. Since the system includes both frontend (React) and backend (Node.js) components, testing verifies that each component works individually and together.
 
----
+Testing helps:
+- Detect bugs and accessibility barriers early
+- Validate functional requirements (Learning paths, Progress tracking)
+- Ensure robust authentication and data privacy
+- Maintain data integrity (User progress, Streaks)
+- Ensure accessibility compliance (Screen reader compatibility, Keyboard navigation)
 
-## 🎨 Frontend Testing (Vitest)
+## Technologies and Languages Used
 
-We recommend **Vitest** for the frontend as it is built natively for Vite, offering faster performance than Jest for this stack.
+### Backend
+- **Node.js** – JavaScript runtime for server-side logic
+- **Express.js** – Web framework for REST APIs
+- **MongoDB & Mongoose** – NoSQL database and ODM
+- **JWT** – Stateless authentication
+- **Nodemailer** – Email service for password resets
 
-### 1. Installation
-Run the following inside the `frontend` directory:
+### Frontend
+- **React** – UI development
+- **Vite** – Frontend build tooling
+- **Context API** – Global state management
+- **CSS Modules** – Styling
 
-```bash
-cd frontend
-npm install -D vitest jsdom @testing-library/react @testing-library/jest-dom
-```
+## Comprehensive Testing Tools & Frameworks Summary
 
-### 2. Configuration (`vite.config.js`)
-Update your `vite.config.js` (or `.ts`) to include the test configuration:
+### Backend Testing Tools
 
-```javascript
-/// <reference types="vitest" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+| Tool/Framework | Purpose | Usage |
+|----------------|---------|-------|
+| **Jest** | Test Runner & Assertion Library | Primary test execution for backend logic |
+| **Supertest** | HTTP Assertions | Interface testing for Express API endpoints |
+| **MongoDB Memory Server** | Database Mocking | Isolated, in-memory database for integration tests |
+| **Cross-Env** | Environment Configuration | Setting `NODE_ENV=test` across platforms |
+| **Jest Mock Functions** | Service Mocking | Manually mocking `nodemailer` to prevent real email sending |
 
-export default defineConfig({
-  plugins: [react()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: './src/tests/setup.js', // We will create this next
-  },
-})
-```
+### Frontend Testing Tools
 
-### 3. Setup File
-Create a new file at `frontend/src/tests/setup.js`:
+| Tool/Framework | Purpose | Usage |
+|----------------|---------|-------|
+| **Vitest** | Test Runner | Fast, Vite-native unit and integration testing |
+| **react-testing-library (RTL)** | Component Testing | User-centric component behavior testing |
+| **@testing-library/user-event** | User Interaction | Simulate clicks, typing, and keyboard navigation |
+| **jsdom** | Browser Simulation | DOM environment for Node-based tests |
+| **Vitest UI** | Test Visualization | Interactive test result exploration (`npm run test:ui`) |
 
-```javascript
-import '@testing-library/jest-dom';
-```
+### Code Quality & Analysis
 
-### 4. Add Test Script
-Add the following script to `frontend/package.json`:
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| **ESLint** | Linting | Static code analysis for JavaScript/React |
 
-```json
-"scripts": {
-  "test": "vitest",
-  "test:ui": "vitest --ui",
-  "coverage": "vitest run --coverage"
-}
-```
+## Testing Levels and Scope
 
-### 5. Example Test
-Create `frontend/src/components/Example.test.jsx`:
+### 1. Unit Testing
 
-```jsx
-import { render, screen } from '@testing-library/react';
-import App from '../App';
+#### Backend Unit Tests
+**Auth Controller (`src/routes/authRoutes.js`)**
+- **Functions Tested:**
+  - `POST /register` – User registration, password hashing
+  - `POST /login` – Credential validation, JWT issuance
+  - `POST /forgot-password` – OTP generation (Mocked email)
+  - `PUT /reset-password/:token` – OTP validation, password update
+  - `PUT /update-progress` – Daily progress syncing, streak calculation
+  - `POST /get-user-data` – Secure data retrieval
+  - `PUT /update-profile` – Profile management
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn/i); // Adjust text based on your App content
-  expect(linkElement).toBeInTheDocument();
-});
-```
+- **Test Scenarios:**
+  - **Success**: Valid credentials, correct token generation.
+  - **Validation**: Duplicate emails, invalid passwords.
+  - **Security**: Password exclusion from responses.
+  - **Logic**: Daily streak resets, login history caps.
 
----
+#### Frontend Unit Tests
+**Core Logic & Context (`src/context/UserContext.jsx`)**
+- **Methods Tested:**
+  - `login` – State update and persistence
+  - `logout` – State clearing
+  - `updateProgress` – Daily progress calculation
+  - `updatePreferences` – Theme application
+- **Test Scenarios**:
+  - Initial state hydration from localStorage.
+  - Automatic daily reset of progress.
 
-## 🔧 Backend Testing (Jest)
+**Components (`src/tests/*.test.jsx`)**
+- **Tested Components**: `Login`, `Signup`, `Dashboard`, `Settings`, `LearningScreen`.
+- **Test Properties**:
+  - **Rendering**: Correct display of UI elements.
+  - **Interaction**: Typing in forms, clicking buttons (using `user-event`).
+  - **Navigation**: Link routing (using mocked `react-router-dom`).
+  - **API Calls**: Axios mocking (using `vi.mock`).
 
-We use **Jest** for the backend as it is the industry standard for Node.js testing.
+### 2. Integration Testing
 
-### 1. Installation
-Run the following inside the `backend` directory:
+#### Backend Integration Tests
+- **Flow**: API Route -> Controller -> In-Memory Database.
+- **Verification**: Ensuring data is correctly saved and retrieved from the mocked MongoDB instance.
 
-```bash
-cd backend
-npm install -D jest supertest
-```
+#### Frontend Integration Tests
+- **Mocking**: Axios calls are mocked to return specific responses, allowing component state to update as if talking to a real backend.
+- **Scenarios**: Successful login redirects, failed login shows error messages.
 
-### 2. Configuration
-Initialize Jest (or create `jest.config.js` manually):
+### 4. Compatibility Testing
 
-```bash
-npx jest --init
-# Choose: Node environment, Coverage=Yes, Babel=No (since we use CommonJS)
-```
+**Browser Support**:
+- **Target**: Chrome, Firefox, Edge, Safari (Latest versions).
+- **Responsive**: Verified on Desktop (1920x1080) and Mobile viewpoints.
 
-### 3. Add Test Script
-Add the following script to `backend/package.json`:
+## Test Properties Matrix
 
-```json
-"scripts": {
-  "test": "jest",
-  "test:watch": "jest --watch"
-}
-```
-
-### 4. Separation of Concerns (Important)
-To test your Express app without starting the server on a port every time, separate your app definition from the server listener.
-
-**Update `index.js` (or `app.js`) to export the app:**
-```javascript
-// app.js
-const express = require('express');
-const app = express();
-// ... routes ...
-module.exports = app;
-```
-
-**Create `server.js` to listen:**
-```javascript
-// server.js
-const app = require('./app');
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-```
-
-### 5. Example API Test
-Create `backend/tests/auth.test.js`:
-
-```javascript
-const request = require('supertest');
-const app = require('../app'); // Import the exported app
-
-describe('GET /', () => {
-  it('reviews an endpoint', async () => {
-    const res = await request(app).get('/api/health'); // Adjust route
-    expect(res.statusCode).toEqual(200);
-  });
-});
-```
-
----
-
-## 🎭 End-to-End Testing (Cypress)
-
-1. **Install Cypress** in the `frontend` folder:
-   ```bash
-   cd frontend
-   npm install -D cypress
-   ```
-2. **Open Cypress**:
-   ```bash
-   npx cypress open
-   ```
-3. Follow the UI to configure E2E testing. It will create a `cypress` folder with example specs.
-
----
-
-## 🔄 CI/CD Example (GitHub Actions)
-
-Create `.github/workflows/test.yml` to automate tests on push:
-
-```yaml
-name: Test Suite
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Frontend Tests
-        working-directory: ./frontend
-        run: |
-          npm install
-          npm test -- --run
-          
-      - name: Backend Tests
-        working-directory: ./backend
-        run: |
-          npm install
-          npm test
-```
+| Component Type | Properties Tested | Test Methods |
+|----------------|-------------------|--------------|
+| **Backend API** | Status Codes, Auth Logic, DB Interactions | Jest + Supertest |
+| **UI Components** | Visual Rendering, Interactions, Accessibility | Vitest + RTL |
+| **State** | Persistence, Updates, API Sync | Context Tests |
+| **Utilities** | Helper Functions (Speech, Sound) | Unit Tests |
