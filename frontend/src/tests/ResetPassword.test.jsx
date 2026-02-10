@@ -43,7 +43,7 @@ describe('ResetPassword Component Tests', () => {
         expect(screen.getByText(/Set New Password/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/Enter new password/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/Confirm new password/i)).toBeInTheDocument();
-        
+
         const submitButton = screen.getByRole('button', { name: /Update Password/i });
         expect(submitButton).toBeInTheDocument();
         expect(submitButton).toHaveClass('login-btn');
@@ -80,7 +80,7 @@ describe('ResetPassword Component Tests', () => {
         const toggleButtons = screen.getAllByRole('button');
         // Filter out the submit button
         const eyeButtons = toggleButtons.filter(btn => btn.getAttribute('type') === 'button');
-        
+
         expect(eyeButtons.length).toBeGreaterThanOrEqual(2); // One for each password field
     });
 
@@ -90,7 +90,7 @@ describe('ResetPassword Component Tests', () => {
 
         const passwordInput = screen.getByPlaceholderText(/Enter new password/i);
         const toggleButtons = screen.getAllByRole('button');
-        const passwordToggle = toggleButtons.find(btn => 
+        const passwordToggle = toggleButtons.find(btn =>
             btn.getAttribute('type') === 'button' &&
             btn.parentElement.querySelector('input[placeholder*="Enter new password"]')
         );
@@ -113,7 +113,7 @@ describe('ResetPassword Component Tests', () => {
 
         const confirmInput = screen.getByPlaceholderText(/Confirm new password/i);
         const toggleButtons = screen.getAllByRole('button');
-        const confirmToggle = toggleButtons.find(btn => 
+        const confirmToggle = toggleButtons.find(btn =>
             btn.getAttribute('type') === 'button' &&
             btn.parentElement.querySelector('input[placeholder*="Confirm new password"]')
         );
@@ -308,7 +308,7 @@ describe('ResetPassword Component Tests', () => {
 
         await user.type(passwordInput, 'NewPassword123');
         await user.type(confirmInput, 'NewPassword123');
-        
+
         // Mock form submission
         const form = submitButton.closest('form');
         const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
@@ -355,7 +355,7 @@ describe('ResetPassword Component Tests', () => {
 
     test('Should display generic error when no response message', async () => {
         const user = userEvent.setup();
-        
+
         axios.put.mockRejectedValueOnce(new Error('Network Error'));
 
         renderResetPassword();
@@ -469,7 +469,7 @@ describe('ResetPassword Component Tests', () => {
 
     test('Should clear error message when submitting again', async () => {
         const user = userEvent.setup();
-        
+
         // First submission fails
         const mockError = {
             response: {
@@ -505,7 +505,7 @@ describe('ResetPassword Component Tests', () => {
         await user.clear(confirmInput);
         await user.type(passwordInput, 'AnotherPassword123');
         await user.type(confirmInput, 'AnotherPassword123');
-        
+
         // Second submission
         form = document.querySelector('form');
         submitEvent = new Event('submit', { bubbles: true, cancelable: true });
@@ -544,7 +544,7 @@ describe('ResetPassword Component Tests', () => {
 
         const labels = document.querySelectorAll('label');
         const labelTexts = Array.from(labels).map(label => label.textContent);
-        
+
         expect(labelTexts).toContain('New Password');
         expect(labelTexts).toContain('Confirm Password');
     });
@@ -611,7 +611,7 @@ describe('ResetPassword Component Tests', () => {
         const submitButton = screen.getByRole('button', { name: /Update Password/i });
         const passwordInput = screen.getByPlaceholderText(/Enter new password/i);
         const confirmInput = screen.getByPlaceholderText(/Confirm new password/i);
-        
+
         // HTML5 validation should prevent submission
         expect(passwordInput).toHaveAttribute('required');
         expect(confirmInput).toHaveAttribute('required');
@@ -621,7 +621,7 @@ describe('ResetPassword Component Tests', () => {
     test('Should handle very long passwords', async () => {
         const user = userEvent.setup();
         const longPassword = 'A'.repeat(100) + '123';
-        
+
         renderResetPassword();
 
         const passwordInput = screen.getByPlaceholderText(/Enter new password/i);
