@@ -569,3 +569,151 @@ const Settings = () => {
 };
 
 export default Settings;
+
+
+
+
+/*
+
+1. Profile Viewing & Editing
+
+What it does
+
+Shows user name, age, gender, bio, avatar
+
+Allows editing when Edit Profile is clicked
+
+Frontend (React – key idea)
+const [isEditingProfile, setIsEditingProfile] = useState(false);
+const [profileData, setProfileData] = useState({...});
+
+{!isEditingProfile ? (
+  <ProfileView data={profileData} />
+) : (
+  <ProfileEditForm data={profileData} />
+)}
+
+Backend (Express)
+router.put('/update-profile', async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  user.username = req.body.username;
+  user.bio = req.body.bio;
+  await user.save();
+  res.json({ message: 'Profile updated' });
+});
+
+
+Toggle UI → update state → send data → MongoDB updated
+
+
+
+
+
+
+2. Avatar Selection (Preset + Upload)
+
+What it does
+
+Choose preset avatar (DiceBear)
+
+Upload custom image (Base64)
+
+Frontend
+onClick={() => handleProfileChange('avatarUrl', url)}
+
+const reader = new FileReader();
+reader.onloadend = () => setProfileData({ avatarUrl: reader.result });
+
+Backend
+if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
+
+
+
+Avatar URL/Base64 stored directly in user document
+
+
+
+
+
+
+
+
+3. Display & Accessibility Settings
+
+What it does
+
+Font size
+
+Dark mode
+
+Sound effects
+
+Reduce motion
+
+Frontend
+updatePreferences({ theme: 'dark' });
+updatePreferences({ fontSize: 'large' });
+
+Backend
+router.put('/update-settings', async (req, res) => {
+  user.preferences = { ...user.preferences, ...req.body.preferences };
+  await user.save();
+});
+
+
+UI button → preferences object → merged & saved
+
+
+
+
+
+
+
+4. Learning Goals (Daily Minutes)
+
+What it does
+
+User sets daily learning goal (3 / 5 / 10 / 15 min)
+
+Frontend
+<button onClick={() =>
+  updatePreferences({ dailyGoalMinutes: 10 })
+}>
+  10 min
+</button>
+
+Backend
+user.preferences.dailyGoalMinutes = preferences.dailyGoalMinutes;
+
+
+
+Simple number saved → used for progress tracking
+
+
+
+
+
+
+
+5. Login History (Security Feature)
+
+What it does
+
+Stores last 10 logins with time + device
+
+Displays them in Settings
+
+Backend (LOGIN)
+user.loginHistory.push({
+  timestamp: new Date(),
+  device: 'Web Browser'
+});
+if (user.loginHistory.length > 10) user.loginHistory.shift();
+await user.save();
+
+Frontend
+user.loginHistory.map(entry => (
+  <span>{new Date(entry.timestamp).toLocaleString()}</span>
+))
+
+*/
