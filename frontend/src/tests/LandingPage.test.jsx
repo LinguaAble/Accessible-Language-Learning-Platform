@@ -1,3 +1,4 @@
+// Unit tests for LandingPage component
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -139,17 +140,17 @@ describe('LandingPage Component Tests', () => {
     // ==================== AUTO-LOGIN REDIRECT TESTS ====================
     test('Should check localStorage for existing token on mount', () => {
         const getItemSpy = vi.spyOn(Storage.prototype, 'getItem');
-        
+
         renderLandingPage();
 
         expect(getItemSpy).toHaveBeenCalledWith('token');
-        
+
         getItemSpy.mockRestore();
     });
 
     test('Should redirect to dashboard if token exists', () => {
         localStorage.setItem('token', 'mock-token');
-        
+
         renderLandingPage();
 
         // Should attempt to navigate to dashboard
@@ -158,12 +159,12 @@ describe('LandingPage Component Tests', () => {
 
     test('Should not redirect if no token exists', () => {
         localStorage.removeItem('token');
-        
+
         renderLandingPage();
 
         // Should not navigate
         expect(mockNavigate).not.toHaveBeenCalled();
-        
+
         // Should still render landing page content
         expect(screen.getByText(/Sign In/i)).toBeInTheDocument();
         expect(screen.getByText(/Create Account/i)).toBeInTheDocument();
@@ -212,7 +213,7 @@ describe('LandingPage Component Tests', () => {
 
         const ctaButtons = document.querySelector('.cta-buttons');
         expect(ctaButtons).toBeInTheDocument();
-        
+
         const buttons = ctaButtons.querySelectorAll('button');
         expect(buttons).toHaveLength(2);
     });
@@ -231,7 +232,7 @@ describe('LandingPage Component Tests', () => {
         // Check for proper heading hierarchy
         const h1 = document.querySelector('.hero-title');
         const h2 = document.querySelector('.features-title');
-        
+
         expect(h1).toBeInTheDocument();
         expect(h2).toBeInTheDocument();
     });
@@ -242,7 +243,7 @@ describe('LandingPage Component Tests', () => {
 
         const heroTitle = document.querySelector('.hero-title');
         expect(heroTitle).toBeInTheDocument();
-        
+
         const linguaPart = heroTitle.querySelector('.text-brand-blue');
         const ablePart = heroTitle.querySelector('.text-brand-red');
 
