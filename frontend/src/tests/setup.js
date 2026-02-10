@@ -49,4 +49,3 @@ vi.mock('@react-oauth/google', () => ({
             onClick: () => onSuccess({ credential: 'mock-google-token' })
         }, 'Sign in with Google'),
 }));
-
