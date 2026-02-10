@@ -299,11 +299,12 @@ router.put('/update-settings', async (req, res) => {
     const { email, preferences } = req.body;
     if (!email || !preferences) return res.status(400).json({ message: "Data missing" });
 
-    const user = await User.findOneAndUpdate(
-      { email },
-      { $set: { preferences } },
-      { new: true }
-    );
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Merge preferences instead of replacing
+    user.preferences = { ...user.preferences, ...preferences };
+    await user.save();
 
     res.json({ success: true, preferences: user.preferences });
   } catch (err) {
