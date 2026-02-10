@@ -19,10 +19,10 @@ LinguaAble follows a classic **MERN** (MongoDB, Express, React, Node.js) archite
 ### High-Level Architecture
 ```mermaid
 graph LR
-    User[User] -->|HTTPS| Client[Frontend (React + Vite)]
-    Client -->|REST API| Server[Backend (Express + Node.js)]
-    Server -->|Mongoose| DB[(MongoDB)]
-    Server -->|SMTP| Email[Email Service (Nodemailer)]
+    User[User] -- "HTTPS" --> Client["Frontend (React + Vite)"]
+    Client -- "REST API" --> Server["Backend (Express + Node.js)"]
+    Server -- "Mongoose" --> DB[("MongoDB")]
+    Server -- "SMTP" --> Email["Email Service (Nodemailer)"]
 ```
 
 ---
