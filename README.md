@@ -61,6 +61,31 @@ Key goals:
 
 ---
 
+🧩 System Diagrams (StarUML)
+
+The following UML diagrams were created using StarUML to clearly represent the design and behavior of the Accessible Language Learning Platform.
+These diagrams help contributors and reviewers quickly understand the system flow, structure, and interactions.
+
+📊 Activity Diagram
+
+Illustrates the overall workflow of the platform, showing how users move from authentication to lesson interaction, practice, and progress tracking.
+
+![Activity Diagram](https://github.com/LinguaAble/Accessible-Language-Learning-Platform/blob/main/ActivityDiagram.jpg)
+
+👤 Use Case Diagram
+
+Depicts the interactions between different user roles (Learner, Admin) and the system, highlighting key functionalities such as login, lesson access, and progress management.
+
+🔁 Sequence Diagram
+
+Shows the sequence of interactions between the frontend, backend, and database during core operations like login, lesson retrieval, and leaderboard updates.
+
+🧱 Class Diagram
+
+Represents the static structure of the system, including core classes, their attributes, methods, and relationships used in both frontend and backend modules.
+
+
+
 
 ## ✨ Features
 
