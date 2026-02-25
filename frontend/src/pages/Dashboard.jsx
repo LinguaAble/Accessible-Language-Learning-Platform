@@ -51,20 +51,20 @@ const Dashboard = () => {
     const buildWeeklyData = () => {
       const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
       const data = [];
-      const dailyCounts = user.dailyLessonCounts || [];
+      const dailyScores = user.dailyScores || [];
 
       for (let i = 0; i < 7; i++) {
         const currentDate = new Date(startOfWeek);
         currentDate.setDate(startOfWeek.getDate() + i);
         const dateStr = formatDate(currentDate);
 
-        // Find count for this date in backend data
-        const entry = dailyCounts.find(e => e.date === dateStr);
-        const lessonsCompleted = entry ? entry.count : 0;
+        // Find accumulated score for this date
+        const entry = dailyScores.find(e => e.date === dateStr);
+        const dayScore = entry ? entry.score : 0;
 
         data.push({
           day: days[i],
-          value: lessonsCompleted,
+          value: dayScore,
           date: dateStr,
           isToday: dateStr === today
         });
@@ -85,7 +85,7 @@ const Dashboard = () => {
 
     return () => clearInterval(interval);
 
-  }, [user.completedLessons, user.dailyLessonCounts]);
+  }, [user.completedLessons, user.dailyScores]);
 
   // Sync progress with backend
   useEffect(() => {
@@ -316,7 +316,7 @@ const Dashboard = () => {
                     position: 'relative',
                     boxShadow: item.isToday ? '0 0 10px rgba(230, 126, 34, 0.5)' : '0 4px 6px rgba(0, 0, 0, 0.1)'
                   }}
-                  title={`${item.date}: ${item.value} lesson${item.value !== 1 ? 's' : ''}`}
+                  title={`${item.date}: Score ${item.value}`}
                 >
                   {item.value > 0 && (
                     <span style={{

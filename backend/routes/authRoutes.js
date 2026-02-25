@@ -50,7 +50,8 @@ router.post('/register', async (req, res) => {
         loginHistory: user.loginHistory,
         todayProgress: user.todayProgress,
         progressDate: user.progressDate,
-        dailyLessonCounts: user.dailyLessonCounts
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
       }
     });
   } catch (err) {
@@ -102,7 +103,8 @@ router.post('/login', async (req, res) => {
         loginHistory: user.loginHistory,
         todayProgress: user.todayProgress,
         progressDate: user.progressDate,
-        dailyLessonCounts: user.dailyLessonCounts
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
       }
     });
   } catch (err) {
@@ -200,7 +202,7 @@ router.put('/reset-password/:token', async (req, res) => {
 // 5. UPDATE USER PROGRESS (Unified)
 router.put('/update-progress', async (req, res) => {
   try {
-    const { email, completedLessons, todayProgress, incrementLessonCount, date } = req.body;
+    const { email, completedLessons, todayProgress, incrementLessonCount, date, lessonScore } = req.body;
 
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
@@ -247,6 +249,19 @@ router.put('/update-progress', async (req, res) => {
       }
     }
 
+    // D. Accumulate Daily Score (for score-based graph)
+    if (lessonScore !== undefined && lessonScore !== null) {
+      const today = date || new Date().toISOString().split('T')[0];
+      if (!user.dailyScores) user.dailyScores = [];
+      const existingScoreEntry = user.dailyScores.find(e => e.date === today);
+
+      if (existingScoreEntry) {
+        existingScoreEntry.score += lessonScore;
+      } else {
+        user.dailyScores.push({ date: today, score: lessonScore });
+      }
+    }
+
     await user.save();
 
     res.json({
@@ -254,7 +269,8 @@ router.put('/update-progress', async (req, res) => {
       completedLessons: user.completedLessons,
       todayProgress: user.todayProgress,
       progressDate: user.progressDate,
-      dailyLessonCounts: user.dailyLessonCounts
+      dailyLessonCounts: user.dailyLessonCounts,
+      dailyScores: user.dailyScores
     });
   } catch (err) {
     console.error(err);
@@ -284,7 +300,8 @@ router.post('/get-user-data', async (req, res) => {
         completedLessons: user.completedLessons,
         todayProgress: user.todayProgress,
         progressDate: user.progressDate,
-        dailyLessonCounts: user.dailyLessonCounts
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
       }
     });
   } catch (err) {

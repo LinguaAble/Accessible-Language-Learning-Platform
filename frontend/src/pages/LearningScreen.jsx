@@ -734,6 +734,8 @@ const LearningScreen = () => {
           completedLessons.push(lessonId);
           localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
 
+          // Compute lesson score (0–100, based on first-attempt accuracy)
+          const { percentage: lessonScore } = calculateScore();
 
           // Sync with backend
           if (user.email) {
@@ -750,12 +752,19 @@ const LearningScreen = () => {
               completedLessons,
               todayProgress: (todayProgress || 0) + timeSpentMinutes, // Add actual time spent
               incrementLessonCount: 1,
+              lessonScore,           // e.g. 95 for 95% — accumulated into dailyScores
               date: formattedDate
             })
               .then(res => {
                 if (res.data.success) {
-                  // Update local context with new daily stats
-                  login({ ...user, completedLessons: res.data.completedLessons, dailyLessonCounts: res.data.dailyLessonCounts, todayProgress: res.data.todayProgress });
+                  // Update local context with new daily stats (including dailyScores for graph)
+                  login({
+                    ...user,
+                    completedLessons: res.data.completedLessons,
+                    dailyLessonCounts: res.data.dailyLessonCounts,
+                    dailyScores: res.data.dailyScores,
+                    todayProgress: res.data.todayProgress
+                  });
                 }
               })
               .catch(err => console.error("Failed to sync progress", err));

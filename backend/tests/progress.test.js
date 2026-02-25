@@ -322,5 +322,88 @@ describe('User Progress API Tests', () => {
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
         });
+
+        // ========== DAILY SCORE TESTS ==========
+        test('Should add lessonScore into dailyScores for a given date', async () => {
+            const today = new Date().toISOString().split('T')[0];
+
+            const response = await request(app)
+                .put('/api/auth/update-progress')
+                .send({
+                    email: 'progresstest@example.com',
+                    lessonScore: 85,
+                    date: today
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body.dailyScores).toBeDefined();
+            expect(response.body.dailyScores.length).toBe(1);
+            expect(response.body.dailyScores[0].date).toBe(today);
+            expect(response.body.dailyScores[0].score).toBe(85);
+        });
+
+        test('Should accumulate multiple lessonScores on the same day', async () => {
+            const today = new Date().toISOString().split('T')[0];
+
+            // Lesson 1: 95%
+            await request(app)
+                .put('/api/auth/update-progress')
+                .send({ email: 'progresstest@example.com', lessonScore: 95, date: today });
+
+            // Lesson 2: 80%
+            await request(app)
+                .put('/api/auth/update-progress')
+                .send({ email: 'progresstest@example.com', lessonScore: 80, date: today });
+
+            // Lesson 3: 60%
+            const response = await request(app)
+                .put('/api/auth/update-progress')
+                .send({ email: 'progresstest@example.com', lessonScore: 60, date: today });
+
+            expect(response.status).toBe(200);
+            expect(response.body.dailyScores.length).toBe(1);
+            expect(response.body.dailyScores[0].score).toBe(235); // 95+80+60
+        });
+
+        test('Should track lessonScores across different days independently', async () => {
+            const day1 = '2024-03-01';
+            const day2 = '2024-03-02';
+
+            await request(app)
+                .put('/api/auth/update-progress')
+                .send({ email: 'progresstest@example.com', lessonScore: 90, date: day1 });
+
+            await request(app)
+                .put('/api/auth/update-progress')
+                .send({ email: 'progresstest@example.com', lessonScore: 70, date: day1 });
+
+            const response = await request(app)
+                .put('/api/auth/update-progress')
+                .send({ email: 'progresstest@example.com', lessonScore: 100, date: day2 });
+
+            expect(response.status).toBe(200);
+            const scores = response.body.dailyScores;
+            expect(scores.find(e => e.date === day1).score).toBe(160); // 90+70
+            expect(scores.find(e => e.date === day2).score).toBe(100);
+        });
+
+        test('Should return dailyScores in the response alongside other fields', async () => {
+            const today = new Date().toISOString().split('T')[0];
+
+            const response = await request(app)
+                .put('/api/auth/update-progress')
+                .send({
+                    email: 'progresstest@example.com',
+                    completedLessons: [1],
+                    incrementLessonCount: 1,
+                    lessonScore: 75,
+                    date: today
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body.dailyLessonCounts).toBeDefined();
+            expect(response.body.dailyScores).toBeDefined();
+            expect(response.body.dailyScores[0].score).toBe(75);
+        });
     });
 });

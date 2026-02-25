@@ -29,6 +29,10 @@ let mockUserContextValue = {
             { date: '2026-02-10', count: 2 },
             { date: '2026-02-09', count: 1 }
         ],
+        dailyScores: [
+            { date: '2026-02-10', score: 180 },
+            { date: '2026-02-09', score: 75 }
+        ],
         avatarUrl: null
     },
     preferences: {
@@ -55,7 +59,7 @@ vi.mock('../context/UserContext', () => ({
 const renderDashboard = (userContextOverride = {}) => {
     // Update the mock context value
     mockUserContextValue = { ...mockUserContextValue, ...userContextOverride };
-    
+
     return render(
         <BrowserRouter>
             <Dashboard />
@@ -68,7 +72,7 @@ describe('Dashboard Component Tests', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockNavigate.mockClear();
-        
+
         // Reset mock context to default values
         mockUserContextValue = {
             user: {
@@ -78,6 +82,10 @@ describe('Dashboard Component Tests', () => {
                 dailyLessonCounts: [
                     { date: '2026-02-10', count: 2 },
                     { date: '2026-02-09', count: 1 }
+                ],
+                dailyScores: [
+                    { date: '2026-02-10', score: 180 },
+                    { date: '2026-02-09', score: 75 }
                 ],
                 avatarUrl: null
             },
@@ -95,14 +103,14 @@ describe('Dashboard Component Tests', () => {
             updateProfile: vi.fn(),
             updateProgress: vi.fn(),
         };
-        
+
         // Mock localStorage
         Storage.prototype.getItem = vi.fn((key) => {
             if (key === 'completedLessons') return JSON.stringify([1, 2, 3]);
             return null;
         });
         Storage.prototype.setItem = vi.fn();
-        
+
         // Mock axios
         axios.put.mockResolvedValue({
             data: {
@@ -148,7 +156,7 @@ describe('Dashboard Component Tests', () => {
         renderDashboard();
 
         expect(screen.getByText(/This Week/i)).toBeInTheDocument();
-        
+
         // Check for day labels (M, T, W, T, F, S, S)
         const dayLabels = screen.getAllByText(/^[MTWFS]$/);
         expect(dayLabels.length).toBeGreaterThanOrEqual(7);
@@ -184,8 +192,8 @@ describe('Dashboard Component Tests', () => {
 
     test('Should extract name from email when username not available', () => {
         renderDashboard({
-            user: { 
-                ...mockUserContextValue.user, 
+            user: {
+                ...mockUserContextValue.user,
                 username: null,
                 email: 'arjun@example.com'
             }
@@ -196,8 +204,8 @@ describe('Dashboard Component Tests', () => {
 
     test('Should display "Learner" when no email or username', () => {
         renderDashboard({
-            user: { 
-                ...mockUserContextValue.user, 
+            user: {
+                ...mockUserContextValue.user,
                 username: null,
                 email: null
             }
@@ -248,7 +256,7 @@ describe('Dashboard Component Tests', () => {
         // But it falls back to localStorage which has 3 lessons
         // So we need to also clear localStorage
         Storage.prototype.getItem = vi.fn(() => JSON.stringify([]));
-        
+
         // Re-render with empty lessons
         const { container } = renderDashboard({
             user: { ...mockUserContextValue.user, completedLessons: [] }
@@ -437,7 +445,7 @@ describe('Dashboard Component Tests', () => {
         renderDashboard();
 
         const bellButton = screen.getByLabelText(/Notifications/i);
-        
+
         await user.hover(bellButton);
 
         await waitFor(() => {
@@ -450,7 +458,7 @@ describe('Dashboard Component Tests', () => {
         renderDashboard();
 
         const bellButton = screen.getByLabelText(/Notifications/i);
-        
+
         await user.hover(bellButton);
         await waitFor(() => {
             expect(screen.getByText(/No notifications/i)).toBeInTheDocument();
@@ -461,7 +469,7 @@ describe('Dashboard Component Tests', () => {
             expect(screen.queryByText(/No notifications/i)).not.toBeInTheDocument();
         });
     });
-    
+
 
     // ==================== DATA SYNC TESTS ====================
     test('Should sync progress with backend on mount', async () => {
@@ -505,7 +513,7 @@ describe('Dashboard Component Tests', () => {
     });
 
     test('Should handle sync failure gracefully', async () => {
-        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
         axios.put.mockRejectedValueOnce(new Error('Network error'));
 
         renderDashboard();
@@ -522,16 +530,16 @@ describe('Dashboard Component Tests', () => {
         renderDashboard({
             user: {
                 ...mockUserContextValue.user,
-                dailyLessonCounts: [
-                    { date: '2026-02-10', count: 2 },
-                    { date: '2026-02-09', count: 3 },
-                    { date: '2026-02-08', count: 1 }
+                dailyScores: [
+                    { date: '2026-02-10', score: 200 },
+                    { date: '2026-02-09', score: 300 },
+                    { date: '2026-02-08', score: 100 }
                 ]
             }
         });
 
         expect(screen.getByText(/This Week/i)).toBeInTheDocument();
-        
+
         // Chart should have 7 day labels
         const dayLabels = screen.getAllByText(/^[MTWFS]$/);
         expect(dayLabels.length).toBe(7);
@@ -570,22 +578,22 @@ describe('Dashboard Component Tests', () => {
     });
 
     // ==================== EDGE CASES ====================
-    test('Should handle empty daily lesson counts', () => {
+    test('Should handle empty daily scores', () => {
         renderDashboard({
             user: {
                 ...mockUserContextValue.user,
-                dailyLessonCounts: []
+                dailyScores: []
             }
         });
 
         expect(screen.getByText(/This Week/i)).toBeInTheDocument();
     });
 
-    test('Should handle undefined daily lesson counts', () => {
+    test('Should handle undefined daily scores', () => {
         renderDashboard({
             user: {
                 ...mockUserContextValue.user,
-                dailyLessonCounts: undefined
+                dailyScores: undefined
             }
         });
 

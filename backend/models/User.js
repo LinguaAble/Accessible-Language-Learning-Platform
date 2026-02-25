@@ -80,6 +80,12 @@ const UserSchema = new mongoose.Schema({
     count: { type: Number, default: 0 }
   }],
 
+  // Daily score totals (for weekly score graph)
+  dailyScores: [{
+    date: { type: String, required: true }, // YYYY-MM-DD
+    score: { type: Number, default: 0 }      // sum of all lesson scores that day
+  }],
+
   // Story: Login History
   loginHistory: [{
     timestamp: { type: Date, default: Date.now },
