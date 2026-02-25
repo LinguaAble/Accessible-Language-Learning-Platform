@@ -373,6 +373,55 @@ router.put('/update-profile', async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 });
+// 10. LEADERBOARD — Weekly Score Rankings
+router.get('/leaderboard', async (req, res) => {
+  try {
+    // Build the date strings for this Mon–Sun week
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    monday.setHours(0, 0, 0, 0);
+
+    const weekDates = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return d.toISOString().split('T')[0]; // YYYY-MM-DD
+    });
+
+    // Fetch all users (no passwords)
+    const users = await User.find({}).select('username fullName email avatarUrl dailyScores completedLessons');
+
+    // Compute weekly score per user
+    const ranked = users.map(u => {
+      const weeklyScore = (u.dailyScores || [])
+        .filter(e => weekDates.includes(e.date))
+        .reduce((sum, e) => sum + (e.score || 0), 0);
+
+      return {
+        username: u.username || u.email.split('@')[0],
+        email: u.email,
+        avatarUrl: u.avatarUrl || '',
+        weeklyScore,
+        completedLessons: (u.completedLessons || []).length
+      };
+    });
+
+    // Sort descending by weekly score, then by total lessons as tiebreaker
+    ranked.sort((a, b) => b.weeklyScore - a.weeklyScore || b.completedLessons - a.completedLessons);
+
+    // Assign ranks and cap at 50
+    const leaderboard = ranked.slice(0, 50).map((entry, index) => ({
+      rank: index + 1,
+      ...entry
+    }));
+
+    res.json({ success: true, leaderboard, weekStart: weekDates[0], weekEnd: weekDates[6] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
 
 
 
