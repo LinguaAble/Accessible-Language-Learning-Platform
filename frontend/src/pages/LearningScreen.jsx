@@ -6,6 +6,7 @@ import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, Refresh
 import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
 import { transcribeAudio } from '../utils/googleSpeechService';
 
+import logo from '../assets/logo.png';
 import '../Learning.css';
 
 // --- HELPER: GENERATE SLIDES ---
@@ -872,89 +873,77 @@ const LearningScreen = () => {
     const xpEarned = Math.max(10, firstAttemptCorrect * 2);
 
     return (
-      <div className="success-screen-landing">
+      <div className="sc-root">
+        {/* Scattered confetti dots */}
+        <div className="sc-confetti" aria-hidden="true">
+          {[...Array(22)].map((_, i) => (
+            <span key={i} className={`sc-dot sc-dot-${i % 6}`} style={{ '--i': i }} />
+          ))}
+        </div>
 
-
-        <div className="success-landing-content">
-          {/* Trophy with float animation - mirrors landing page logo */}
-          <div className="success-logo-wrapper">
-            <Trophy size={90} className="success-trophy-logo" />
+        <div className="sc-card">
+          {/* Brand row */}
+          <div className="sc-brand">
+            <img src={logo} alt="LinguaAble" className="sc-brand-img" />
+            <span className="sc-brand-text">Lingua<span className="sc-brand-accent">Able</span></span>
           </div>
 
-          {/* Hero-style Title */}
-          <h1 className="success-hero-title">
-            <span className="success-title-white">Lesson </span>
-            <span className="success-title-orange">Complete!</span>
+          {/* Title */}
+          <h1 className="sc-title">
+            Lesson Completed <span className="sc-check">✓</span>
           </h1>
 
-          <p className="success-hero-tagline">
-            {percentage >= 90 ? 'OUTSTANDING PERFORMANCE!' : percentage >= 75 ? 'GREAT JOB, KEEP IT UP!' : 'KEEP LEARNING, KEEP GROWING!'}
-          </p>
-
-          <p className="success-hero-message">{message}</p>
-
-          {/* Score Circle */}
-          <div className="success-score-ring">
-            <svg width="160" height="160" viewBox="0 0 160 160">
-              <circle cx="80" cy="80" r="68" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="12" />
-              <circle
-                cx="80" cy="80" r="68" fill="none"
-                stroke="var(--accent-color)" strokeWidth="12"
-                strokeDasharray={`${(percentage / 100) * 427} 427`}
-                strokeLinecap="round" transform="rotate(-90 80 80)"
-                className="score-progress-animated"
-              />
-            </svg>
-            <div className="success-ring-text">
-              <div className="success-grade">{grade}</div>
-              <div className="success-pct">{percentage}%</div>
+          {/* Grade bar */}
+          <div className="sc-grade-bar-wrap">
+            <span className="sc-grade-label">Grade: <strong>{grade}</strong></span>
+            <div className="sc-grade-track">
+              <div className="sc-grade-fill" style={{ width: `${percentage}%` }} />
             </div>
+            <span className="sc-grade-pct">{percentage}%</span>
           </div>
 
-          {/* Stat Cards - landing-page feature-card style */}
-          <div className="success-stats-row">
-            <div className="success-stat-card">
-              <CheckCircle size={28} className="success-stat-icon" />
-              <div className="success-stat-label">First Try</div>
-              <div className="success-stat-val">{firstAttemptCorrect}<span className="success-stat-denom">/{totalQuestions}</span></div>
-            </div>
-            <div className="success-stat-card">
-              <Zap size={28} className="success-stat-icon" />
-              <div className="success-stat-label">XP Earned</div>
-              <div className="success-stat-val">+{xpEarned}</div>
-            </div>
-            {reviewedAndCorrected > 0 && (
-              <div className="success-stat-card">
-                <RefreshCw size={28} className="success-stat-icon" />
-                <div className="success-stat-label">Mastered</div>
-                <div className="success-stat-val">{reviewedAndCorrected}</div>
+          {/* Stat cards */}
+          <div className="sc-stat-cards">
+            <div className="sc-stat-card">
+              <div className="sc-stat-card-top">
+                <span className="sc-stat-card-icon sc-icon-orange"><CheckCircle size={20} /></span>
+                <span className="sc-stat-card-val">{firstAttemptCorrect}/{totalQuestions}</span>
               </div>
-            )}
-            <div className="success-stat-card">
-              <Target size={28} className="success-stat-icon" />
-              <div className="success-stat-label">Accuracy</div>
-              <div className="success-stat-val">{percentage}%</div>
+              <div className="sc-stat-card-lbl">First Try</div>
+            </div>
+            <div className="sc-stat-card">
+              <div className="sc-stat-card-top">
+                <span className="sc-stat-card-icon sc-icon-orange"><Zap size={20} /></span>
+                <span className="sc-stat-card-val">+{xpEarned} <span className="sc-stat-card-unit">XP</span></span>
+              </div>
+              <div className="sc-stat-card-lbl">XP Earned</div>
+            </div>
+            <div className="sc-stat-card">
+              <div className="sc-stat-card-top">
+                <span className="sc-stat-card-icon sc-icon-green"><Target size={20} /></span>
+                <span className="sc-stat-card-val">{percentage}%</span>
+              </div>
+              <div className="sc-stat-card-lbl">Accuracy</div>
             </div>
           </div>
 
-          {/* CTA Pills - matches landing page button style */}
-          <div className="success-cta-row">
-            <button className="success-cta-primary" onClick={() => navigate('/lessons')}>
-              Continue to Next Lesson <ChevronRight size={20} strokeWidth={3} />
+          {/* CTA section */}
+          <div className="sc-cta-section">
+            <h2 className="sc-cta-heading">Continue Learning</h2>
+            <p className="sc-cta-sub">{message}</p>
+            <button className="sc-cta-btn" onClick={() => navigate('/lessons')}>
+              Continue Learning
             </button>
-            <button className="success-cta-secondary" onClick={() => navigate('/dashboard')}>
+            <button className="sc-cta-dash" onClick={() => navigate('/dashboard')}>
               Go to Dashboard
             </button>
           </div>
-
-          {/* Subtle encouragement footer */}
-          <p className="success-footer-msg">
-            {percentage >= 90 ? '🌟 You are absolutely amazing!' : percentage >= 80 ? '💪 Fantastic work!' : '🌱 Keep growing — you\'re doing great!'}
-          </p>
         </div>
       </div>
     );
   }
+
+
 
   const slide = activeSlides[currentSlideIndex];
   if (!slide) return <div>Loading...</div>;

@@ -1,4 +1,4 @@
-/* src/Learning.css */
+﻿/* src/Learning.css */
 
 .learning-container {
     height: 100vh;
@@ -153,10 +153,514 @@
 }
 
 /* ===================================== */
-/* SUCCESS SCREEN - LANDING PAGE STYLE   */
+/* SUCCESS SCREEN â€” REFERENCE DESIGN     */
 /* ===================================== */
 
-/* Full-page overlay — respects theme */
+/* Root: full-page, light bg */
+.sc-root {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    z-index: 3000;
+    padding: 24px 16px;
+}
+
+/* Scattered static confetti dots */
+.sc-confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sc-dot {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    opacity: 0.55;
+}
+
+/* Place dots at fixed positions using nth-child tricks via --i */
+.sc-dot:nth-child(1) {
+    background: #4ade80;
+    top: 8%;
+    left: 6%;
+    width: 8px;
+    height: 8px;
+}
+
+.sc-dot:nth-child(2) {
+    background: #93c5fd;
+    top: 14%;
+    left: 88%;
+    width: 6px;
+    height: 6px;
+}
+
+.sc-dot:nth-child(3) {
+    background: #f97316;
+    top: 22%;
+    left: 3%;
+    width: 5px;
+    height: 5px;
+}
+
+.sc-dot:nth-child(4) {
+    background: #a78bfa;
+    top: 5%;
+    left: 72%;
+    width: 7px;
+    height: 7px;
+}
+
+.sc-dot:nth-child(5) {
+    background: #fb923c;
+    top: 35%;
+    left: 95%;
+    width: 5px;
+    height: 5px;
+}
+
+.sc-dot:nth-child(6) {
+    background: #60a5fa;
+    top: 50%;
+    left: 2%;
+    width: 6px;
+    height: 6px;
+}
+
+.sc-dot:nth-child(7) {
+    background: #34d399;
+    top: 62%;
+    left: 91%;
+    width: 8px;
+    height: 8px;
+}
+
+.sc-dot:nth-child(8) {
+    background: #c084fc;
+    top: 75%;
+    left: 4%;
+    width: 5px;
+    height: 5px;
+}
+
+.sc-dot:nth-child(9) {
+    background: #fbbf24;
+    top: 85%;
+    left: 82%;
+    width: 7px;
+    height: 7px;
+}
+
+.sc-dot:nth-child(10) {
+    background: #f472b6;
+    top: 90%;
+    left: 12%;
+    width: 6px;
+    height: 6px;
+}
+
+.sc-dot:nth-child(11) {
+    background: #38bdf8;
+    top: 40%;
+    left: 97%;
+    width: 5px;
+    height: 5px;
+}
+
+.sc-dot:nth-child(12) {
+    background: #86efac;
+    top: 18%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 2px;
+}
+
+.sc-dot:nth-child(13) {
+    background: #818cf8;
+    top: 70%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+}
+
+.sc-dot:nth-child(14) {
+    background: #fb923c;
+    top: 95%;
+    left: 55%;
+    width: 5px;
+    height: 5px;
+}
+
+.sc-dot:nth-child(15) {
+    background: #4ade80;
+    top: 3%;
+    left: 30%;
+    width: 6px;
+    height: 6px;
+}
+
+.sc-dot:nth-child(16) {
+    background: #93c5fd;
+    top: 88%;
+    left: 35%;
+    width: 7px;
+    height: 7px;
+}
+
+.sc-dot:nth-child(17) {
+    background: #f43f5e;
+    top: 55%;
+    left: 8%;
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+}
+
+.sc-dot:nth-child(18) {
+    background: #a3e635;
+    top: 28%;
+    left: 75%;
+    width: 5px;
+    height: 5px;
+}
+
+.sc-dot:nth-child(19) {
+    background: #22d3ee;
+    top: 45%;
+    left: 20%;
+    width: 6px;
+    height: 6px;
+}
+
+.sc-dot:nth-child(20) {
+    background: #fb7185;
+    top: 78%;
+    left: 68%;
+    width: 5px;
+    height: 5px;
+}
+
+.sc-dot:nth-child(21) {
+    background: #fde68a;
+    top: 10%;
+    left: 55%;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+}
+
+.sc-dot:nth-child(22) {
+    background: #6ee7b7;
+    top: 65%;
+    left: 30%;
+    width: 6px;
+    height: 6px;
+}
+
+/* WHITE CARD */
+.sc-card {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 560px;
+    background: #ffffff;
+    border-radius: 28px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.10);
+    padding: 36px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    animation: sc-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Dark theme: keep card visually distinct */
+[data-theme="dark"] .sc-card,
+.dark .sc-card,
+body.dark .sc-card {
+    background: var(--card-bg);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes sc-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* â”€â”€ Brand row â”€â”€ */
+.sc-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.sc-brand-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.sc-brand-text {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--text-main);
+    letter-spacing: -0.3px;
+}
+
+.sc-brand-accent {
+    color: var(--accent-color);
+}
+
+/* â”€â”€ Title â”€â”€ */
+.sc-title {
+    font-size: 2.1rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0 0 20px;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sc-check {
+    color: #22c55e;
+    font-size: 1.8rem;
+}
+
+/* â”€â”€ Grade bar â”€â”€ */
+.sc-grade-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #f8f8f8;
+    border-radius: 14px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+}
+
+[data-theme="dark"] .sc-grade-bar-wrap,
+.dark .sc-grade-bar-wrap,
+body.dark .sc-grade-bar-wrap {
+    background: var(--card-hover);
+}
+
+.sc-grade-label {
+    font-size: 0.95rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.sc-grade-label strong {
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.sc-grade-track {
+    flex: 1;
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.sc-grade-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+    border-radius: 99px;
+    transition: width 1s ease;
+}
+
+.sc-grade-pct {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    flex-shrink: 0;
+}
+
+/* â”€â”€ Stat cards row â”€â”€ */
+.sc-stat-cards {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.sc-stat-card {
+    flex: 1;
+    background: #f8f8f8;
+    border-radius: 16px;
+    padding: 16px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+[data-theme="dark"] .sc-stat-card,
+.dark .sc-stat-card,
+body.dark .sc-stat-card {
+    background: var(--card-hover);
+}
+
+.sc-stat-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sc-stat-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sc-icon-orange {
+    background: rgba(247, 156, 66, 0.15);
+    color: var(--accent-color);
+}
+
+.sc-icon-green {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.sc-stat-card-val {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+.sc-stat-card-unit {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.sc-stat-card-lbl {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding-left: 2px;
+}
+
+/* â”€â”€ CTA section â”€â”€ */
+.sc-cta-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.sc-cta-heading {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0 0 4px;
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+
+.sc-cta-sub {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+.sc-cta-btn {
+    width: 100%;
+    padding: 17px 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: white;
+    letter-spacing: 0.3px;
+    box-shadow: 0 6px 20px rgba(247, 115, 22, 0.4);
+    transition: all 0.25s ease;
+    margin-bottom: 10px;
+}
+
+.sc-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(247, 115, 22, 0.5);
+}
+
+.sc-cta-dash {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 4px 8px;
+    transition: color 0.2s;
+}
+
+.sc-cta-dash:hover {
+    color: var(--accent-color);
+}
+
+/* Responsive */
+@media (max-width: 540px) {
+    .sc-card {
+        padding: 28px 20px 32px;
+        border-radius: 20px;
+    }
+
+    .sc-title {
+        font-size: 1.7rem;
+    }
+
+    .sc-stat-cards {
+        flex-direction: column;
+    }
+
+    .sc-cta-heading {
+        font-size: 1.5rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+/* ===================================== */
+/* SUCCESS SCREEN - REDESIGNED LAYOUT    */
+/* ===================================== */
+
+
+/* Full-page overlay */
 .success-screen-landing {
     position: fixed;
     inset: 0;
@@ -166,7 +670,342 @@
     justify-content: center;
     overflow-y: auto;
     z-index: 3000;
+    padding: 24px 16px;
 }
+
+/* Content wrapper */
+.success-landing-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 780px;
+    gap: 20px;
+    animation: fade-in-up-success 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fade-in-up-success {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* â”€â”€ Brand strip â”€â”€ */
+.success-brand-strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.success-brand-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+.success-brand-name {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+.success-brand-lingua {
+    color: var(--text-main);
+}
+
+.success-brand-able {
+    color: var(--accent-color);
+}
+
+/* â”€â”€ Hero banner â”€â”€ */
+.success-hero-banner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    border-radius: 24px;
+    padding: 28px 32px;
+    box-shadow: 0 10px 40px rgba(247, 156, 66, 0.35);
+}
+
+.success-banner-left {
+    flex-shrink: 0;
+}
+
+.success-trophy-ring {
+    width: 90px;
+    height: 90px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.success-trophy-icon {
+    color: white;
+}
+
+.success-banner-right {
+    flex: 1;
+    text-align: left;
+}
+
+.success-hero-title {
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: white;
+    margin: 0 0 8px;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+}
+
+.success-title-orange {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.success-hero-tagline {
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 6px;
+    letter-spacing: 0.5px;
+}
+
+.success-hero-message {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* â”€â”€ Score + Stats side by side â”€â”€ */
+.success-body-row {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+}
+
+/* Score panel */
+.success-score-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 28px 24px 16px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    flex-shrink: 0;
+    min-width: 190px;
+}
+
+.success-score-ring {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.success-ring-text {
+    position: absolute;
+    text-align: center;
+}
+
+.success-grade {
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--accent-color);
+    line-height: 1;
+}
+
+.success-pct {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.success-score-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Stat cards 2Ã—2 grid */
+.success-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    flex: 1;
+}
+
+.success-stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 18px 16px;
+    text-align: center;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.success-stat-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 28px rgba(247, 156, 66, 0.2);
+}
+
+.success-stat-icon {
+    color: var(--accent-color);
+    margin-bottom: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.success-stat-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.success-stat-val {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+.success-stat-denom {
+    font-size: 0.9rem;
+    opacity: 0.5;
+}
+
+/* â”€â”€ Encouragement strip â”€â”€ */
+.success-encouragement {
+    background: linear-gradient(135deg, rgba(247, 156, 66, 0.1), rgba(247, 156, 66, 0.05));
+    border: 1px solid rgba(247, 156, 66, 0.25);
+    border-radius: 14px;
+    padding: 14px 20px;
+    text-align: center;
+}
+
+.success-encouragement-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+/* â”€â”€ CTA Buttons â”€â”€ */
+.success-cta-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.success-cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 36px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 20px rgba(247, 156, 66, 0.4);
+    transition: all 0.3s ease;
+    flex: 1;
+    justify-content: center;
+}
+
+.success-cta-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(247, 156, 66, 0.55);
+}
+
+.success-cta-secondary {
+    padding: 15px 36px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    border: 2px solid var(--accent-color);
+    border-radius: 50px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+}
+
+.success-cta-secondary:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(247, 156, 66, 0.35);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .success-hero-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px 20px;
+    }
+
+    .success-banner-right {
+        text-align: center;
+    }
+
+    .success-hero-title {
+        font-size: 2rem;
+    }
+
+    .success-body-row {
+        flex-direction: column;
+    }
+
+    .success-cta-row {
+        flex-direction: column;
+    }
+}
+
+
 
 .success-floating-shapes {
     position: fixed;
