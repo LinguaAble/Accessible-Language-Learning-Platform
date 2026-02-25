@@ -5,7 +5,7 @@
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
-    background: var(--bg-pattern);
+    background-color: var(--bg-color);
     margin: 0;
     padding: 0;
     position: relative;
@@ -25,61 +25,6 @@
     z-index: 10;
 }
 
-/* Floating Background Shapes */
-.floating-shapes {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.shape {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.08;
-    animation: float-random 25s ease-in-out infinite;
-    filter: blur(40px);
-}
-
-.shape-1 {
-    width: 400px;
-    height: 400px;
-    background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-    top: 5%;
-    left: 5%;
-    animation-delay: 0s;
-}
-
-.shape-2 {
-    width: 350px;
-    height: 350px;
-    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-    bottom: 10%;
-    right: 5%;
-    animation-delay: 7s;
-}
-
-.shape-3 {
-    width: 300px;
-    height: 300px;
-    background: var(--accent-color);
-    top: 50%;
-    right: 20%;
-    animation-delay: 14s;
-}
-
-.shape-4 {
-    width: 250px;
-    height: 250px;
-    background: var(--primary-color);
-    bottom: 30%;
-    left: 15%;
-    animation-delay: 21s;
-}
 
 /* Hero Section */
 .hero-section {
@@ -118,7 +63,7 @@
 }
 
 .text-brand-blue {
-    color: white !important;
+    color: var(--text-main) !important;
 }
 
 .text-brand-red {

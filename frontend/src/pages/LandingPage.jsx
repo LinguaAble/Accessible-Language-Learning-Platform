@@ -53,13 +53,6 @@ const LandingPage = () => {
 
     return (
         <div className="landing-page">
-            {/* Animated Background Elements */}
-            <div className="floating-shapes">
-                <div className="shape shape-1"></div>
-                <div className="shape shape-2"></div>
-                <div className="shape shape-3"></div>
-                <div className="shape shape-4"></div>
-            </div>
 
             <div className="landing-container">
                 {/* Hero Section */}
@@ -69,8 +62,8 @@ const LandingPage = () => {
                     </div>
 
                     <h1 className="hero-title">
-                        <span className="text-brand-blue" style={{ color: 'white' }}>Lingua</span>
-                        <span className="text-brand-red" style={{ color: '#f79c42' }}>Able</span>
+                        <span className="text-brand-blue">Lingua</span>
+                        <span className="text-brand-red">Able</span>
                     </h1>
 
                     <p className="hero-tagline">Built Around Learners, Not Limitations!</p>

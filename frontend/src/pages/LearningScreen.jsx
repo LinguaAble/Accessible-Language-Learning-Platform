@@ -872,122 +872,85 @@ const LearningScreen = () => {
     const xpEarned = Math.max(10, firstAttemptCorrect * 2);
 
     return (
-      <div className="learning-container success-screen">
-        <div className="success-content">
-          {/* Big Trophy Header */}
-          <div className="celebration-header">
-            <div className="trophy-wrapper">
-              <Trophy size={80} className="trophy-icon" />
-            </div>
-            <h1 className="success-title-big">Lesson Complete!</h1>
-            <div className="stars-row">
-              <Star size={35} className="star-1" />
-              <Star size={35} className="star-2" />
-              <Star size={35} className="star-3" />
+      <div className="success-screen-landing">
+
+
+        <div className="success-landing-content">
+          {/* Trophy with float animation - mirrors landing page logo */}
+          <div className="success-logo-wrapper">
+            <Trophy size={90} className="success-trophy-logo" />
+          </div>
+
+          {/* Hero-style Title */}
+          <h1 className="success-hero-title">
+            <span className="success-title-white">Lesson </span>
+            <span className="success-title-orange">Complete!</span>
+          </h1>
+
+          <p className="success-hero-tagline">
+            {percentage >= 90 ? 'OUTSTANDING PERFORMANCE!' : percentage >= 75 ? 'GREAT JOB, KEEP IT UP!' : 'KEEP LEARNING, KEEP GROWING!'}
+          </p>
+
+          <p className="success-hero-message">{message}</p>
+
+          {/* Score Circle */}
+          <div className="success-score-ring">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="68" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="12" />
+              <circle
+                cx="80" cy="80" r="68" fill="none"
+                stroke="var(--accent-color)" strokeWidth="12"
+                strokeDasharray={`${(percentage / 100) * 427} 427`}
+                strokeLinecap="round" transform="rotate(-90 80 80)"
+                className="score-progress-animated"
+              />
+            </svg>
+            <div className="success-ring-text">
+              <div className="success-grade">{grade}</div>
+              <div className="success-pct">{percentage}%</div>
             </div>
           </div>
 
-          {/* Success Message */}
-          <p className="success-message-big">{message}</p>
-
-          {/* Score Circle - ADHD Optimized */}
-          <div className="score-display-adhd">
-            <div className="score-circle-large">
-              <svg width="200" height="200" viewBox="0 0 200 200">
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="85"
-                  fill="none"
-                  stroke="#e5e7eb"
-                  strokeWidth="16"
-                />
-                <circle
-                  cx="100"
-                  cy="100"
-                  r="85"
-                  fill="none"
-                  stroke="#58cc02"
-                  strokeWidth="16"
-                  strokeDasharray={`${(percentage / 100) * 534} 534`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 100 100)"
-                  className="score-progress-animated"
-                />
-              </svg>
-              <div className="score-text-large">
-                <div className="score-grade-big">{grade}</div>
-                <div className="score-percentage-big">{percentage}%</div>
-              </div>
+          {/* Stat Cards - landing-page feature-card style */}
+          <div className="success-stats-row">
+            <div className="success-stat-card">
+              <CheckCircle size={28} className="success-stat-icon" />
+              <div className="success-stat-label">First Try</div>
+              <div className="success-stat-val">{firstAttemptCorrect}<span className="success-stat-denom">/{totalQuestions}</span></div>
             </div>
-          </div>
-
-          {/* Stats Grid - Clear & Bold */}
-          <div className="stats-grid-adhd">
-            <div className="stat-card-adhd positive-card">
-              <div className="stat-icon-large">
-                <CheckCircle size={32} strokeWidth={3} />
-              </div>
-              <div className="stat-label-adhd">First Try Wins</div>
-              <div className="stat-value-adhd">{firstAttemptCorrect}<span className="stat-total">/{totalQuestions}</span></div>
+            <div className="success-stat-card">
+              <Zap size={28} className="success-stat-icon" />
+              <div className="success-stat-label">XP Earned</div>
+              <div className="success-stat-val">+{xpEarned}</div>
             </div>
-
-            <div className="stat-card-adhd xp-card">
-              <div className="stat-icon-large">
-                <Zap size={32} strokeWidth={3} />
-              </div>
-              <div className="stat-label-adhd">XP Earned</div>
-              <div className="stat-value-adhd">+{xpEarned}</div>
-            </div>
-
             {reviewedAndCorrected > 0 && (
-              <div className="stat-card-adhd growth-card">
-                <div className="stat-icon-large">
-                  <RefreshCw size={32} strokeWidth={3} />
-                </div>
-                <div className="stat-label-adhd">Mastered</div>
-                <div className="stat-value-adhd">{reviewedAndCorrected}</div>
+              <div className="success-stat-card">
+                <RefreshCw size={28} className="success-stat-icon" />
+                <div className="success-stat-label">Mastered</div>
+                <div className="success-stat-val">{reviewedAndCorrected}</div>
               </div>
             )}
-
-            <div className="stat-card-adhd accuracy-card">
-              <div className="stat-icon-large">
-                <Target size={32} strokeWidth={3} />
-              </div>
-              <div className="stat-label-adhd">Accuracy</div>
-              <div className="stat-value-adhd">{percentage}%</div>
+            <div className="success-stat-card">
+              <Target size={28} className="success-stat-icon" />
+              <div className="success-stat-label">Accuracy</div>
+              <div className="success-stat-val">{percentage}%</div>
             </div>
           </div>
 
-          {/* Achievement Banner */}
-          <div className="achievement-banner">
-            <div className="banner-icon">
-              <Award size={45} />
-            </div>
-            <div className="banner-content">
-              <span className="banner-title">🎉 Lesson {lessonId} Completed!</span>
-              <span className="banner-subtitle">You're crushing it! Keep going! 🚀</span>
-            </div>
+          {/* CTA Pills - matches landing page button style */}
+          <div className="success-cta-row">
+            <button className="success-cta-primary" onClick={() => navigate('/lessons')}>
+              Continue to Next Lesson <ChevronRight size={20} strokeWidth={3} />
+            </button>
+            <button className="success-cta-secondary" onClick={() => navigate('/dashboard')}>
+              Go to Dashboard
+            </button>
           </div>
 
-          {/* Big Continue Button */}
-          <button className="continue-btn-adhd" onClick={() => navigate('/lessons')}>
-            <span className="btn-text">Continue to Next Lesson</span>
-            <ChevronRight size={28} strokeWidth={3} />
-          </button>
-
-          {/* Encouragement */}
-          <div className="encouragement-box">
-            <p className="encouragement-text-adhd">
-              {percentage >= 90
-                ? "🌟 WOW! You're absolutely amazing! Ready for more?"
-                : percentage >= 80
-                  ? "💪 Fantastic work! You're getting stronger every day!"
-                  : percentage >= 70
-                    ? "🎯 Great progress! You're on the right track!"
-                    : "🌱 You're learning and growing! That's what matters!"}
-            </p>
-          </div>
+          {/* Subtle encouragement footer */}
+          <p className="success-footer-msg">
+            {percentage >= 90 ? '🌟 You are absolutely amazing!' : percentage >= 80 ? '💪 Fantastic work!' : '🌱 Keep growing — you\'re doing great!'}
+          </p>
         </div>
       </div>
     );
