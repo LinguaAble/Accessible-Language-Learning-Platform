@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users, Target } from 'lucide-react';
+import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users, Target, BookOpen, Layers } from 'lucide-react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
 import '../Dashboard.css';
@@ -44,6 +44,14 @@ const Settings = () => {
 
     const toggleAnimation = () => {
         updatePreferences({ animationReduced: !preferences.animationReduced });
+    };
+
+    const toggleDyslexiaFont = () => {
+        updatePreferences({ dyslexiaFont: !preferences.dyslexiaFont });
+    };
+
+    const changeColorOverlay = (overlay) => {
+        updatePreferences({ colorOverlay: overlay });
     };
 
     const changeFontSize = (size) => {
@@ -476,6 +484,76 @@ const Settings = () => {
                         <button className={`toggle-btn ${preferences.animationReduced ? 'active' : ''}`} onClick={toggleAnimation}>
                             {preferences.animationReduced ? 'ON' : 'OFF'}
                         </button>
+                    </div>
+
+                    {/* DYSLEXIA FONT */}
+                    <div className="settings-row">
+                        <div className="setting-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <BookOpen size={18} />
+                                <span className="setting-label">Dyslexia-Friendly Font</span>
+                            </div>
+                            <span className="setting-desc">Switches to OpenDyslexic font to reduce letter confusion.</span>
+                            {preferences.dyslexiaFont && (
+                                <span style={{
+                                    marginTop: '6px',
+                                    fontSize: '0.75rem',
+                                    fontFamily: '"OpenDyslexic", sans-serif',
+                                    color: 'var(--text-muted)',
+                                    display: 'block'
+                                }}>
+                                    Preview: The quick brown fox jumps over the lazy dog.
+                                </span>
+                            )}
+                        </div>
+                        <button
+                            className={`toggle-btn ${preferences.dyslexiaFont ? 'active' : ''}`}
+                            onClick={toggleDyslexiaFont}
+                            style={{ minWidth: '64px' }}
+                        >
+                            {preferences.dyslexiaFont ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+
+                    {/* COLOR OVERLAY */}
+                    <div className="settings-row" style={{ flexWrap: 'wrap', gap: '12px' }}>
+                        <div className="setting-info" style={{ minWidth: '200px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Layers size={18} />
+                                <span className="setting-label">Reading Color Overlay</span>
+                            </div>
+                            <span className="setting-desc">Adds a tinted overlay to reduce visual stress.</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {[
+                                { value: 'none', label: '✕ None', color: 'var(--border-color)', textColor: 'var(--text-main)' },
+                                { value: 'yellow', label: '🟡 Yellow', color: '#fbbf24', textColor: '#1a1a1a' },
+                                { value: 'blue', label: '🔵 Blue', color: '#60a5fa', textColor: '#fff' },
+                                { value: 'green', label: '🟢 Green', color: '#34d399', textColor: '#1a1a1a' },
+                                { value: 'rose', label: '🌸 Rose', color: '#f472b6', textColor: '#fff' },
+                            ].map(({ value, label, color, textColor }) => (
+                                <button
+                                    key={value}
+                                    onClick={() => changeColorOverlay(value)}
+                                    style={{
+                                        padding: '6px 14px',
+                                        borderRadius: '20px',
+                                        border: preferences.colorOverlay === value
+                                            ? '2px solid var(--accent-color)'
+                                            : '2px solid var(--border-color)',
+                                        background: preferences.colorOverlay === value ? color : 'var(--card-bg)',
+                                        color: preferences.colorOverlay === value ? textColor : 'var(--text-main)',
+                                        cursor: 'pointer',
+                                        fontWeight: 600,
+                                        fontSize: '0.85rem',
+                                        transition: 'all 0.2s',
+                                        boxShadow: preferences.colorOverlay === value ? `0 2px 8px ${color}66` : 'none'
+                                    }}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 

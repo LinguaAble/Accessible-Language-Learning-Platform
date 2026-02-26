@@ -337,3 +337,60 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+/* ============================================================
+   ACCESSIBILITY: COLOR OVERLAY
+   A fixed, full-screen tinted layer to reduce visual stress.
+   pointer-events: none means it never blocks clicks or inputs.
+   ============================================================ */
+.color-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  transition: background-color 0.4s ease;
+  mix-blend-mode: multiply;
+}
+
+/* Overlay is hidden by default */
+body[data-overlay='none'] .color-overlay {
+  background-color: transparent;
+}
+
+/* Yellow: softens harsh white backgrounds */
+body[data-overlay='yellow'] .color-overlay {
+  background-color: rgba(255, 220, 60, 0.18);
+}
+
+/* Blue: calming, reduces red wavelength eye strain */
+body[data-overlay='blue'] .color-overlay {
+  background-color: rgba(80, 160, 255, 0.14);
+}
+
+/* Green: gentle, natural tone */
+body[data-overlay='green'] .color-overlay {
+  background-color: rgba(60, 200, 100, 0.12);
+}
+
+/* Rose: warm tint, preferred by some dyslexic readers */
+body[data-overlay='rose'] .color-overlay {
+  background-color: rgba(255, 100, 130, 0.12);
+}
+
+/* ============================================================
+   ACCESSIBILITY: DYSLEXIA FONT – Focus Mode Badge
+   ============================================================ */
+.a11y-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}

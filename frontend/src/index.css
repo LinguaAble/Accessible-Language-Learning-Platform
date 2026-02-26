@@ -1,3 +1,14 @@
+/* Dyslexia-friendly font */
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
+
+body.font-dyslexic,
+body.font-dyslexic * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.15em;
+  line-height: 1.7;
+}
+
 :root {
   /* LIGHT THEME DEFAULTS */
   --bg-color: #f0f2f5;

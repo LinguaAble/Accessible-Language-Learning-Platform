@@ -58,7 +58,8 @@ function AppContent() {
 
   return (
     <div className="app-container">
-      {/* Routes */}
+      {/* Color Overlay for visual stress reduction (Dyslexia/ADHD) */}
+      <div className="color-overlay" aria-hidden="true" />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />

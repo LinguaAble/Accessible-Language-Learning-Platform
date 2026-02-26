@@ -19,6 +19,52 @@
     gap: 20px;
 }
 
+/* ============================================================
+   ACCESSIBILITY: FOCUS MODE
+   Hides non-essential UI elements to reduce cognitive load.
+   ============================================================ */
+.learning-container.focus-mode .learning-header .close-btn,
+.learning-container.focus-mode .learning-header .progress-track,
+.learning-container.focus-mode .learning-header .review-badge {
+    opacity: 0.1;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.learning-container.focus-mode .learning-header:hover .close-btn,
+.learning-container.focus-mode .learning-header:hover .progress-track,
+.learning-container.focus-mode .learning-header:hover .review-badge {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.focus-mode-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.focus-mode-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.learning-container.focus-mode .focus-mode-btn {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
 .slide-content {
     flex: 1;
     display: flex;

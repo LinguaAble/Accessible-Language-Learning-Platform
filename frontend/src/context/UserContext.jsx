@@ -12,7 +12,9 @@ export const UserProvider = ({ children }) => {
         soundEffects: false,
         animationReduced: false,
         fontSize: 'medium',
-        dailyGoalMinutes: 5
+        dailyGoalMinutes: 5,
+        dyslexiaFont: false,
+        colorOverlay: 'none'
     });
 
     // Track today's progress (minutes completed)
@@ -94,7 +96,7 @@ export const UserProvider = ({ children }) => {
         }
     }, []);
 
-    // Apply global side effects (theme, font size, motion)
+    // Apply global side effects (theme, font size, motion, dyslexia font, overlay)
     useEffect(() => {
         document.body.setAttribute('data-theme', preferences.theme === 'dark' ? 'dark' : 'light');
         document.documentElement.setAttribute('data-font-size', preferences.fontSize);
@@ -104,6 +106,16 @@ export const UserProvider = ({ children }) => {
         } else {
             document.body.classList.remove('reduce-motion');
         }
+
+        // Dyslexia font
+        if (preferences.dyslexiaFont) {
+            document.body.classList.add('font-dyslexic');
+        } else {
+            document.body.classList.remove('font-dyslexic');
+        }
+
+        // Color overlay
+        document.body.setAttribute('data-overlay', preferences.colorOverlay || 'none');
 
         localStorage.setItem('theme', preferences.theme === 'dark' ? 'dark' : 'light');
     }, [preferences]);
@@ -195,7 +207,9 @@ export const UserProvider = ({ children }) => {
             soundEffects: false,
             animationReduced: false,
             fontSize: 'medium',
-            dailyGoalMinutes: 5
+            dailyGoalMinutes: 5,
+            dyslexiaFont: false,
+            colorOverlay: 'none'
         });
         localStorage.removeItem('user');
         localStorage.removeItem('token');

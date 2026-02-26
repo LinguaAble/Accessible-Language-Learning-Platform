@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic, Trophy, Star, Target, Clock } from 'lucide-react';
+import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic, Trophy, Star, Target, Clock, Eye, EyeOff } from 'lucide-react';
 import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
 import { transcribeAudio } from '../utils/googleSpeechService';
 
@@ -495,6 +495,9 @@ const LearningScreen = () => {
   const [isListening, setIsListening] = useState(false);
   const [listeningText, setListeningText] = useState("");
 
+  // Focus Mode
+  const [focusMode, setFocusMode] = useState(false);
+
   const mediaRecorderRef = React.useRef(null);
   const audioChunksRef = React.useRef([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -967,13 +970,22 @@ const LearningScreen = () => {
   if (!slide) return <div>Loading...</div>;
 
   return (
-    <div className="learning-container">
+    <div className={`learning-container${focusMode ? ' focus-mode' : ''}`}>
       <div className="learning-header">
         <button className="close-btn" onClick={() => navigate('/lessons')}><X size={24} /></button>
         <div className="progress-track">
           <div className="progress-fill" style={{ width: `${progress}%`, backgroundColor: isReviewMode ? '#f59e0b' : '#58cc02' }}></div>
         </div>
         {isReviewMode && <div className="review-badge fade-in"><RefreshCw size={16} /> Reviewing</div>}
+        <button
+          className="focus-mode-btn"
+          onClick={() => setFocusMode(f => !f)}
+          title={focusMode ? 'Exit Focus Mode' : 'Enter Focus Mode — hide distractions'}
+          aria-label={focusMode ? 'Exit focus mode' : 'Enter focus mode'}
+        >
+          {focusMode ? <EyeOff size={18} /> : <Eye size={18} />}
+          <span>{focusMode ? 'Exit Focus' : 'Focus'}</span>
+        </button>
       </div>
 
       <div className="slide-content">
