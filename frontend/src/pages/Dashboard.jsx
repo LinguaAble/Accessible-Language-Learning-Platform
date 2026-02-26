@@ -6,7 +6,7 @@ import { BookOpen, Flame, PlayCircle, BarChart3, Bell, TrendingUp, Settings, Tro
 import '../Dashboard.css';
 
 const Dashboard = () => {
-  const { user, preferences, todayProgress } = useUser();
+  const { user, preferences, todayProgress, streak } = useUser();
   const navigate = useNavigate();
   const [showProfileTooltip, setShowProfileTooltip] = useState(false);
   const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
@@ -69,7 +69,7 @@ const Dashboard = () => {
         <div className="db-header-right">
           <div className="db-streak">
             <Flame size={15} fill="currentColor" />
-            {totalLessonsCompleted > 0 ? 1 : 0} Day Streak
+            {streak} Day{streak !== 1 ? 's' : ''} Streak
           </div>
           <div className="notification-container" onMouseEnter={() => setShowNotificationTooltip(true)} onMouseLeave={() => setShowNotificationTooltip(false)}>
             <button className="db-icon-btn" aria-label="Notifications" onClick={() => navigate('/settings')}><Bell size={18} /></button>

@@ -20,15 +20,16 @@ export const UserProvider = ({ children }) => {
         const saved = localStorage.getItem('todayProgress');
         const savedDate = localStorage.getItem('progressDate');
         const today = new Date().toDateString();
-
         if (!savedDate || savedDate !== today) {
             localStorage.setItem('progressDate', today);
             localStorage.setItem('todayProgress', '0');
             return 0;
         }
-
         return parseInt(saved) || 0;
     });
+
+    // Track streak
+    const [streak, setStreak] = useState(() => parseInt(localStorage.getItem('streak') || '0'));
 
     // Ensure progress resets daily
     useEffect(() => {
@@ -71,6 +72,12 @@ export const UserProvider = ({ children }) => {
                             setTodayProgress(freshData.todayProgress);
                             localStorage.setItem('todayProgress', freshData.todayProgress.toString());
                             localStorage.setItem('progressDate', today);
+                        }
+
+                        // Sync streak
+                        if (freshData.streak !== undefined) {
+                            setStreak(freshData.streak);
+                            localStorage.setItem('streak', freshData.streak.toString());
                         }
 
                         if (freshData.preferences) {
@@ -139,6 +146,12 @@ export const UserProvider = ({ children }) => {
             document.body.setAttribute('data-theme', userData.preferences.theme === 'dark' ? 'dark' : 'light');
         }
 
+        // Sync streak
+        if (userData.streak !== undefined) {
+            setStreak(userData.streak);
+            localStorage.setItem('streak', userData.streak.toString());
+        }
+
         // Load progress from backend
         const today = new Date().toDateString();
         if (userData.progressDate === today && userData.todayProgress !== undefined) {
@@ -161,6 +174,12 @@ export const UserProvider = ({ children }) => {
             axios.put('http://localhost:5000/api/auth/update-progress', {
                 email: user.email,
                 todayProgress: newProgress
+            }).then(res => {
+                // Sync streak back from backend
+                if (res.data.streak !== undefined) {
+                    setStreak(res.data.streak);
+                    localStorage.setItem('streak', res.data.streak.toString());
+                }
             }).catch(err => console.error("Failed to sync progress", err));
         }
     };
@@ -180,7 +199,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ user, preferences, todayProgress, updatePreferences, updateProfile, updateProgress, login, logout }}>
+        <UserContext.Provider value={{ user, preferences, todayProgress, streak, updatePreferences, updateProfile, updateProgress, login, logout }}>
             {children}
         </UserContext.Provider>
     );

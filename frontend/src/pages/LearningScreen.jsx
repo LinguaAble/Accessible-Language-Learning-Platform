@@ -764,14 +764,16 @@ const LearningScreen = () => {
           })
             .then(res => {
               if (res.data.success) {
-                // Update local context with fresh data from backend
+                // Update local context with fresh data from backend (including streak)
                 login({
                   ...user,
                   completedLessons: res.data.completedLessons,
                   dailyLessonCounts: res.data.dailyLessonCounts,
                   dailyScores: res.data.dailyScores,
                   todayProgress: res.data.todayProgress,
-                  progressDate: res.data.progressDate
+                  progressDate: res.data.progressDate,
+                  streak: res.data.streak,
+                  lastStreakDate: res.data.lastStreakDate
                 });
               }
             })

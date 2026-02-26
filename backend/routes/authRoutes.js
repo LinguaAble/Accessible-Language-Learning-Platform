@@ -50,6 +50,8 @@ router.post('/register', async (req, res) => {
         loginHistory: user.loginHistory,
         todayProgress: user.todayProgress,
         progressDate: user.progressDate,
+        streak: user.streak,
+        lastStreakDate: user.lastStreakDate,
         dailyLessonCounts: user.dailyLessonCounts,
         dailyScores: user.dailyScores
       }
@@ -65,53 +67,70 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check User
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password.' });
-    }
+    if (!user) return res.status(400).json({ message: 'Invalid email or password.' });
 
-    // Check Password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password.' });
+    if (!isMatch) return res.status(400).json({ message: 'Invalid email or password.' });
+
+    // Build update object
+    const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: 'Web Browser' }];
+    if (newHistory.length > 10) newHistory.shift();
+
+    // Streak reset check: if last streak date is before yesterday, reset to 0
+    let newStreak = user.streak || 0;
+    const lastStreakDate = user.lastStreakDate || '';
+    if (lastStreakDate) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (lastStreakDate < yesterdayStr && lastStreakDate !== todayStr) {
+        newStreak = 0;
+      }
     }
 
-    // Update Login History
-    user.loginHistory.push({ timestamp: new Date(), device: 'Web Browser' });
-    // Keep only last 10 entries
-    if (user.loginHistory.length > 10) {
-      user.loginHistory.shift();
-    }
-    await user.save();
+    // Use findOneAndUpdate to avoid validation errors on existing documents
+    const updated = await User.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          loginHistory: newHistory,
+          streak: newStreak
+        }
+      },
+      { new: true }
+    );
 
-    // Create Token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: updated._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       token,
       user: {
-        email: user.email,
-        username: user.username,
-        fullName: user.fullName,
-        age: user.age,
-        gender: user.gender,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        preferences: user.preferences,
-        completedLessons: user.completedLessons,
-        loginHistory: user.loginHistory,
-        todayProgress: user.todayProgress,
-        progressDate: user.progressDate,
-        dailyLessonCounts: user.dailyLessonCounts,
-        dailyScores: user.dailyScores
+        email: updated.email,
+        username: updated.username,
+        fullName: updated.fullName,
+        age: updated.age,
+        gender: updated.gender,
+        bio: updated.bio,
+        avatarUrl: updated.avatarUrl,
+        preferences: updated.preferences,
+        completedLessons: updated.completedLessons,
+        loginHistory: updated.loginHistory,
+        todayProgress: updated.todayProgress,
+        progressDate: updated.progressDate,
+        streak: updated.streak,
+        lastStreakDate: updated.lastStreakDate,
+        dailyLessonCounts: updated.dailyLessonCounts,
+        dailyScores: updated.dailyScores
       }
     });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err.message, err.stack);
     res.status(500).json({ message: 'Server Error' });
   }
 });
+
 
 // 3. FORGOT PASSWORD (OTP VERSION)
 router.post('/forgot-password', async (req, res) => {
@@ -213,35 +232,56 @@ router.put('/update-progress', async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Helper: get today's date as YYYY-MM-DD in LOCAL time via date param or server UTC
+    const todayStr = date || new Date().toISOString().split('T')[0];
+
     // A. Update Completed Lessons (if provided)
     if (completedLessons) {
       const existing = user.completedLessons || [];
       const incoming = completedLessons || [];
-      // Merge and unique
       user.completedLessons = [...new Set([...existing, ...incoming])];
     }
 
-    // B. Update Daily Progress (Minutes) (if provided)
+    // B. Update Daily Progress + Streak
     if (todayProgress !== undefined) {
       const today = new Date().toDateString();
 
-      // Check if day changed
+      // Reset progress if day changed
       if (user.progressDate !== today) {
-        // New day, update date and set progress
         user.progressDate = today;
-        user.todayProgress = todayProgress;
-      } else {
-        // Same day, update progress
-        user.todayProgress = todayProgress;
       }
+      user.todayProgress = todayProgress;
+
+      // --- Streak Logic ---
+      const dailyGoal = user.preferences?.dailyGoalMinutes || 5;
+      const goalMet = todayProgress >= dailyGoal;
+
+      if (goalMet) {
+        if (user.lastStreakDate === todayStr) {
+          // Goal already counted for today — no change
+        } else {
+          // Check if yesterday was the last streak day
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+          if (user.lastStreakDate === yesterdayStr) {
+            // Consecutive day — extend streak
+            user.streak = (user.streak || 0) + 1;
+          } else {
+            // Gap detected or first time — reset to 1
+            user.streak = 1;
+          }
+          user.lastStreakDate = todayStr;
+        }
+      }
+      // If goal not met, streak stays as-is (don't reset until midnight check on login)
     }
 
     // C. Update Daily Lesson Count (for Chart)
     if (incrementLessonCount) {
-      // detailed fix: Use date from frontend if available (to match user's timezone), else fallback to server UTC
       const today = date || new Date().toISOString().split('T')[0];
       const existingEntry = user.dailyLessonCounts.find(e => e.date === today);
-
       if (existingEntry) {
         existingEntry.count += incrementLessonCount;
       } else {
@@ -254,7 +294,6 @@ router.put('/update-progress', async (req, res) => {
       const today = date || new Date().toISOString().split('T')[0];
       if (!user.dailyScores) user.dailyScores = [];
       const existingScoreEntry = user.dailyScores.find(e => e.date === today);
-
       if (existingScoreEntry) {
         existingScoreEntry.score += lessonScore;
       } else {
@@ -269,6 +308,8 @@ router.put('/update-progress', async (req, res) => {
       completedLessons: user.completedLessons,
       todayProgress: user.todayProgress,
       progressDate: user.progressDate,
+      streak: user.streak,
+      lastStreakDate: user.lastStreakDate,
       dailyLessonCounts: user.dailyLessonCounts,
       dailyScores: user.dailyScores
     });
@@ -277,6 +318,7 @@ router.put('/update-progress', async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+
 
 // 6. GET USER DATA (Settings & History)
 router.post('/get-user-data', async (req, res) => {

@@ -74,6 +74,16 @@ const UserSchema = new mongoose.Schema({
     default: () => new Date().toDateString()
   },
 
+  // Streak tracking
+  streak: {
+    type: Number,
+    default: 0
+  },
+  lastStreakDate: {
+    type: String,   // YYYY-MM-DD format
+    default: ''
+  },
+
   // Daily lesson counts (for weekly chart)
   dailyLessonCounts: [{
     date: { type: String, required: true },
