@@ -77,11 +77,11 @@ const Dashboard = () => {
           </div>
           <div className="profile-avatar-container" onMouseEnter={() => setShowProfileTooltip(true)} onMouseLeave={() => setShowProfileTooltip(false)}>
             <div className="profile-avatar" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }}>
-              <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" />
+              <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
             </div>
             {showProfileTooltip && <div className="profile-tooltip">
               <div className="tooltip-header">
-                <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" className="tooltip-avatar" />
+                <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" className="tooltip-avatar" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '50%' }} />
                 <div className="tooltip-user-info"><h4>{name}</h4><p>{user.email || 'No email'}</p></div>
               </div>
               <div className="tooltip-divider" />

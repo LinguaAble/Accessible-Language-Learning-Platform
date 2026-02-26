@@ -380,34 +380,46 @@ router.put('/update-profile', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Update fields if provided
-    if (username !== undefined) user.username = username;
-    if (fullName !== undefined) user.fullName = fullName;
-    if (age !== undefined) user.age = age;
-    if (gender !== undefined) user.gender = gender;
-    if (bio !== undefined) user.bio = bio;
-    if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
+    // Build update object dynamically
+    const updateQuery = { $set: {} };
+    if (username !== undefined) updateQuery.$set.username = username;
+    if (fullName !== undefined) updateQuery.$set.fullName = fullName;
+    if (age !== undefined) updateQuery.$set.age = age;
+    if (gender !== undefined) updateQuery.$set.gender = gender;
+    if (bio !== undefined) updateQuery.$set.bio = bio;
+    if (avatarUrl !== undefined) updateQuery.$set.avatarUrl = avatarUrl;
 
     // Update preferences if provided
     if (preferences !== undefined) {
-      user.preferences = { ...user.preferences, ...preferences };
+      updateQuery.$set.preferences = { ...user.preferences, ...preferences };
     }
 
-    await user.save();
+    // Use findOneAndUpdate to bypass validation on unrelated document fields
+    const updated = await User.findOneAndUpdate(
+      { email },
+      updateQuery,
+      { new: true }
+    );
 
     res.json({
       message: 'Profile updated successfully',
       user: {
-        email: user.email,
-        username: user.username,
-        fullName: user.fullName,
-        age: user.age,
-        gender: user.gender,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        preferences: user.preferences,
-        completedLessons: user.completedLessons,
-        loginHistory: user.loginHistory
+        email: updated.email,
+        username: updated.username,
+        fullName: updated.fullName,
+        age: updated.age,
+        gender: updated.gender,
+        bio: updated.bio,
+        avatarUrl: updated.avatarUrl,
+        preferences: updated.preferences,
+        completedLessons: updated.completedLessons,
+        loginHistory: updated.loginHistory,
+        todayProgress: updated.todayProgress,
+        progressDate: updated.progressDate,
+        streak: updated.streak,
+        lastStreakDate: updated.lastStreakDate,
+        dailyLessonCounts: updated.dailyLessonCounts,
+        dailyScores: updated.dailyScores
       }
     });
   } catch (err) {

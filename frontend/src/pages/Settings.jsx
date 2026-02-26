@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users, Target } from 'lucide-react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
@@ -18,6 +18,8 @@ const Settings = () => {
     });
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [saveStatus, setSaveStatus] = useState(null); // null | 'success' | 'error'
+    const fileInputRef = useRef(null);
 
     // Update local input when user context changes
     React.useEffect(() => {
@@ -54,12 +56,18 @@ const Settings = () => {
 
     const handleSaveProfile = async () => {
         setIsSavingProfile(true);
+        setSaveStatus(null);
         try {
             await updateProfile(profileData);
-            setIsEditingProfile(false); // Close edit mode after successful save
-            // Optional: Show success toast
+            setSaveStatus('success');
+            setTimeout(() => {
+                setIsEditingProfile(false);
+                setSaveStatus(null);
+            }, 1500);
         } catch (error) {
             console.error("Failed to update profile", error);
+            setSaveStatus('error');
+            setTimeout(() => setSaveStatus(null), 3000);
         } finally {
             setIsSavingProfile(false);
         }
@@ -231,11 +239,14 @@ const Settings = () => {
                                 {/* Custom Upload */}
                                 <div>
                                     <div style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '10px', color: 'var(--text-main)' }}>
-                                        Custom Upload
+                                        Upload from Device
                                     </div>
+                                    {/* Hidden file input */}
                                     <input
+                                        ref={fileInputRef}
                                         type="file"
                                         accept="image/jpeg,image/png,image/gif,image/webp"
+                                        style={{ display: 'none' }}
                                         onChange={(e) => {
                                             const file = e.target.files[0];
                                             if (file) {
@@ -250,19 +261,40 @@ const Settings = () => {
                                                 reader.readAsDataURL(file);
                                             }
                                         }}
-                                        style={{
-                                            padding: '10px',
-                                            borderRadius: '8px',
-                                            border: '1px solid var(--border-color)',
-                                            background: 'var(--input-bg)',
-                                            color: 'var(--text-main)',
-                                            width: '100%',
-                                            cursor: 'pointer'
-                                        }}
                                     />
+                                    {/* Styled upload button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            padding: '12px 20px',
+                                            borderRadius: '10px',
+                                            border: '2px dashed var(--border-color)',
+                                            background: 'var(--bg-color)',
+                                            color: 'var(--text-main)',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9rem',
+                                            fontWeight: 600,
+                                            width: '100%',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent-color)'; e.currentTarget.style.color = 'var(--accent-color)'; }}
+                                        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.color = 'var(--text-main)'; }}
+                                    >
+                                        📁 Choose Photo from Device
+                                    </button>
                                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                                        Max file size: 2MB. Supported formats: JPG, PNG, GIF, WEBP
+                                        Max 2MB · JPG, PNG, GIF, WEBP
                                     </div>
+                                    {/* Show selected file name if custom upload is active */}
+                                    {profileData.avatarUrl?.startsWith('data:') && (
+                                        <div style={{ marginTop: '8px', fontSize: '0.82rem', color: '#27ae60', fontWeight: 600 }}>
+                                            ✓ Custom image selected
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -355,14 +387,22 @@ const Settings = () => {
                             </div>
 
                             {/* Save Button */}
-                            <button
-                                className="toggle-btn active"
-                                onClick={handleSaveProfile}
-                                disabled={isSavingProfile}
-                                style={{ padding: '12px 30px', alignSelf: 'flex-start' }}
-                            >
-                                {isSavingProfile ? 'Saving...' : 'Save Profile'}
-                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', alignSelf: 'flex-start' }}>
+                                <button
+                                    className="toggle-btn active"
+                                    onClick={handleSaveProfile}
+                                    disabled={isSavingProfile}
+                                    style={{ padding: '12px 30px' }}
+                                >
+                                    {isSavingProfile ? 'Saving...' : 'Save Profile'}
+                                </button>
+                                {saveStatus === 'success' && (
+                                    <span style={{ color: '#27ae60', fontWeight: 600, fontSize: '0.9rem' }}>✓ Profile saved!</span>
+                                )}
+                                {saveStatus === 'error' && (
+                                    <span style={{ color: '#e74c3c', fontWeight: 600, fontSize: '0.9rem' }}>✗ Save failed. Please try again.</span>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

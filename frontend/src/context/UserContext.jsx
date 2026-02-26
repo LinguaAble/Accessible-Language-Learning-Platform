@@ -63,6 +63,10 @@ export const UserProvider = ({ children }) => {
                     const freshData = res.data.user || res.data;
 
                     if (freshData) {
+                        // Preserve local avatarUrl if server didn't return one
+                        if (!freshData.avatarUrl && savedUser.avatarUrl) {
+                            freshData.avatarUrl = savedUser.avatarUrl;
+                        }
                         const updatedUser = { ...savedUser, ...freshData };
                         setUser(updatedUser);
 
