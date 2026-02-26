@@ -167,7 +167,6 @@ describe('Dashboard Component Tests', () => {
 
         expect(screen.getByText(/Quick Actions/i)).toBeInTheDocument();
         expect(screen.getByText(/^Learn$/)).toBeInTheDocument();
-        expect(screen.getByText(/^Practice$/)).toBeInTheDocument();
         expect(screen.getByText(/^Leaderboard$/)).toBeInTheDocument();
         expect(screen.getByText(/^Settings$/)).toBeInTheDocument();
     });
@@ -342,17 +341,7 @@ describe('Dashboard Component Tests', () => {
         });
     });
 
-    test('Should navigate to practice when Practice quick action clicked', async () => {
-        const user = userEvent.setup();
-        renderDashboard();
 
-        const practiceButton = screen.getByText(/^Practice$/);
-        await user.click(practiceButton);
-
-        await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/practice');
-        });
-    });
 
     test('Should navigate to leaderboard when Leaderboard quick action clicked', async () => {
         const user = userEvent.setup();
@@ -390,7 +379,7 @@ describe('Dashboard Component Tests', () => {
         });
     });
 
-    test('Should navigate to practice when Accuracy card clicked', async () => {
+    test('Should navigate to lessons when Accuracy card clicked', async () => {
         const user = userEvent.setup();
         renderDashboard();
 
@@ -398,7 +387,7 @@ describe('Dashboard Component Tests', () => {
         await user.click(accuracyCard);
 
         await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/practice');
+            expect(mockNavigate).toHaveBeenCalledWith('/lessons');
         });
     });
 

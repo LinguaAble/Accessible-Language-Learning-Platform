@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, MessageSquare, ChevronLeft, ChevronRight
+    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 import zebraMascot from '../assets/zebra-mascot.png';
@@ -53,13 +53,6 @@ const Sidebar = () => {
                     <BookOpen size={20} /> <span>Lessons</span>
                 </button>
 
-                <button
-                    className={`nav-item ${location.pathname === '/practice' ? 'active' : ''}`}
-                    onClick={() => handleNavigation('/practice')}
-                    title="Practice"
-                >
-                    <MessageSquare size={20} /> <span>Practice</span>
-                </button>
 
                 <button
                     className={`nav-item ${location.pathname === '/leaderboard' ? 'active' : ''}`}

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import {
   BookOpen, Flame, PlayCircle, BarChart3, Bell, Award, Target, TrendingUp,
-  Zap, ChevronRight, Star, Clock
+  Star, Clock
 } from 'lucide-react';
 import '../Dashboard.css';
 
@@ -280,7 +280,7 @@ const Dashboard = () => {
           <div
             className="progress-card"
             style={{ padding: '20px', textAlign: 'center', cursor: 'pointer' }}
-            onClick={() => navigate('/practice')}
+            onClick={() => navigate('/lessons')}
           >
             <Target size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
             <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>82%</h4>
@@ -349,10 +349,7 @@ const Dashboard = () => {
             <BookOpen size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
             <p style={{ margin: 0, fontWeight: 600 }}>Learn</p>
           </div>
-          <div className="activity-item" onClick={() => handleNavigation('/practice')}>
-            <Zap size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <p style={{ margin: 0, fontWeight: 600 }}>Practice</p>
-          </div>
+
           <div className="activity-item" onClick={() => handleNavigation('/leaderboard')}>
             <Star size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
             <p style={{ margin: 0, fontWeight: 600 }}>Leaderboard</p>

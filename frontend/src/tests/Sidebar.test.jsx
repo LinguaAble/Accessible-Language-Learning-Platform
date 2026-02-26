@@ -78,7 +78,6 @@ describe('Sidebar Component Tests', () => {
 
             expect(screen.getByTitle('Dashboard')).toBeInTheDocument();
             expect(screen.getByTitle('Lessons')).toBeInTheDocument();
-            expect(screen.getByTitle('Practice')).toBeInTheDocument();
             expect(screen.getByTitle('Leaderboard')).toBeInTheDocument();
             expect(screen.getByTitle('Settings')).toBeInTheDocument();
             expect(screen.getByTitle('Logout')).toBeInTheDocument();
@@ -89,7 +88,6 @@ describe('Sidebar Component Tests', () => {
 
             expect(screen.getByText('Dashboard')).toBeInTheDocument();
             expect(screen.getByText('Lessons')).toBeInTheDocument();
-            expect(screen.getByText('Practice')).toBeInTheDocument();
             expect(screen.getByText('Leaderboard')).toBeInTheDocument();
             expect(screen.getByText('Settings')).toBeInTheDocument();
             expect(screen.getByText('Logout')).toBeInTheDocument();
@@ -154,13 +152,7 @@ describe('Sidebar Component Tests', () => {
             expect(lessonsButton).toHaveClass('active');
         });
 
-        test('Should highlight Practice when on /practice', () => {
-            mockLocationPathname = '/practice';
-            renderSidebar();
 
-            const practiceButton = screen.getByTitle('Practice');
-            expect(practiceButton).toHaveClass('active');
-        });
 
         test('Should highlight Leaderboard when on /leaderboard', () => {
             mockLocationPathname = '/leaderboard';
@@ -211,15 +203,7 @@ describe('Sidebar Component Tests', () => {
             expect(mockNavigate).toHaveBeenCalledWith('/lessons');
         });
 
-        test('Should navigate to Practice when Practice clicked', async () => {
-            const user = userEvent.setup();
-            renderSidebar();
 
-            const practiceButton = screen.getByTitle('Practice');
-            await user.click(practiceButton);
-
-            expect(mockNavigate).toHaveBeenCalledWith('/practice');
-        });
 
         test('Should navigate to Leaderboard when Leaderboard clicked', async () => {
             const user = userEvent.setup();
@@ -247,7 +231,7 @@ describe('Sidebar Component Tests', () => {
 
         test('Should clear localStorage on logout', async () => {
             const user = userEvent.setup();
-            
+
             // Set some data in localStorage
             localStorageMock.setItem('token', 'test-token');
             localStorageMock.setItem('user', JSON.stringify({ email: 'test@example.com' }));
@@ -333,16 +317,16 @@ describe('Sidebar Component Tests', () => {
             renderSidebar();
 
             const sidebar = document.querySelector('.sidebar');
-            
+
             // Should start collapsed
             expect(sidebar).toHaveClass('collapsed');
-            
+
             // Hover to expand
             await user.hover(sidebar);
             await waitFor(() => {
                 expect(sidebar).not.toHaveClass('collapsed');
             });
-            
+
             // Unhover to collapse
             await user.unhover(sidebar);
             await waitFor(() => {
@@ -435,7 +419,7 @@ describe('Sidebar Component Tests', () => {
 
             const logoSection = document.querySelector('.logo-section');
             const sidebar = document.querySelector('.sidebar');
-            
+
             expect(logoSection).toBeInTheDocument();
             expect(sidebar.firstElementChild).toEqual(logoSection);
         });
@@ -445,7 +429,7 @@ describe('Sidebar Component Tests', () => {
 
             const nav = document.querySelector('.side-nav');
             const sidebar = document.querySelector('.sidebar');
-            
+
             expect(nav).toBeInTheDocument();
             expect(sidebar.children[1]).toEqual(nav);
         });
@@ -474,12 +458,10 @@ describe('Sidebar Component Tests', () => {
             const nav = document.querySelector('.side-nav');
             const dashboardButton = nav.querySelector('[title="Dashboard"]');
             const lessonsButton = nav.querySelector('[title="Lessons"]');
-            const practiceButton = nav.querySelector('[title="Practice"]');
             const leaderboardButton = nav.querySelector('[title="Leaderboard"]');
 
             expect(dashboardButton).toBeInTheDocument();
             expect(lessonsButton).toBeInTheDocument();
-            expect(practiceButton).toBeInTheDocument();
             expect(leaderboardButton).toBeInTheDocument();
         });
     });
@@ -493,17 +475,15 @@ describe('Sidebar Component Tests', () => {
 
             const dashboardBtn = screen.getByTitle('Dashboard');
             const lessonsBtn = screen.getByTitle('Lessons');
-            const practiceBtn = screen.getByTitle('Practice');
             const leaderboardBtn = screen.getByTitle('Leaderboard');
             const settingsBtn = screen.getByTitle('Settings');
 
             await user.click(dashboardBtn);
             await user.click(lessonsBtn);
-            await user.click(practiceBtn);
             await user.click(leaderboardBtn);
             await user.click(settingsBtn);
 
-            expect(mockNavigate).toHaveBeenCalledTimes(5);
+            expect(mockNavigate).toHaveBeenCalledTimes(4);
         });
 
         test('Should handle rapid navigation clicks', async () => {
@@ -573,7 +553,7 @@ describe('Sidebar Component Tests', () => {
 
         test('Should not break with empty localStorage', () => {
             localStorageMock.clear();
-            
+
             expect(() => renderSidebar()).not.toThrow();
         });
 

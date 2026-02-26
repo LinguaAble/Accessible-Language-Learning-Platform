@@ -7,7 +7,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Lessons from './pages/Lessons';
-import Practice from './pages/Practice';
 import Leaderboard from './pages/Leaderboard';
 import Settings from './pages/Settings';
 import Layout from './components/Layout';
@@ -75,7 +74,6 @@ function AppContent() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/lessons" element={<Lessons />} />
-          <Route path="/practice" element={<Practice />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
