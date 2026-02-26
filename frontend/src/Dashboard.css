@@ -96,7 +96,9 @@
 /* Main Content Layout */
 .main-content {
   flex: 1;
-  padding: 30px;
+  min-width: 0;
+  padding: 32px 36px;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -830,5 +832,786 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ════════════════════════════════════════
+   DASHBOARD — clean redesign
+════════════════════════════════════════ */
+
+/* Root container (replaces .main-content padding) */
+.db-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* ── Header ───────────────────────────── */
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+.db-namaste {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.db-name {
+  font-size: 1.9rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.db-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.db-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.db-streak {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(230, 126, 34, 0.12);
+  border: 1px solid rgba(230, 126, 34, 0.35);
+  color: var(--accent-color);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.db-icon-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-icon-btn:hover {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+/* ── Top grid ─────────────────────────── */
+.db-top-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 18px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+/* ── Hero card ────────────────────────── */
+.db-hero {
+  background: linear-gradient(140deg, #f79c42 0%, #c0392b 100%);
+  border-radius: 20px;
+  padding: 26px 28px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 28px rgba(230, 126, 34, 0.3);
+  min-width: 0;
+}
+
+.db-hero::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.db-hero-badge {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 3px 11px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.db-hero-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  margin: 4px 0 0;
+}
+
+.db-hero-hindi {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.88;
+  margin: 0;
+}
+
+.db-hero-desc {
+  font-size: 0.83rem;
+  opacity: 0.78;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.db-start-btn {
+  margin-top: 10px;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-start-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Right column ─────────────────────── */
+.db-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* ── Daily Goal card ──────────────────── */
+.db-goal-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.db-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.db-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.db-goal-time {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.db-goal-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.db-goal-status {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.db-goal-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ring sizing for this card */
+.db-goal-card .ring-bg {
+  stroke-width: 6;
+}
+
+.db-goal-card .ring-fill {
+  stroke-width: 6;
+}
+
+/* ── Lessons card ─────────────────────── */
+.db-lessons-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 0;
+}
+
+.db-lessons-card:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(230, 126, 34, 0.14);
+}
+
+.db-lessons-card>div:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.db-stat-num {
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.db-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ── Generic card ─────────────────────── */
+.db-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 20px 22px;
+  min-width: 0;
+}
+
+.db-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ── Chart ────────────────────────────── */
+.db-card .weekly-chart {
+  height: 110px;
+  margin-top: 14px;
+}
+
+.bar {
+  position: relative;
+}
+
+.bar-today {
+  background: var(--accent-color) !important;
+  box-shadow: 0 0 10px rgba(230, 126, 34, 0.45) !important;
+}
+
+.bar-score-label {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-color);
+  white-space: nowrap;
+}
+
+/* ── Quick Actions ────────────────────── */
+.db-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.db-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.18s;
+  width: 100%;
+  color: var(--text-main);
+  min-width: 0;
+}
+
+.db-action-btn:hover {
+  border-color: var(--accent-color);
+  transform: translateX(3px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.db-action-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.db-action-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ── Responsive ───────────────────────── */
+@media (max-width: 820px) {
+  .db-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Main scroll container */
+.db-main {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  min-width: 0;
+}
+
+/* ── Header ─────────────────────────────────── */
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.db-greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.db-namaste {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  letter-spacing: 0.5px;
+}
+
+.db-name {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.db-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.db-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.db-streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(230, 126, 34, 0.12);
+  border: 1px solid rgba(230, 126, 34, 0.35);
+  color: var(--accent-color);
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.db-icon-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-icon-btn:hover {
+  color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+/* ── Hero card — full width horizontal ─────── */
+.db-hero-card {
+  background: linear-gradient(135deg, var(--accent-color) 0%, #c0392b 100%);
+  border-radius: 20px;
+  padding: 28px 32px;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(230, 126, 34, 0.3);
+  flex-wrap: wrap;
+}
+
+.db-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.db-hero-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.db-hero-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.db-hero-hindi {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.db-hero-desc {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 340px;
+}
+
+.db-start-btn {
+  margin-top: 8px;
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+  padding: 11px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.db-start-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Stats row: Daily Goal + Lessons side-by-side ── */
+.db-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Daily Goal card */
+.db-goal-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 20px 22px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.db-goal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.db-section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.db-goal-time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.db-goal-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.db-goal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.db-goal-status {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.db-goal-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Ring override for bigger size */
+.db-goal-card .ring-bg {
+  stroke-width: 7;
+}
+
+.db-goal-card .ring-fill {
+  stroke-width: 7;
+  stroke-dasharray: 239;
+}
+
+.db-goal-card .percent {
+  font-size: 1.15rem;
+}
+
+/* Lessons completed card */
+.db-lessons-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 20px 22px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-lessons-card:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(230, 126, 34, 0.15);
+}
+
+.db-lessons-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(230, 126, 34, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.db-lessons-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.db-stat-num {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.db-stat-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ── Chart ──────────────────────────────────── */
+.db-chart-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 20px 22px;
+}
+
+.db-chart-card .weekly-chart {
+  height: 120px;
+  margin-top: 12px;
+}
+
+.db-chart-card .bar {
+  max-height: 90px;
+}
+
+.db-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.db-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-main);
+}
+
+.bar-today {
+  background: var(--accent-color) !important;
+  box-shadow: 0 0 12px rgba(230, 126, 34, 0.5) !important;
+}
+
+.bar-score-label {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-color);
+  white-space: nowrap;
+}
+
+.bar {
+  position: relative;
+}
+
+/* ── Quick Actions ──────────────────────────── */
+.db-actions-section {
+  padding-bottom: 10px;
+}
+
+.db-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: left;
+  color: var(--text-main);
+}
+
+.db-action-btn:hover {
+  border-color: var(--accent-color);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.db-action-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.db-action-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 900px) {
+  .db-row-hero {
+    grid-template-columns: 1fr;
   }
 }

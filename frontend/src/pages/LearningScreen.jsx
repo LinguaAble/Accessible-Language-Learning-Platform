@@ -730,45 +730,52 @@ const LearningScreen = () => {
         setCurrentSlideIndex(prev => prev + 1);
       } else {
         const completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-        if (!completedLessons.includes(lessonId)) {
+        const isNewLesson = !completedLessons.includes(lessonId);
+
+        // Calculate actual time spent — minimum 1 minute so progress always moves
+        const lessonEndTime = Date.now();
+        const timeSpentMs = lessonEndTime - lessonStartTime;
+        const timeSpentMinutes = Math.max(1, Math.ceil(timeSpentMs / 60000));
+        const newTodayProgress = (todayProgress || 0) + timeSpentMinutes;
+
+        // Always persist progress to localStorage immediately (Dashboard reads this on focus)
+        localStorage.setItem('todayProgress', newTodayProgress.toString());
+
+        if (isNewLesson) {
           completedLessons.push(lessonId);
           localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+        }
 
-          // Compute lesson score (0–100, based on first-attempt accuracy)
-          const { percentage: lessonScore } = calculateScore();
+        // Compute lesson score (0–100, based on first-attempt accuracy)
+        const { percentage: lessonScore } = calculateScore();
 
-          // Sync with backend
-          if (user.email) {
-            const today = new Date();
-            const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        // Sync with backend (for new lessons: full sync; for replayed: just time + score)
+        if (user.email) {
+          const today = new Date();
+          const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-            // Calculate actual time spent on lesson (in minutes)
-            const lessonEndTime = Date.now();
-            const timeSpentMs = lessonEndTime - lessonStartTime;
-            const timeSpentMinutes = Math.round(timeSpentMs / 60000); // Convert to minutes and round
-
-            axios.put('http://localhost:5000/api/auth/update-progress', {
-              email: user.email,
-              completedLessons,
-              todayProgress: (todayProgress || 0) + timeSpentMinutes, // Add actual time spent
-              incrementLessonCount: 1,
-              lessonScore,           // e.g. 95 for 95% — accumulated into dailyScores
-              date: formattedDate
+          axios.put('http://localhost:5000/api/auth/update-progress', {
+            email: user.email,
+            completedLessons: isNewLesson ? completedLessons : undefined,
+            todayProgress: newTodayProgress,
+            incrementLessonCount: isNewLesson ? 1 : undefined,
+            lessonScore,
+            date: formattedDate
+          })
+            .then(res => {
+              if (res.data.success) {
+                // Update local context with fresh data from backend
+                login({
+                  ...user,
+                  completedLessons: res.data.completedLessons,
+                  dailyLessonCounts: res.data.dailyLessonCounts,
+                  dailyScores: res.data.dailyScores,
+                  todayProgress: res.data.todayProgress,
+                  progressDate: res.data.progressDate
+                });
+              }
             })
-              .then(res => {
-                if (res.data.success) {
-                  // Update local context with new daily stats (including dailyScores for graph)
-                  login({
-                    ...user,
-                    completedLessons: res.data.completedLessons,
-                    dailyLessonCounts: res.data.dailyLessonCounts,
-                    dailyScores: res.data.dailyScores,
-                    todayProgress: res.data.todayProgress
-                  });
-                }
-              })
-              .catch(err => console.error("Failed to sync progress", err));
-          }
+            .catch(err => console.error("Failed to sync progress", err));
         }
 
         setProgress(100);

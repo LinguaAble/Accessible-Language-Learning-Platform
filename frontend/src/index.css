@@ -37,6 +37,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden;
 }
 
 /* Global Reduced Motion */

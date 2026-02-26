@@ -145,10 +145,6 @@ describe('Dashboard Component Tests', () => {
     test('Should render all quick stat cards', () => {
         renderDashboard();
 
-        expect(screen.getByText(/47/i)).toBeInTheDocument(); // Words Learned
-        expect(screen.getByText(/Words Learned/i)).toBeInTheDocument();
-        expect(screen.getByText(/82%/i)).toBeInTheDocument(); // Accuracy
-        expect(screen.getByText(/Accuracy/i)).toBeInTheDocument();
         expect(screen.getByText(/Lessons Completed/i)).toBeInTheDocument();
     });
 
@@ -367,29 +363,9 @@ describe('Dashboard Component Tests', () => {
         });
     });
 
-    test('Should navigate to lessons when Words Learned card clicked', async () => {
-        const user = userEvent.setup();
-        renderDashboard();
 
-        const wordsCard = screen.getByText(/Words Learned/i).closest('div');
-        await user.click(wordsCard);
 
-        await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/lessons');
-        });
-    });
 
-    test('Should navigate to lessons when Accuracy card clicked', async () => {
-        const user = userEvent.setup();
-        renderDashboard();
-
-        const accuracyCard = screen.getByText(/^Accuracy$/i).closest('div');
-        await user.click(accuracyCard);
-
-        await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/lessons');
-        });
-    });
 
     test('Should navigate to lessons when Lessons Completed card clicked', async () => {
         const user = userEvent.setup();
@@ -540,15 +516,6 @@ describe('Dashboard Component Tests', () => {
         // Today's bar should have special styling (tested via data attributes or classes)
         const weeklyChart = screen.getByText(/This Week/i).closest('.progress-card');
         expect(weeklyChart).toBeInTheDocument();
-    });
-
-    // ==================== WORD OF THE DAY TESTS ====================
-    test('Should display word of the day', () => {
-        renderDashboard();
-
-        expect(screen.getByText(/Word of the Day/i)).toBeInTheDocument();
-        expect(screen.getByText(/दोस्त/i)).toBeInTheDocument();
-        expect(screen.getByText(/Dost · Friend/i)).toBeInTheDocument();
     });
 
     // ==================== ACCESSIBILITY TESTS ====================

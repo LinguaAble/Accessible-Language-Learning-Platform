@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import {
-  BookOpen, Flame, PlayCircle, BarChart3, Bell, Award, Target, TrendingUp,
-  Star, Clock
-} from 'lucide-react';
+import { BookOpen, Flame, PlayCircle, BarChart3, Bell, TrendingUp, Settings, Trophy, ChevronRight } from 'lucide-react';
 import '../Dashboard.css';
 
 const Dashboard = () => {
@@ -16,352 +13,176 @@ const Dashboard = () => {
   const [weeklyData, setWeeklyData] = useState([]);
   const [totalLessonsCompleted, setTotalLessonsCompleted] = useState(0);
 
-  // Helper function to get start of week (Monday)
-  const getStartOfWeek = (date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when Sunday
-    return new Date(d.setDate(diff));
+  const getLatestProgress = () => {
+    const stored = parseInt(localStorage.getItem('todayProgress'), 10) || 0;
+    return Math.max(todayProgress, stored);
   };
-
-  // Helper function to format date as YYYY-MM-DD (Local Time)
-  const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  // Initialize or update chart data from backend
+  const [displayProgress, setDisplayProgress] = useState(getLatestProgress);
+  useEffect(() => { setDisplayProgress(getLatestProgress()); }, [todayProgress]);
   useEffect(() => {
-    const today = formatDate(new Date());
-    const now = new Date();
+    const refresh = () => setDisplayProgress(getLatestProgress());
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => { document.removeEventListener('visibilitychange', refresh); window.removeEventListener('focus', refresh); };
+  }, [todayProgress]);
 
-    // Get current week info
-    const startOfWeek = getStartOfWeek(now);
+  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const startOfWeek = (d) => { const x = new Date(d), day = x.getDay(); x.setDate(x.getDate() - day + (day === 0 ? -6 : 1)); return x; };
 
-    // Get total completed lessons
-    const completedLessons = (user.completedLessons && user.completedLessons.length > 0)
-      ? user.completedLessons
-      : JSON.parse(localStorage.getItem('completedLessons') || '[]');
-
-    setTotalLessonsCompleted(completedLessons.length);
-
-    // Build weekly data for chart using Backend Data
-    const buildWeeklyData = () => {
-      const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-      const data = [];
-      const dailyScores = user.dailyScores || [];
-
-      for (let i = 0; i < 7; i++) {
-        const currentDate = new Date(startOfWeek);
-        currentDate.setDate(startOfWeek.getDate() + i);
-        const dateStr = formatDate(currentDate);
-
-        // Find accumulated score for this date
-        const entry = dailyScores.find(e => e.date === dateStr);
-        const dayScore = entry ? entry.score : 0;
-
-        data.push({
-          day: days[i],
-          value: dayScore,
-          date: dateStr,
-          isToday: dateStr === today
-        });
-      }
-
-      return data;
-    };
-    setWeeklyData(buildWeeklyData());
-
-    // Set up an interval to refresh the chart every minute (in case day changes)
-    const interval = setInterval(() => {
-      const newToday = formatDate(new Date());
-      if (newToday !== today) {
-        console.log('📅 Day changed, refreshing...');
-        window.location.reload();
-      }
-    }, 60000); // Check every minute
-
-    return () => clearInterval(interval);
-
+  useEffect(() => {
+    const today = fmt(new Date());
+    const sow = startOfWeek(new Date());
+    const cl = (user.completedLessons?.length > 0) ? user.completedLessons : JSON.parse(localStorage.getItem('completedLessons') || '[]');
+    setTotalLessonsCompleted(cl.length);
+    const ds = user.dailyScores || [];
+    setWeeklyData(['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => {
+      const d = new Date(sow); d.setDate(sow.getDate() + i);
+      const str = fmt(d);
+      return { day, value: ds.find(e => e.date === str)?.score || 0, isToday: str === today };
+    }));
+    const t = setInterval(() => { if (fmt(new Date()) !== today) window.location.reload(); }, 60000);
+    return () => clearInterval(t);
   }, [user.completedLessons, user.dailyScores]);
 
-  // Sync progress with backend
   useEffect(() => {
-    if (user.email) {
-      const localLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-      axios.put('http://localhost:5000/api/auth/update-progress', {
-        email: user.email,
-        completedLessons: localLessons
-      }).then(res => {
-        if (res.data.success && res.data.completedLessons) {
-          localStorage.setItem('completedLessons', JSON.stringify(res.data.completedLessons));
-          console.log("Progress synced:", res.data.completedLessons);
-        }
-      }).catch(err => console.error("Sync failed", err));
-    }
+    if (!user.email) return;
+    const ll = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+    axios.put('http://localhost:5000/api/auth/update-progress', { email: user.email, completedLessons: ll })
+      .then(r => { if (r.data.success && r.data.completedLessons) localStorage.setItem('completedLessons', JSON.stringify(r.data.completedLessons)); })
+      .catch(e => console.error('Sync failed', e));
   }, [user.email]);
 
-  const getDisplayName = () => {
-    if (user.username) return user.username;
-    if (!user.email) return "Learner";
-    const namePart = user.email.split('@')[0];
-    return namePart.charAt(0).toUpperCase() + namePart.slice(1);
-  };
-
-  const displayName = getDisplayName();
-
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-
-  // Calculate max value for chart scaling
-  const maxValue = Math.max(...weeklyData.map(d => d.value), 1);
+  const name = user.username || (user.email ? user.email.split('@')[0].replace(/^./, c => c.toUpperCase()) : 'Learner');
+  const maxVal = Math.max(...weeklyData.map(d => d.value), 1);
+  const goalPct = Math.min(100, Math.round((displayProgress / preferences.dailyGoalMinutes) * 100));
 
   return (
-    <div className="main-content">
+    <div className="main-content db-root">
+
       {/* Header */}
-      <header className="content-header">
-        <div className="greeting">
-          <span className="hindi-text" style={{ fontSize: '18px', fontWeight: 500 }}>नमस्ते</span>
-          <h2>{displayName}</h2>
-          <p>You're doing amazing — keep the momentum going!</p>
+      <header className="db-header">
+        <div>
+          <div className="db-namaste">नमस्ते,</div>
+          <h1 className="db-name">{name} 👋</h1>
+          <p className="db-subtitle">Ready to continue your Hindi journey?</p>
         </div>
-
-        <div className="header-stats">
-          <div className="stat-pill streak">
-            <Flame size={18} fill="currentColor" />
-            {totalLessonsCompleted > 0 ? '1' : '0'} Day Streak
+        <div className="db-header-right">
+          <div className="db-streak">
+            <Flame size={15} fill="currentColor" />
+            {totalLessonsCompleted > 0 ? 1 : 0} Day Streak
           </div>
-          <div
-            className="notification-container"
-            onMouseEnter={() => setShowNotificationTooltip(true)}
-            onMouseLeave={() => setShowNotificationTooltip(false)}
-            style={{ position: 'relative' }}
-          >
-            <button
-              className="notif-btn"
-              aria-label="Notifications"
-              onClick={() => navigate('/settings')}
-              style={{ cursor: 'pointer' }}
-            >
-              <Bell size={20} />
-            </button>
-
-            {showNotificationTooltip && (
-              <div className="notification-tooltip">
-                <div className="notification-tooltip-content">
-                  <Bell size={24} style={{ color: 'var(--text-muted)', opacity: 0.5 }} />
-                  <p>No notifications</p>
-                </div>
-              </div>
-            )}
+          <div className="notification-container" onMouseEnter={() => setShowNotificationTooltip(true)} onMouseLeave={() => setShowNotificationTooltip(false)}>
+            <button className="db-icon-btn" aria-label="Notifications" onClick={() => navigate('/settings')}><Bell size={18} /></button>
+            {showNotificationTooltip && <div className="notification-tooltip"><div className="notification-tooltip-content"><Bell size={20} style={{ color: 'var(--text-muted)', opacity: 0.5 }} /><p>No notifications</p></div></div>}
           </div>
-          <div
-            className="profile-avatar-container"
-            onMouseEnter={() => setShowProfileTooltip(true)}
-            onMouseLeave={() => setShowProfileTooltip(false)}
-            style={{ position: 'relative' }}
-          >
-            <div
-              className="profile-avatar"
-              onClick={() => navigate('/settings')}
-              style={{ cursor: 'pointer' }}
-            >
-              <img
-                src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
-                alt="User avatar"
-              />
+          <div className="profile-avatar-container" onMouseEnter={() => setShowProfileTooltip(true)} onMouseLeave={() => setShowProfileTooltip(false)}>
+            <div className="profile-avatar" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }}>
+              <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" />
             </div>
-
-            {showProfileTooltip && (
-              <div className="profile-tooltip">
-                <div className="tooltip-header">
-                  <img
-                    src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`}
-                    alt="User avatar"
-                    className="tooltip-avatar"
-                  />
-                  <div className="tooltip-user-info">
-                    <h4>{displayName}</h4>
-                    <p>{user.email || 'No email provided'}</p>
-                  </div>
-                </div>
-                <div className="tooltip-divider"></div>
-                <div className="tooltip-stats">
-                  <div className="tooltip-stat">
-                    <Flame size={16} fill="currentColor" style={{ color: 'var(--accent-color)' }} />
-                    <span>{totalLessonsCompleted > 0 ? '1' : '0'} Day Streak</span>
-                  </div>
-                  <div className="tooltip-stat">
-                    <Award size={16} style={{ color: 'var(--accent-color)' }} />
-                    <span>47 Words Learned</span>
-                  </div>
-                  <div className="tooltip-stat">
-                    <Target size={16} style={{ color: 'var(--accent-color)' }} />
-                    <span>82% Accuracy</span>
-                  </div>
-                </div>
-                <button
-                  className="tooltip-settings-btn"
-                  onClick={() => navigate('/settings')}
-                >
-                  View Profile Settings
-                </button>
+            {showProfileTooltip && <div className="profile-tooltip">
+              <div className="tooltip-header">
+                <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" className="tooltip-avatar" />
+                <div className="tooltip-user-info"><h4>{name}</h4><p>{user.email || 'No email'}</p></div>
               </div>
-            )}
+              <div className="tooltip-divider" />
+              <button className="tooltip-settings-btn" onClick={() => navigate('/settings')}>View Profile Settings</button>
+            </div>}
           </div>
         </div>
       </header>
 
-      {/* Dashboard Grid */}
-      <div className="dashboard-grid">
-        {/* Focus Card */}
-        <div className="focus-card">
-          <div className="focus-info">
-            <span className="badge">→ CONTINUE LEARNING</span>
-            <h3>Common Phrases</h3>
-            <p className="hindi-text" style={{ fontSize: '18px', fontWeight: 600 }}>आम वाक्यांश</p>
-            <p style={{ opacity: 0.9, marginTop: '10px' }}>
-              Master 10 essential greetings for daily conversation
-            </p>
-            <button className="start-btn" onClick={() => handleNavigation('/lessons')}>
-              <PlayCircle size={22} />
-              START NOW
-            </button>
-          </div>
+      {/* Top grid: Hero (left) + Stats (right) */}
+      <div className="db-top-grid">
+        {/* Hero */}
+        <div className="db-hero">
+          <span className="db-hero-badge">→ CONTINUE LEARNING</span>
+          <h2 className="db-hero-title">Common Phrases</h2>
+          <p className="db-hero-hindi">आम वाक्यांश</p>
+          <p className="db-hero-desc">Master 10 essential greetings for daily conversation</p>
+          <button className="db-start-btn" onClick={() => navigate('/lessons')}>
+            <PlayCircle size={18} /> Start Now
+          </button>
         </div>
 
-        {/* Stats Column */}
-        <div className="stats-column">
+        {/* Right: Daily Goal + Lessons stacked */}
+        <div className="db-right-col">
           {/* Daily Goal */}
-          <div className="goal-circle-card">
-            <h4 style={{ fontSize: '16px', margin: '0 0 8px 0' }}>Daily Goal</h4>
-            <div className="progress-ring">
-              <svg width="80" height="80">
-                <circle className="ring-bg" cx="40" cy="40" r="36" />
-                <circle
-                  className="ring-fill"
-                  cx="40"
-                  cy="40"
-                  r="36"
-                  style={{
-                    strokeDashoffset: 226 - (226 * Math.min(1, todayProgress / preferences.dailyGoalMinutes))
-                  }}
-                />
-              </svg>
-              <span className="percent" style={{ fontSize: '18px' }}>{Math.min(100, Math.round((todayProgress / preferences.dailyGoalMinutes) * 100))}%</span>
+          <div className="db-goal-card">
+            <div className="db-card-row">
+              <span className="db-label">Daily Goal</span>
             </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '8px 0 0 0' }}>{todayProgress}/{preferences.dailyGoalMinutes} min today</p>
+            <div className="db-goal-body">
+              <div className="progress-ring">
+                <svg width="72" height="72">
+                  <circle className="ring-bg" cx="36" cy="36" r="30" />
+                  <circle className="ring-fill" cx="36" cy="36" r="30"
+                    style={{ strokeDasharray: 188, strokeDashoffset: 188 - (188 * Math.min(1, displayProgress / preferences.dailyGoalMinutes)) }} />
+                </svg>
+                <span className="percent" style={{ fontSize: '0.9rem' }}>{goalPct}%</span>
+              </div>
+              <div>
+                <p className="db-goal-status">
+                  {goalPct >= 100 ? '🎉 Goal reached!' : goalPct >= 50 ? '🔥 Halfway!' : '💪 Keep going!'}
+                </p>
+                <p className="db-goal-hint">Target: {preferences.dailyGoalMinutes} min</p>
+              </div>
+            </div>
           </div>
 
-          {/* Word of Day */}
-          <div className="word-card">
-            <span className="label" style={{ fontSize: '11px' }}>Word of the Day</span>
-            <h4 style={{ fontSize: '28px', margin: '8px 0' }}>दोस्त</h4>
-            <p style={{ margin: 0, fontSize: '14px' }}>Dost · Friend</p>
+          {/* Lessons */}
+          <div className="db-lessons-card" onClick={() => navigate('/lessons')}>
+            <TrendingUp size={24} color="var(--accent-color)" />
+            <div>
+              <div className="db-stat-num">{totalLessonsCompleted}</div>
+              <div className="db-stat-label">Lessons Completed</div>
+            </div>
+            <ChevronRight size={16} color="var(--text-muted)" style={{ marginLeft: 'auto' }} />
           </div>
         </div>
       </div>
 
-      {/* Quick Stats Row */}
-      <section style={{ marginTop: '30px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-          <div
-            className="progress-card"
-            style={{ padding: '20px', textAlign: 'center', cursor: 'pointer' }}
-            onClick={() => navigate('/lessons')}
-          >
-            <Award size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>47</h4>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Words Learned</p>
-          </div>
-          <div
-            className="progress-card"
-            style={{ padding: '20px', textAlign: 'center', cursor: 'pointer' }}
-            onClick={() => navigate('/lessons')}
-          >
-            <Target size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>82%</h4>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Accuracy</p>
-          </div>
-          <div
-            className="progress-card"
-            style={{ padding: '20px', textAlign: 'center', cursor: 'pointer' }}
-            onClick={() => navigate('/lessons')}
-          >
-            <TrendingUp size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <h4 style={{ margin: '5px 0', fontSize: '24px', fontWeight: 800 }}>{totalLessonsCompleted}</h4>
-            <p style={{ color: 'var(--text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Lessons Completed</p>
-          </div>
+      {/* Weekly chart */}
+      <div className="db-card">
+        <div className="db-card-row" style={{ marginBottom: '16px' }}>
+          <h3 className="db-card-title">This Week</h3>
+          <BarChart3 size={16} color="var(--text-muted)" />
         </div>
-      </section>
-
-      {/* Weekly Progress */}
-      <section style={{ marginTop: '30px' }}>
-        <div className="progress-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h3 style={{ margin: 0 }}>This Week</h3>
-            <BarChart3 size={18} color="var(--text-muted)" />
-          </div>
-          <div className="weekly-chart">
-            {weeklyData.map((item, i) => (
-              <div key={i} className="bar-wrapper">
-                <div
-                  className="bar"
-                  style={{
-                    height: `${(item.value / Math.max(maxValue, 5)) * 100}%`,
-                    opacity: item.isToday ? 1 : 0.7,
-                    position: 'relative',
-                    boxShadow: item.isToday ? '0 0 10px rgba(230, 126, 34, 0.5)' : '0 4px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                  title={`${item.date}: Score ${item.value}`}
-                >
-                  {item.value > 0 && (
-                    <span style={{
-                      position: 'absolute',
-                      top: '-20px',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      fontSize: '10px',
-                      fontWeight: 'bold',
-                      color: 'var(--accent-color)'
-                    }}>
-                      {item.value}
-                    </span>
-                  )}
-                </div>
-                <span className="day-label" style={{ fontWeight: item.isToday ? 800 : 700, color: item.isToday ? 'var(--accent-color)' : 'var(--text-muted)' }}>
-                  {item.day}
-                </span>
+        <div className="weekly-chart">
+          {weeklyData.map((item, i) => (
+            <div key={i} className="bar-wrapper">
+              <div className={`bar${item.isToday ? ' bar-today' : ''}`}
+                style={{ height: `${Math.min(85, (item.value / Math.max(maxVal, 5)) * 85)}%` }}
+                title={`Score: ${item.value}`}>
+                {item.value > 0 && <span className="bar-score-label">{item.value}</span>}
               </div>
-            ))}
-          </div>
+              <span className="day-label" style={{
+                fontWeight: item.isToday ? 800 : 600,
+                color: item.isToday ? 'var(--accent-color)' : 'var(--text-muted)'
+              }}>{item.day}</span>
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
 
       {/* Quick Actions */}
-      <section style={{ marginTop: '30px' }}>
-        <h3 style={{ marginBottom: '20px' }}>Quick Actions</h3>
-        <div className="activities-grid">
-          <div className="activity-item" onClick={() => handleNavigation('/lessons')}>
-            <BookOpen size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <p style={{ margin: 0, fontWeight: 600 }}>Learn</p>
-          </div>
-
-          <div className="activity-item" onClick={() => handleNavigation('/leaderboard')}>
-            <Star size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <p style={{ margin: 0, fontWeight: 600 }}>Leaderboard</p>
-          </div>
-          <div className="activity-item" onClick={() => handleNavigation('/settings')}>
-            <Clock size={32} color="var(--accent-color)" style={{ margin: '0 auto 10px' }} />
-            <p style={{ margin: 0, fontWeight: 600 }}>Settings</p>
-          </div>
+      <div>
+        <h3 className="db-card-title" style={{ marginBottom: '12px' }}>Quick Actions</h3>
+        <div className="db-actions">
+          {[
+            { label: 'Lessons', icon: BookOpen, path: '/lessons', color: '#e67e22' },
+            { label: 'Leaderboard', icon: Trophy, path: '/leaderboard', color: '#9b59b6' },
+            { label: 'Settings', icon: Settings, path: '/settings', color: '#27ae60' },
+          ].map(({ label, icon: Icon, path, color }) => (
+            <button key={label} className="db-action-btn" onClick={() => navigate(path)}>
+              <div className="db-action-icon" style={{ background: `${color}18`, color }}><Icon size={20} /></div>
+              <span className="db-action-label">{label}</span>
+              <ChevronRight size={15} color="var(--text-muted)" style={{ marginLeft: 'auto' }} />
+            </button>
+          ))}
         </div>
-      </section>
+      </div>
+
     </div>
   );
 };
-
 export default Dashboard;
