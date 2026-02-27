@@ -2,11 +2,17 @@ import React, { useState } from 'react';
 import { Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw, Volume2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useUser } from '../context/UserContext';
 import '../Dashboard.css';
 
 const Lessons = () => {
     const navigate = useNavigate();
+    const { user, streak } = useUser();
     const [completedLessons, setCompletedLessons] = useState([]);
+    const [showProfileTooltip, setShowProfileTooltip] = useState(false);
+    const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
+
+    const name = user?.username || (user?.email ? user.email.split('@')[0].replace(/^./, c => c.toUpperCase()) : 'Learner');
 
     // Load progress
     React.useEffect(() => {
@@ -117,13 +123,27 @@ const Lessons = () => {
                     <h2>Lessons</h2>
                     <p>Master the Hindi alphabet and basic conversation.</p>
                 </div>
-                <div className="header-stats">
-                    <div className="stat-pill streak">
-                        <Flame size={18} fill="currentColor" /> {completedLessons.length > 0 ? '1' : '0'} Day Streak
+                <div className="db-header-right">
+                    <div className="db-streak">
+                        <Flame size={15} fill="currentColor" />
+                        {streak} Day{streak !== 1 ? 's' : ''} Streak
                     </div>
-                    <button className="notif-btn"><Bell size={20} /></button>
-                    <div className="profile-avatar">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun" alt="User" />
+                    <div className="notification-container" onMouseEnter={() => setShowNotificationTooltip(true)} onMouseLeave={() => setShowNotificationTooltip(false)}>
+                        <button className="db-icon-btn" aria-label="Notifications" onClick={() => navigate('/settings')}><Bell size={18} /></button>
+                        {showNotificationTooltip && <div className="notification-tooltip"><div className="notification-tooltip-content"><Bell size={20} style={{ color: 'var(--text-muted)', opacity: 0.5 }} /><p>No notifications</p></div></div>}
+                    </div>
+                    <div className="profile-avatar-container" onMouseEnter={() => setShowProfileTooltip(true)} onMouseLeave={() => setShowProfileTooltip(false)}>
+                        <div className="profile-avatar" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }}>
+                            <img src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                        </div>
+                        {showProfileTooltip && <div className="profile-tooltip">
+                            <div className="tooltip-header">
+                                <img src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" className="tooltip-avatar" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '50%' }} />
+                                <div className="tooltip-user-info"><h4>{name}</h4><p>{user?.email || 'No email'}</p></div>
+                            </div>
+                            <div className="tooltip-divider" />
+                            <button className="tooltip-settings-btn" onClick={() => navigate('/settings')}>View Profile Settings</button>
+                        </div>}
                     </div>
                 </div>
             </header>
