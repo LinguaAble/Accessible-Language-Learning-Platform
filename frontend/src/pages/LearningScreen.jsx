@@ -5,6 +5,7 @@ import { useUser } from '../context/UserContext';
 import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic, Trophy, Star, Target, Clock, Eye, EyeOff } from 'lucide-react';
 import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
 import { transcribeAudio } from '../utils/googleSpeechService';
+import { evaluatePronunciation, getConfidenceBadge } from '../utils/nlpEvalService';
 
 import logo from '../assets/logo.png';
 import '../Learning.css';
@@ -501,6 +502,7 @@ const LearningScreen = () => {
   const mediaRecorderRef = React.useRef(null);
   const audioChunksRef = React.useRef([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [nlpFeedback, setNlpFeedback] = useState(null); // NLP: { feedback, confidence, matchType }
 
   // Toggle Recording
   const handleMicClick = async () => {
@@ -518,9 +520,24 @@ const LearningScreen = () => {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Use 'audio/webm' as it is widely supported and works with Google API (WEBM_OPUS)
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      // FIX: Request 48000Hz sample rate explicitly so it matches what we tell Google
+      // { audio: true } lets browser pick any rate — often 44100Hz — causing mismatch
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          sampleRate: 48000,
+          channelCount: 1,      // Mono is all Google needs, reduces noise
+          echoCancellation: true,
+          noiseSuppression: true,
+        }
+      });
+
+      // FIX: Use 'audio/webm;codecs=opus' explicitly — plain 'audio/webm' can
+      // use vp8 video codec on some browsers which Google STT cannot decode
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : 'audio/webm';
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
 
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -532,25 +549,31 @@ const LearningScreen = () => {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         setIsProcessing(true);
+        setNlpFeedback(null);
         setListeningText("Analyzing...");
 
         try {
-          // Use our new Google Speech Service
-          // Pass the expected character as a 'hint' to the API to boost accuracy
           const currentSlide = activeSlides[currentSlideIndex];
-          const hints = currentSlide ? [currentSlide.mainChar] : [];
+          const hints = currentSlide ? [currentSlide.mainChar, currentSlide.answer] : [];
 
           const transcript = await transcribeAudio(audioBlob, hints);
-          setListeningText(transcript || "No speech detected, try again.");
-          checkPronunciation(transcript);
+
+          if (!transcript || transcript.trim() === '') {
+            setListeningText("No speech detected. Please try again.");
+            setIsProcessing(false);
+            stream.getTracks().forEach(track => track.stop());
+            return;
+          }
+
+          setListeningText(`Heard: "${transcript}" — evaluating...`);
+          await checkPronunciation(transcript);
         } catch (error) {
           console.error("Speech analysis failed", error);
           setListeningText("Error analyzing speech. Try again.");
         } finally {
           setIsProcessing(false);
-          // Stop all tracks to release mic
           stream.getTracks().forEach(track => track.stop());
         }
       };
@@ -571,21 +594,28 @@ const LearningScreen = () => {
     }
   };
 
-  const checkPronunciation = (transcript) => {
+  const checkPronunciation = async (transcript) => {
     const currentSlide = activeSlides[currentSlideIndex];
 
-    // Normalize function to handle chandrabindu (ँ) vs anusvar (ं) variations
-    const normalizeHindi = (text) => {
-      return text.trim().replace(/ँ/g, 'ं'); // Replace chandrabindu with anusvar for comparison
-    };
+    // NLP EVALUATION — replaces simple string match
+    // Pipeline: exact Hindi → exact Roman → transliteration →
+    // phonetic normalization → Levenshtein fuzzy → Dice similarity → partial word
+    // Falls back to local evaluation if server is unreachable.
+    const result = await evaluatePronunciation(
+      transcript,
+      currentSlide.answer,   // e.g. "ka", "main hoon"
+      currentSlide.mainChar  // e.g. "क", "मैं हूँ"
+    );
 
-    // Strict Hindi Matching with normalization
-    const normalizedTranscript = normalizeHindi(transcript);
-    const normalizedMainChar = normalizeHindi(currentSlide.mainChar);
+    // Store rich feedback for UI display
+    setNlpFeedback({
+      feedback: result.feedback,
+      confidence: result.confidence,
+      matchType: result.matchType,
+    });
+    setListeningText(result.feedback);
 
-    const correct = normalizedTranscript.includes(normalizedMainChar);
-
-    if (correct) {
+    if (result.isCorrect) {
       setIsCorrect(true);
       playSoundEffect('correct');
 
@@ -650,10 +680,9 @@ const LearningScreen = () => {
   }, [currentSlideIndex, originalCount]);
 
   const playAudio = (text) => {
-    // Check Sound Preference
-    const soundEnabled = user.preferences?.soundEffects ?? false;
-    if (!soundEnabled) return;
-
+    // FIX: Removed soundEffects gate — "Click to listen" must ALWAYS work
+    // soundEffects setting only controls game sounds (correct/incorrect beeps)
+    // not the pronunciation audio which is core to learning
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
@@ -722,6 +751,7 @@ const LearningScreen = () => {
     setSelectedOption(null);
     setIsCorrect(null);
     setListeningText(""); // Reset listening text
+    setNlpFeedback(null); // Reset NLP feedback
 
     if (currentSlideIndex < activeSlides.length - 1) {
       setCurrentSlideIndex(prev => prev + 1);
@@ -1050,9 +1080,42 @@ const LearningScreen = () => {
                 >
                   <Mic size={40} />
                 </button>
-                <p className="listening-status" style={{ marginTop: '10px', minHeight: '24px' }}>
-                  {listeningText}
-                </p>
+
+                {/* NLP Feedback Display */}
+                <div style={{ marginTop: '14px', minHeight: '70px' }}>
+                  {isProcessing && (
+                    <p className="listening-status" style={{ color: '#f39c12', fontWeight: '600' }}>
+                      🔍 Analyzing...
+                    </p>
+                  )}
+                  {!isProcessing && nlpFeedback && (
+                    <div style={{
+                      background: isCorrect === true ? 'rgba(46,204,113,0.1)' : isCorrect === false ? 'rgba(231,76,60,0.08)' : 'transparent',
+                      borderRadius: '12px',
+                      padding: '10px 16px',
+                      border: isCorrect === true ? '1px solid rgba(46,204,113,0.3)' : isCorrect === false ? '1px solid rgba(231,76,60,0.25)' : 'none',
+                    }}>
+                      {(() => {
+                        const badge = getConfidenceBadge(nlpFeedback.confidence);
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <span style={{ background: badge.color, color: 'white', borderRadius: '20px', padding: '3px 12px', fontSize: '0.75rem', fontWeight: '700' }}>
+                              {badge.emoji} {badge.label} · {Math.round(nlpFeedback.confidence * 100)}%
+                            </span>
+                          </div>
+                        );
+                      })()}
+                      <p className="listening-status" style={{ margin: 0, fontWeight: '500' }}>
+                        {nlpFeedback.feedback}
+                      </p>
+                    </div>
+                  )}
+                  {!isProcessing && !nlpFeedback && (
+                    <p className="listening-status" style={{ marginTop: '10px', minHeight: '24px' }}>
+                      {listeningText || (isListening ? 'Listening... (click to stop)' : 'Tap the mic and say the sound')}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
