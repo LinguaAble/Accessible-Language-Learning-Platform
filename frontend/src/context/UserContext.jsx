@@ -187,9 +187,12 @@ export const UserProvider = ({ children }) => {
         localStorage.setItem('todayProgress', newProgress.toString());
 
         if (user.email) {
+            const locDate = new Date();
+            const dateStr = `${locDate.getFullYear()}-${String(locDate.getMonth() + 1).padStart(2, '0')}-${String(locDate.getDate()).padStart(2, '0')}`;
             axios.put('http://localhost:5000/api/auth/update-progress', {
                 email: user.email,
-                todayProgress: newProgress
+                todayProgress: newProgress,
+                date: dateStr
             }).then(res => {
                 // Sync streak back from backend
                 if (res.data.streak !== undefined) {

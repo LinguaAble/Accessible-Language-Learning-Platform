@@ -260,10 +260,14 @@ router.put('/update-progress', async (req, res) => {
         if (user.lastStreakDate === todayStr) {
           // Goal already counted for today — no change
         } else {
-          // Check if yesterday was the last streak day
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          // Calculate yesterday based on todayStr
+          const [yyyy, mm, dd] = todayStr.split('-').map(Number);
+          const refDate = new Date(yyyy, mm - 1, dd);
+          refDate.setDate(refDate.getDate() - 1);
+          const yyyyLast = refDate.getFullYear();
+          const mmLast = String(refDate.getMonth() + 1).padStart(2, '0');
+          const ddLast = String(refDate.getDate()).padStart(2, '0');
+          const yesterdayStr = `${yyyyLast}-${mmLast}-${ddLast}`;
 
           if (user.lastStreakDate === yesterdayStr) {
             // Consecutive day — extend streak
@@ -342,6 +346,8 @@ router.post('/get-user-data', async (req, res) => {
         completedLessons: user.completedLessons,
         todayProgress: user.todayProgress,
         progressDate: user.progressDate,
+        streak: user.streak,
+        lastStreakDate: user.lastStreakDate,
         dailyLessonCounts: user.dailyLessonCounts,
         dailyScores: user.dailyScores
       }
