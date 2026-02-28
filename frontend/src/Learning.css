@@ -10,6 +10,7 @@
     top: 0;
     left: 0;
     z-index: 2000;
+    overflow: hidden;
 }
 
 .learning-header {
@@ -86,7 +87,8 @@
     align-items: center;
     justify-content: space-between;
     background: var(--card-bg);
-    min-height: 100px;
+    min-height: 120px;
+    box-sizing: border-box;
     transition: background-color 0.3s;
 }
 
@@ -1990,7 +1992,6 @@ ADHD-FRIENDLY PRINCIPLES:
 }
 
 .option-btn:active {
-    border-bottom-width: 2px;
     transform: translateY(2px);
 }
 

@@ -99,7 +99,7 @@ router.post('/login', async (req, res) => {
           streak: newStreak
         }
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     const token = jwt.sign({ id: updated._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -404,7 +404,7 @@ router.put('/update-profile', async (req, res) => {
     const updated = await User.findOneAndUpdate(
       { email },
       updateQuery,
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     res.json({

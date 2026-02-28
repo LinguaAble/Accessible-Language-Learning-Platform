@@ -551,6 +551,14 @@
   width: 80px;
 }
 
+.sidebar.collapsed .nav-item {
+  padding: 14px 0;
+  justify-content: center;
+  margin-left: 0;
+  margin-right: 0;
+  gap: 0;
+}
+
 /* Smooth Text Hiding */
 .nav-item span,
 .slogan-text,
