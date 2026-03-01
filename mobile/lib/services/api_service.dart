@@ -1,22 +1,24 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // Use 10.0.2.2 for Android emulator (maps to host localhost)
-  // static const String _baseUrl = 'http://10.0.2.2:5000/api/auth';
-  // static const String _evalUrl = 'http://10.0.2.2:5000/api/eval';
-
-  // For real device via USB (adb reverse tcp:5000 tcp:5000):
-  static const String _baseUrl = 'http://127.0.0.1:5000/api/auth';
-  static const String _evalUrl = 'http://127.0.0.1:5000/api/eval';
+  // adb reverse tcp:5000 tcp:5000 — tunnels phone localhost → PC backend via USB.
+  // This means we can always use localhost on both web and native Android.
+  static const String _baseUrl = 'http://localhost:5000/api/auth';
+  static const String _evalUrl = 'http://localhost:5000/api/eval';
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+        'device': 'Mobile App', // Sent so loginHistory shows correct device
+      }),
     );
     final data = jsonDecode(response.body);
     return response.statusCode == 200
@@ -36,6 +38,7 @@ class ApiService {
         'email': email,
         'password': password,
         'username': username ?? email.split('@')[0],
+        'device': 'Mobile App', // Sent so loginHistory shows correct device
       }),
     );
     final data = jsonDecode(response.body);
@@ -78,6 +81,8 @@ class ApiService {
       body: jsonEncode({'email': email}),
     );
     final data = jsonDecode(response.body);
+    // Backend returns { user: {...} } on 200, NOT { success: true, user: {...} }
+    // We inject 'success: true' ourselves when status is 200.
     return response.statusCode == 200
         ? {'success': true, ...data}
         : {'success': false, 'message': data['message'] ?? 'Fetch failed'};
