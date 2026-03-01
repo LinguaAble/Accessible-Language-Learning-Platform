@@ -170,6 +170,7 @@ const Dashboard = () => {
         <div className="db-actions">
           {[
             { label: 'Lessons', icon: BookOpen, path: '/lessons', color: '#e67e22' },
+            { label: 'Progress', icon: BarChart3, path: '/progress', color: '#3498db' },
             { label: 'Leaderboard', icon: Trophy, path: '/leaderboard', color: '#9b59b6' },
             { label: 'Settings', icon: Settings, path: '/settings', color: '#27ae60' },
           ].map(({ label, icon: Icon, path, color }) => (

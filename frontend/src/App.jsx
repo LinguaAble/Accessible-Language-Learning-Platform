@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Lessons from './pages/Lessons';
 import Leaderboard from './pages/Leaderboard';
 import Settings from './pages/Settings';
+import ProgressReport from './pages/ProgressReport';
 import Layout from './components/Layout';
 import LearningScreen from './pages/LearningScreen';
 import { UserProvider, useUser } from './context/UserContext';
@@ -77,6 +78,7 @@ function AppContent() {
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/progress" element={<ProgressReport />} />
         </Route>
 
       </Routes>

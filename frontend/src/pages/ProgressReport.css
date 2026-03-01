@@ -1,0 +1,156 @@
+.report-container {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+}
+
+.report-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.report-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.report-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.report-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.report-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 1.8rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.report-card:hover {
+    transform: translateY(-5px);
+}
+
+.report-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.report-card.total-score::before {
+    background: #9face6;
+}
+
+.report-card.total-lessons::before {
+    background: #74ebd5;
+}
+
+.report-card.total-sessions::before {
+    background: #ffb7b2;
+}
+
+.report-card.learning-streak::before {
+    background: #ffd27f;
+}
+
+.report-icon {
+    margin-bottom: 1rem;
+    display: inline-flex;
+    border-radius: 50%;
+    padding: 1rem;
+}
+
+.report-card.total-score .report-icon {
+    background: rgba(159, 172, 230, 0.1);
+    color: #9face6;
+}
+
+.report-card.total-lessons .report-icon {
+    background: rgba(116, 235, 213, 0.1);
+    color: #74ebd5;
+}
+
+.report-card.total-sessions .report-icon {
+    background: rgba(255, 183, 178, 0.1);
+    color: #ffb7b2;
+}
+
+.report-card.learning-streak .report-icon {
+    background: rgba(255, 210, 127, 0.1);
+    color: #ffd27f;
+}
+
+.card-value {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.2rem;
+    color: var(--text-color);
+}
+
+.card-label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.encouragement-section {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 20px;
+    text-align: center;
+    margin-top: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.encouragement-text {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--text-color);
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+}
+
+.calm-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.calm-image {
+    max-width: 250px;
+    opacity: 0.8;
+    border-radius: 20px;
+}
+
+[data-theme='dark'] .report-card,
+[data-theme='dark'] .report-header,
+[data-theme='dark'] .encouragement-section {
+    background: #1e1e1e;
+    box-shadow: none;
+    border: 1px solid #333;
+}
