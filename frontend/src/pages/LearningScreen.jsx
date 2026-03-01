@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { useNotifications } from '../context/NotificationContext';
 import { X, ChevronRight, Volume2, Award, Zap, CheckCircle, AlertCircle, RefreshCw, Mic, Trophy, Star, Target, Clock, Eye, EyeOff } from 'lucide-react';
 import { playCorrectSound, playIncorrectSound } from '../utils/soundUtils';
 import { transcribeAudio } from '../utils/googleSpeechService';
@@ -462,6 +463,7 @@ const LearningScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, login, todayProgress } = useUser();
+  const { startStudySession, endStudySession, triggerMilestone, triggerEncouragement } = useNotifications();
 
   const lessonId = location.state?.lessonId || 1;
   const initialLessonData = lessonDatabase[lessonId] || lessonDatabase[1];
@@ -476,7 +478,14 @@ const LearningScreen = () => {
   const [mistakeQueue, setMistakeQueue] = useState([]);
   const [isReviewMode, setIsReviewMode] = useState(false);
 
-  // --- BREAK NOTIFICATION SYSTEM ---
+  // US4 – Start study session when lesson screen mounts; stop on unmount
+  useEffect(() => {
+    startStudySession();
+    return () => endStudySession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+    // --- BREAK NOTIFICATION SYSTEM ---
   const [lessonStartTime] = useState(Date.now()); // Track when lesson started
   const [showBreakNotification, setShowBreakNotification] = useState(false);
   const [breakDismissed, setBreakDismissed] = useState(false);
@@ -815,6 +824,28 @@ const LearningScreen = () => {
 
         setProgress(100);
         setShowSuccess(true);
+
+        // US5 – Celebrate lesson completion with a notification
+        const { percentage: score } = calculateScore();
+        const completedNow = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+        if (isNewLesson) {
+          if (completedNow.length > 0 && completedNow.length % 5 === 0) {
+            triggerMilestone(
+              `Amazing! You've completed ${completedNow.length} lessons. Keep that fire going! 🔥`,
+              'View Progress',
+              '/dashboard'
+            );
+          } else {
+            triggerEncouragement(
+              score >= 90
+                ? `Brilliant! ${score}% accuracy — you nailed it! 🎯`
+                : score >= 70
+                ? `Good work! You scored ${score}% on that lesson. 💪`
+                : `Lesson done! A bit of review and you'll master it. 📖`
+            );
+          }
+        }
+
       }
     }
   };

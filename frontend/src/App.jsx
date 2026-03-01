@@ -13,6 +13,8 @@ import ProgressReport from './pages/ProgressReport';
 import Layout from './components/Layout';
 import LearningScreen from './pages/LearningScreen';
 import { UserProvider, useUser } from './context/UserContext';
+import { NotificationProvider } from './context/NotificationContext';
+import NotificationToast from './components/NotificationToast';
 import './App.css';
 import { playClickSound, playNavigationSound } from './utils/soundUtils';
 
@@ -61,6 +63,8 @@ function AppContent() {
     <div className="app-container">
       {/* Color Overlay for visual stress reduction (Dyslexia/ADHD) */}
       <div className="color-overlay" aria-hidden="true" />
+      {/* Global notification toast – renders on all pages */}
+      <NotificationToast />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -89,7 +93,11 @@ function AppContent() {
 function App() {
   return (
     <UserProvider>
-      <AppContent />
+      {/* NotificationProvider is inside UserProvider so it can be safe to use
+          alongside UserContext, but it does NOT depend on it */}
+      <NotificationProvider>
+        <AppContent />
+      </NotificationProvider>
     </UserProvider>
   );
 }

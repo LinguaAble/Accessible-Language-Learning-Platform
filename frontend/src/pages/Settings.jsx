@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users, Target, BookOpen, Layers } from 'lucide-react';
+import { Flame, Bell, Moon, Sun, Volume2, VolumeX, Eye, Shield, Clock, Type, User, Calendar, Users, Target, BookOpen, Layers, AlarmClock, Coffee } from 'lucide-react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import { useNotifications } from '../context/NotificationContext';
 import '../Dashboard.css';
 
 const Settings = () => {
     const { user, preferences, todayProgress, updatePreferences, updateProfile } = useUser();
+    const { notifPrefs, updateNotifPrefs } = useNotifications();
 
     // Local state for profile inputs
     const [profileData, setProfileData] = useState({
@@ -588,6 +590,146 @@ const Settings = () => {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* --- NOTIFICATION SETTINGS (US1–US10) --- */}
+                <div className="stat-card" style={{ gridColumn: 'span 2' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <Bell size={24} color="#e67e22" />
+                        <div>
+                            <h3 style={{ margin: 0 }}>Notification Preferences</h3>
+                            <p style={{ margin: '3px 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                                Control when and how you get reminders.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* US1 – Inactivity reminders */}
+                    <div className="settings-row">
+                        <div className="setting-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <AlarmClock size={18} />
+                                <span className="setting-label">Inactivity Reminders</span>
+                            </div>
+                            <span className="setting-desc">Gentle nudge when you haven't opened a lesson for a while.</span>
+                            {notifPrefs.inactivityReminders && (
+                                <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {[15, 30, 60].map(min => (
+                                        <button key={min}
+                                            className={`toggle-btn ${notifPrefs.inactivityMinutes === min ? 'active' : ''}`}
+                                            onClick={() => updateNotifPrefs({ inactivityMinutes: min })}
+                                            style={{ padding: '4px 12px', fontSize: '0.82rem' }}
+                                        >After {min}m</button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <button className={`toggle-btn ${notifPrefs.inactivityReminders ? 'active' : ''}`}
+                            onClick={() => updateNotifPrefs({ inactivityReminders: !notifPrefs.inactivityReminders })}
+                            style={{ minWidth: '64px' }}>
+                            {notifPrefs.inactivityReminders ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+
+                    {/* US4 – Break reminders */}
+                    <div className="settings-row">
+                        <div className="setting-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Coffee size={18} />
+                                <span className="setting-label">Break Reminders</span>
+                            </div>
+                            <span className="setting-desc">Remind me to rest during long study sessions.</span>
+                            {notifPrefs.breakReminders && (
+                                <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {[15, 20, 30].map(min => (
+                                        <button key={min}
+                                            className={`toggle-btn ${notifPrefs.breakIntervalMinutes === min ? 'active' : ''}`}
+                                            onClick={() => updateNotifPrefs({ breakIntervalMinutes: min })}
+                                            style={{ padding: '4px 12px', fontSize: '0.82rem' }}
+                                        >Every {min}m</button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <button className={`toggle-btn ${notifPrefs.breakReminders ? 'active' : ''}`}
+                            onClick={() => updateNotifPrefs({ breakReminders: !notifPrefs.breakReminders })}
+                            style={{ minWidth: '64px' }}>
+                            {notifPrefs.breakReminders ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+
+                    {/* US3 – Goal reminders */}
+                    <div className="settings-row">
+                        <div className="setting-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Target size={18} />
+                                <span className="setting-label">Daily Goal Reminders</span>
+                            </div>
+                            <span className="setting-desc">Show me how close I am to my daily learning goal.</span>
+                        </div>
+                        <button className={`toggle-btn ${notifPrefs.goalReminders ? 'active' : ''}`}
+                            onClick={() => updateNotifPrefs({ goalReminders: !notifPrefs.goalReminders })}
+                            style={{ minWidth: '64px' }}>
+                            {notifPrefs.goalReminders ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+
+                    {/* US5 – Milestone / encouragement */}
+                    <div className="settings-row">
+                        <div className="setting-info">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Bell size={18} />
+                                <span className="setting-label">Achievement Alerts</span>
+                            </div>
+                            <span className="setting-desc">Celebrate when I finish a lesson or hit a milestone.</span>
+                        </div>
+                        <button className={`toggle-btn ${notifPrefs.milestoneAlerts ? 'active' : ''}`}
+                            onClick={() => updateNotifPrefs({ milestoneAlerts: !notifPrefs.milestoneAlerts })}
+                            style={{ minWidth: '64px' }}>
+                            {notifPrefs.milestoneAlerts ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
+
+                    {/* US6 – Quiet hours */}
+                    <div className="settings-row" style={{ flexWrap: 'wrap', gap: '12px' }}>
+                        <div className="setting-info" style={{ minWidth: '220px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Moon size={18} />
+                                <span className="setting-label">Quiet Hours</span>
+                            </div>
+                            <span className="setting-desc">No notifications will appear during these hours. (US6)</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>From</label>
+                                <select value={notifPrefs.quietHoursStart}
+                                    onChange={e => updateNotifPrefs({ quietHoursStart: parseInt(e.target.value) })}
+                                    style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                                    {Array.from({ length: 24 }, (_, i) => (
+                                        <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>To</label>
+                                <select value={notifPrefs.quietHoursEnd}
+                                    onChange={e => updateNotifPrefs({ quietHoursEnd: parseInt(e.target.value) })}
+                                    style={{ padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                                    {Array.from({ length: 24 }, (_, i) => (
+                                        <option key={i} value={i}>{i === 0 ? '12 AM' : i < 12 ? `${i} AM` : i === 12 ? '12 PM' : `${i - 12} PM`}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                {(() => {
+                                    const h = new Date().getHours();
+                                    const { quietHoursStart: s, quietHoursEnd: e } = notifPrefs;
+                                    const inQH = s > e ? (h >= s || h < e) : (h >= s && h < e);
+                                    return inQH ? '🌙 Quiet hours active' : '🔔 Notifications allowed';
+                                })()}
+                            </span>
                         </div>
                     </div>
                 </div>

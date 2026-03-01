@@ -3,11 +3,14 @@ import { Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw, Volume2 } from '
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationBell from '../components/NotificationBell';
 import '../Dashboard.css';
 
 const Lessons = () => {
     const navigate = useNavigate();
     const { user, streak } = useUser();
+    // useNotifications available via context (no destructure needed here)
     const [completedLessons, setCompletedLessons] = useState([]);
     const [showProfileTooltip, setShowProfileTooltip] = useState(false);
     const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
@@ -129,8 +132,7 @@ const Lessons = () => {
                         {streak} Day{streak !== 1 ? 's' : ''} Streak
                     </div>
                     <div className="notification-container" onMouseEnter={() => setShowNotificationTooltip(true)} onMouseLeave={() => setShowNotificationTooltip(false)}>
-                        <button className="db-icon-btn" aria-label="Notifications" onClick={() => navigate('/settings')}><Bell size={18} /></button>
-                        {showNotificationTooltip && <div className="notification-tooltip"><div className="notification-tooltip-content"><Bell size={20} style={{ color: 'var(--text-muted)', opacity: 0.5 }} /><p>No notifications</p></div></div>}
+                        <NotificationBell btnClassName="db-icon-btn" />
                     </div>
                     <div className="profile-avatar-container" onMouseEnter={() => setShowProfileTooltip(true)} onMouseLeave={() => setShowProfileTooltip(false)}>
                         <div className="profile-avatar" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }}>

@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationBell from '../components/NotificationBell';
 import { BookOpen, Flame, PlayCircle, BarChart3, Bell, TrendingUp, Settings, Trophy, ChevronRight } from 'lucide-react';
 import '../Dashboard.css';
 
 const Dashboard = () => {
   const { user, preferences, todayProgress, streak } = useUser();
+  const { triggerGoalReminder } = useNotifications();
   const navigate = useNavigate();
   const [showProfileTooltip, setShowProfileTooltip] = useState(false);
   const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
@@ -52,6 +55,19 @@ const Dashboard = () => {
       .catch(e => console.error('Sync failed', e));
   }, [user.email]);
 
+  // US3 – Trigger a goal reminder 4 seconds after dashboard loads, if goal not yet met
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const prog = parseInt(localStorage.getItem('todayProgress'), 10) || 0;
+      const goal = preferences?.dailyGoalMinutes || 5;
+      if (prog < goal) {
+        triggerGoalReminder(goal, prog);
+      }
+    }, 4000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount only
+
   const name = user.username || (user.email ? user.email.split('@')[0].replace(/^./, c => c.toUpperCase()) : 'Learner');
   const maxVal = Math.max(...weeklyData.map(d => d.value), 1);
   const goalPct = Math.min(100, Math.round((displayProgress / preferences.dailyGoalMinutes) * 100));
@@ -71,9 +87,12 @@ const Dashboard = () => {
             <Flame size={15} fill="currentColor" />
             {streak} Day{streak !== 1 ? 's' : ''} Streak
           </div>
-          <div className="notification-container" onMouseEnter={() => setShowNotificationTooltip(true)} onMouseLeave={() => setShowNotificationTooltip(false)}>
-            <button className="db-icon-btn" aria-label="Notifications" onClick={() => navigate('/settings')}><Bell size={18} /></button>
-            {showNotificationTooltip && <div className="notification-tooltip"><div className="notification-tooltip-content"><Bell size={20} style={{ color: 'var(--text-muted)', opacity: 0.5 }} /><p>No notifications</p></div></div>}
+          {/* NotificationBell replaces the plain Bell button – same visual position */}
+          <div className="notification-container"
+            onMouseEnter={() => setShowNotificationTooltip(true)}
+            onMouseLeave={() => setShowNotificationTooltip(false)}
+          >
+            <NotificationBell btnClassName="db-icon-btn" />
           </div>
           <div className="profile-avatar-container" onMouseEnter={() => setShowProfileTooltip(true)} onMouseLeave={() => setShowProfileTooltip(false)}>
             <div className="profile-avatar" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }}>
