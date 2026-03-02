@@ -14,8 +14,10 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  List<Map<String, dynamic>> weeklyData = [];
-  int totalLessonsCompleted = 0;
+  // weeklyData and totalLessonsCompleted are NO LONGER stored as state.
+  // They are computed inline in build() from provider, so every
+  // provider.updateUser() / notifyListeners() (e.g. after a lesson)
+  // automatically reflects in the UI without a manual setState.
 
   @override
   void initState() {
@@ -33,27 +35,24 @@ class _DashboardPageState extends State<DashboardPage> {
           // Pull streak fields from top-level (login response) if present
           if (result['streak'] != null) userData['streak'] = result['streak'];
           if (result['lastStreakDate'] != null) userData['lastStreakDate'] = result['lastStreakDate'];
+          // updateUser calls notifyListeners() → triggers build() → re-computes chart
           await provider.updateUser(userData);
         }
       } catch (_) {}
     }
-    _buildWeeklyData();
   }
 
-  void _buildWeeklyData() {
-    final provider = Provider.of<UserProvider>(context, listen: false);
+  /// Pure function — computes chart data directly from the provider.
+  /// Called every build() so data is always in sync with the provider.
+  List<Map<String, dynamic>> _computeWeeklyData(UserProvider provider) {
     final now = DateTime.now();
     final todayStr = _fmt(now);
-
     // Start of week (Monday)
     final dayOfWeek = now.weekday; // 1=Mon, 7=Sun
     final monday = now.subtract(Duration(days: dayOfWeek - 1));
-
     final scores = provider.dailyScores;
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
-    final data = <Map<String, dynamic>>[];
-    for (int i = 0; i < 7; i++) {
+    return List.generate(7, (i) {
       final d = monday.add(Duration(days: i));
       final str = _fmt(d);
       int score = 0;
@@ -62,16 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
           score = (e['score'] as num?)?.toInt() ?? 0;
         }
       }
-      data.add({
-        'day': days[i],
-        'value': score,
-        'isToday': str == todayStr,
-      });
-    }
-
-    setState(() {
-      weeklyData = data;
-      totalLessonsCompleted = provider.completedLessons.length;
+      return {'day': days[i], 'value': score, 'isToday': str == todayStr};
     });
   }
 
@@ -87,11 +77,15 @@ class _DashboardPageState extends State<DashboardPage> {
     final dailyGoal = provider.dailyGoalMinutes;
     final goalPct =
         dailyGoal > 0 ? (todayProgress / dailyGoal * 100).round().clamp(0, 100) : 0;
+
+    // Computed live from provider — auto-refreshes when provider notifies
+    final totalLessonsCompleted = provider.completedLessons.length;
+    final weeklyData = _computeWeeklyData(provider);
     final maxVal =
         weeklyData.isEmpty ? 1 : weeklyData.map((d) => d['value'] as int).reduce(max).clamp(1, 999);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _syncAndLoad,
@@ -104,7 +98,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // --- HEADER ---
-                  _buildHeader(displayName, user, totalLessonsCompleted, provider),
+                  _buildHeader(context, displayName, user, totalLessonsCompleted, provider),
                   const SizedBox(height: 24),
 
                   // --- HERO CARD ---
@@ -122,7 +116,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   const SizedBox(height: 20),
 
                   // --- WEEKLY CHART ---
-                  _buildWeeklyChart(maxVal),
+                  _buildWeeklyChart(weeklyData, maxVal),
                   const SizedBox(height: 20),
 
                   // --- QUICK ACTIONS ---
@@ -137,11 +131,14 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildHeader(
+    BuildContext context,
     String name,
     Map<String, dynamic> user,
     int totalLessons,
     UserProvider provider,
   ) {
+    final cs = Theme.of(context).colorScheme;
+    final sw = MediaQuery.of(context).size.width;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -159,18 +156,20 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               Text(
                 '$name 👋',
-                style: const TextStyle(
-                  fontSize: 26,
+                style: TextStyle(
+                  fontSize: sw < 360 ? 20 : 24,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF1E293B),
+                  color: cs.onSurface,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Ready to continue your Hindi journey?',
+              Text(
+                'Ready for your Hindi journey?',
                 style: TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF64748B),
+                  fontSize: sw < 360 ? 11 : 13,
+                  color: cs.onSurface.withOpacity(0.55),
                 ),
               ),
             ],
@@ -179,9 +178,10 @@ class _DashboardPageState extends State<DashboardPage> {
         // Streak + Avatar
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFFFEF3C7),
                 borderRadius: BorderRadius.circular(20),
@@ -189,45 +189,48 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
-                  const SizedBox(width: 4),
+                  const Icon(Icons.local_fire_department,
+                      color: Colors.orange, size: 14),
+                  const SizedBox(width: 3),
                   Text(
-                    '${provider.streak} Day${provider.streak == 1 ? '' : 's'}',
+                    '${provider.streak}d',
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 12,
+                      fontSize: 11,
                       color: Color(0xFFD97706),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_none, color: Colors.blueGrey),
-                  onPressed: () => context.push('/settings'),
-                  constraints: const BoxConstraints(),
-                  padding: const EdgeInsets.only(right: 12),
+                GestureDetector(
+                  onTap: () => context.push('/settings'),
+                  child: const Icon(Icons.notifications_none,
+                      size: 22, color: Colors.blueGrey),
                 ),
+                const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () => context.push('/settings'),
                   child: Container(
-                    width: 42,
-                    height: 42,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFF79C42), width: 2),
-                      color: const Color(0xFFE2E8F0),
+                      border:
+                          Border.all(color: const Color(0xFFF79C42), width: 2),
                     ),
                     child: ClipOval(
                       child: Image.network(
-                        user['avatarUrl'] ??
-                            'https://api.dicebear.com/7.x/avataaars/png?seed=$name',
+                        user['avatarUrl'] != null && (user['avatarUrl'] as String).isNotEmpty
+                            ? user['avatarUrl'] as String
+                            : 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(name)}&background=F79C42&color=fff&bold=true&size=128',
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 24),
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.person, size: 20, color: Color(0xFFF79C42)),
                       ),
                     ),
                   ),
@@ -375,9 +378,9 @@ class _DashboardPageState extends State<DashboardPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Column(
         children: [
@@ -420,9 +423,9 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
         ),
         child: Column(
           children: [
@@ -458,13 +461,13 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildWeeklyChart(int maxVal) {
+  Widget _buildWeeklyChart(List<Map<String, dynamic>> weeklyData, int maxVal) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -570,9 +573,9 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: Row(
                   children: [
