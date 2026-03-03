@@ -74,13 +74,15 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.blueGrey),
+          icon: Icon(Icons.arrow_back, color: cs.onSurface.withOpacity(0.6)),
           onPressed: () => context.pop(),
         ),
       ),
@@ -94,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cs.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -111,12 +113,12 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Welcome to',
-                style: TextStyle(fontSize: 16, color: Colors.blueGrey),
+                style: TextStyle(fontSize: 16, color: cs.onSurface.withOpacity(0.6)),
               ),
               RichText(
-                text: const TextSpan(
+                text: TextSpan(
                   style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.w900,
@@ -125,9 +127,9 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     TextSpan(
                       text: 'Lingua',
-                      style: TextStyle(color: Color(0xFF1E3A8A)),
+                      style: TextStyle(color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A)),
                     ),
-                    TextSpan(
+                    const TextSpan(
                       text: 'Able',
                       style: TextStyle(color: Color(0xFFF79C42)),
                     ),
@@ -152,23 +154,23 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.all(12),
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEE2E2),
+                    color: cs.error.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                    border: Border.all(color: cs.error.withOpacity(0.4)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.error_outline,
-                        color: Color(0xFFEF4444),
+                        color: cs.error,
                         size: 20,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: const TextStyle(
-                            color: Color(0xFFDC2626),
+                          style: TextStyle(
+                            color: cs.error,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),

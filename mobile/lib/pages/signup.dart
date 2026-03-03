@@ -93,13 +93,15 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.blueGrey),
+          icon: Icon(Icons.arrow_back, color: cs.onSurface.withOpacity(0.6)),
           onPressed: () => context.pop(),
         ),
       ),
@@ -113,7 +115,7 @@ class _SignupPageState extends State<SignupPage> {
                 width: 90,
                 height: 90,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cs.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -131,8 +133,8 @@ class _SignupPageState extends State<SignupPage> {
               ),
               const SizedBox(height: 20),
               RichText(
-                text: const TextSpan(
-                  style: TextStyle(
+                text: TextSpan(
+                  style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -1.0,
@@ -140,9 +142,9 @@ class _SignupPageState extends State<SignupPage> {
                   children: [
                     TextSpan(
                       text: 'Lingua',
-                      style: TextStyle(color: Color(0xFF1E3A8A)),
+                      style: TextStyle(color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A)),
                     ),
-                    TextSpan(
+                    const TextSpan(
                       text: 'Able',
                       style: TextStyle(color: Color(0xFFF79C42)),
                     ),
@@ -150,12 +152,12 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
+              Text(
                 'Create Account',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueGrey,
+                  color: cs.onSurface.withOpacity(0.6),
                 ),
               ),
               const SizedBox(height: 25),
@@ -167,23 +169,23 @@ class _SignupPageState extends State<SignupPage> {
                   padding: const EdgeInsets.all(12),
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFEE2E2),
+                    color: cs.error.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFCA5A5)),
+                    border: Border.all(color: cs.error.withOpacity(0.4)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.error_outline,
-                        color: Color(0xFFEF4444),
+                        color: cs.error,
                         size: 20,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: const TextStyle(
-                            color: Color(0xFFDC2626),
+                          style: TextStyle(
+                            color: cs.error,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
