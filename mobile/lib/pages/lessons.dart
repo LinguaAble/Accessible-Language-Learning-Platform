@@ -11,31 +11,32 @@ class LessonsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<UserProvider>(context);
+    final cs = Theme.of(context).colorScheme;
     final completed = provider.completedLessons.map((e) => int.parse('$e')).toList();
     final streak = provider.streak;
 
     String effectiveAvatar = provider.avatarUrl;
     if (effectiveAvatar.isEmpty) {
-      effectiveAvatar = 'https://api.dicebear.com/7.x/avataaars/png?seed=${provider.username}';
+      effectiveAvatar = 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(provider.username)}&background=F79C42&color=fff&bold=true&size=128';
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.blueGrey),
+          icon: Icon(Icons.arrow_back, color: cs.onSurface.withOpacity(0.6)),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title: Text(
           'Lessons',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.bold),
         ),
         actions: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: const EdgeInsets.only(right: 4),
             decoration: BoxDecoration(
               color: const Color(0xFFFEF3C7),
               borderRadius: BorderRadius.circular(20),
@@ -43,31 +44,29 @@ class LessonsPage extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
-                const SizedBox(width: 4),
+                const Icon(Icons.local_fire_department,
+                    color: Colors.orange, size: 14),
+                const SizedBox(width: 3),
                 Text(
-                  '$streak Day${streak != 1 ? 's' : ''}',
+                  '${streak}d',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Color(0xFFD97706),
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.blueGrey),
-            onPressed: () => context.push('/settings'),
-          ),
           GestureDetector(
             onTap: () => context.push('/settings'),
             child: Container(
-              margin: const EdgeInsets.only(right: 16, left: 4),
+              margin: const EdgeInsets.only(right: 14, left: 4),
               child: CircleAvatar(
-                radius: 16,
+                radius: 15,
                 backgroundColor: const Color(0xFFF79C42).withOpacity(0.3),
                 backgroundImage: NetworkImage(effectiveAvatar),
+                onBackgroundImageError: (_, __) {},
               ),
             ),
           ),
@@ -83,13 +82,12 @@ class LessonsPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF1E293B),
               ),
             ),
             const SizedBox(height: 5),
-            const Text(
+            Text(
               'Master the Hindi alphabet and basic conversation.',
-              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: 14, color: cs.onSurface.withOpacity(0.55)),
             ),
             const SizedBox(height: 24),
             ...chapters.map((chapter) => _buildChapter(context, chapter, completed)),
@@ -100,6 +98,7 @@ class LessonsPage extends StatelessWidget {
   }
 
   Widget _buildChapter(BuildContext context, Map<String, dynamic> chapter, List<int> completed) {
+    final cs = Theme.of(context).colorScheme;
     final title = chapter['title'] as String;
     final subtitle = chapter['subtitle'] as String;
     final lessons = chapter['lessons'] as List<int>;
@@ -160,7 +159,7 @@ class LessonsPage extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 1.25,
+              childAspectRatio: 1.35,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
@@ -177,13 +176,17 @@ class LessonsPage extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isCompleted
-                        ? const Color(0xFFD1FAE5) // light green
-                        : (isLocked ? Colors.grey.shade100 : Colors.white),
+                        ? const Color(0xFF10B981).withOpacity(0.15)
+                        : (isLocked
+                            ? cs.surfaceContainerHighest
+                            : cs.surface),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isCompleted
-                          ? const Color(0xFF10B981) // emerald
-                          : (isLocked ? Colors.transparent : Colors.grey.shade200),
+                          ? const Color(0xFF10B981)
+                          : (isLocked
+                              ? cs.outline.withOpacity(0.3)
+                              : cs.outline),
                       width: 2,
                     ),
                     boxShadow: isLocked || isCompleted
@@ -218,7 +221,9 @@ class LessonsPage extends StatelessWidget {
                       Text(
                         'Lesson $lessonId',
                         style: TextStyle(
-                          color: isLocked ? Colors.grey.shade500 : Colors.blueGrey,
+                          color: isLocked
+                              ? cs.onSurface.withOpacity(0.35)
+                              : cs.onSurface.withOpacity(0.6),
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
                         ),
@@ -227,7 +232,9 @@ class LessonsPage extends StatelessWidget {
                       Text(
                         lessonMeta?.title ?? 'Lesson $lessonId',
                         style: TextStyle(
-                          color: isLocked ? Colors.grey.shade500 : Colors.black87,
+                          color: isLocked
+                              ? cs.onSurface.withOpacity(0.35)
+                              : cs.onSurface,
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),

@@ -61,7 +61,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
 
     String effectiveAvatar = provider.avatarUrl;
     if (effectiveAvatar.isEmpty) {
-      effectiveAvatar = 'https://api.dicebear.com/7.x/avataaars/png?seed=${provider.username}';
+      effectiveAvatar = 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(provider.username)}&background=F79C42&color=fff&bold=true&size=128';
     }
 
     final top3 = _entries.take(3).toList();
@@ -72,28 +72,32 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.blueGrey),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
           onPressed: () => context.pop(),
         ),
-        title: const Row(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.emoji_events, color: Color(0xFFE67E22), size: 28),
-            SizedBox(width: 8),
+            const Icon(Icons.emoji_events, color: Color(0xFFE67E22), size: 22),
+            const SizedBox(width: 6),
             Text(
               'Leaderboard',
-              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17),
             ),
           ],
         ),
         actions: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: const EdgeInsets.only(right: 4),
             decoration: BoxDecoration(
               color: const Color(0xFFFEF3C7),
               borderRadius: BorderRadius.circular(20),
@@ -101,13 +105,14 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
-                const SizedBox(width: 4),
+                const Icon(Icons.local_fire_department,
+                    color: Colors.orange, size: 14),
+                const SizedBox(width: 3),
                 Text(
-                  '$streak Day${streak != 1 ? 's' : ''}',
+                  '${streak}d',
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Color(0xFFD97706),
                   ),
                 ),
@@ -115,21 +120,22 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.blueGrey),
+            icon: Icon(Icons.refresh,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                size: 20),
             onPressed: _fetchLeaderboard,
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.blueGrey),
-            onPressed: () => context.push('/settings'),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            constraints: const BoxConstraints(),
           ),
           GestureDetector(
             onTap: () => context.push('/settings'),
             child: Container(
-              margin: const EdgeInsets.only(right: 16, left: 4),
+              margin: const EdgeInsets.only(right: 12, left: 4),
               child: CircleAvatar(
-                radius: 16,
+                radius: 15,
                 backgroundColor: const Color(0xFFF79C42).withOpacity(0.3),
                 backgroundImage: NetworkImage(effectiveAvatar),
+                onBackgroundImageError: (_, __) {},
               ),
             ),
           ),
@@ -215,9 +221,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.fromLTRB(20, 30, 20, 0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -274,7 +280,12 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               shape: BoxShape.circle,
               border: Border.all(color: color, width: 3),
               image: DecorationImage(
-                image: NetworkImage(entry['avatarUrl'] ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${entry['username']}'),
+                image: NetworkImage(
+                  (entry['avatarUrl'] != null && (entry['avatarUrl'] as String).isNotEmpty)
+                      ? entry['avatarUrl'] as String
+                      : 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(entry["username"] ?? "U")}&background=94A3B8&color=fff&bold=true&size=128',
+                ),
+                onError: (_, __) {},
               ),
             ),
           ),
@@ -283,7 +294,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             '${entry['username']}${isMe ? ' (You)' : ''}',
             style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: isMe ? Color(0xFFE67E22) : Colors.black87,
+              color: isMe ? const Color(0xFFE67E22) : Theme.of(context).colorScheme.onSurface,
               fontSize: 13,
             ),
             textAlign: TextAlign.center,
@@ -291,7 +302,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             overflow: TextOverflow.ellipsis,
           ),
           Text(
-            '${entry['weeklyScore']} pts',
+            (entry['weeklyScore'] ?? 0) > 0
+                ? '${entry['weeklyScore']} pts'
+                : '—',
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -331,9 +344,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Column(
         children: [
@@ -376,8 +389,13 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           const SizedBox(width: 10),
           CircleAvatar(
             radius: 18,
-            backgroundImage: NetworkImage(entry['avatarUrl'] ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${entry['username']}'),
-            backgroundColor: Colors.grey.shade200,
+            backgroundImage: NetworkImage(
+              (entry['avatarUrl'] != null && (entry['avatarUrl'] as String).isNotEmpty)
+                  ? entry['avatarUrl'] as String
+                  : 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(entry["username"] ?? "U")}&background=94A3B8&color=fff&bold=true&size=128',
+            ),
+            onBackgroundImageError: (_, __) {},
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -385,7 +403,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               '${entry['username']}${isMe ? ' (You)' : ''}',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: isMe ? const Color(0xFFE67E22) : Colors.black87,
+                color: isMe ? const Color(0xFFE67E22) : Theme.of(context).colorScheme.onSurface,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -399,8 +417,15 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           SizedBox(
             width: 50,
             child: Text(
-              '${entry['weeklyScore'] ?? 0}',
-              style: const TextStyle(fontWeight: FontWeight.w800),
+              (entry['weeklyScore'] ?? 0) > 0
+                  ? '${entry['weeklyScore']}'
+                  : '—',
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: (entry['weeklyScore'] ?? 0) > 0
+                    ? Theme.of(context).colorScheme.onSurface
+                    : Colors.grey,
+              ),
               textAlign: TextAlign.right,
             ),
           ),

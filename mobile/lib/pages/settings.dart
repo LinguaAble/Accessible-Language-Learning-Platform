@@ -92,12 +92,12 @@ class _SettingsPageState extends State<SettingsPage>
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   String _avatarUrlForSeed(String seed, String bg) =>
-      'https://api.dicebear.com/7.x/avataaars/png?seed=$seed&backgroundColor=$bg';
+      'https://api.dicebear.com/9.x/avataaars/png?seed=$seed&backgroundColor=$bg';
 
   String get _effectiveAvatar {
     if (_avatarUrl.isNotEmpty) return _avatarUrl;
     final provider = Provider.of<UserProvider>(context, listen: false);
-    return 'https://api.dicebear.com/7.x/avataaars/png?seed=${provider.username}';
+    return 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(provider.username)}&background=F79C42&color=fff&bold=true&size=128';
   }
 
   // ── Save profile (offline-first) ─────────────────────────────────────────
@@ -185,18 +185,18 @@ class _SettingsPageState extends State<SettingsPage>
   Widget build(BuildContext context) {
     return Consumer<UserProvider>(builder: (context, provider, _) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF9FAFB),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new,
-                color: Color(0xFF1E293B), size: 20),
+            icon: Icon(Icons.arrow_back_ios_new,
+                color: Theme.of(context).colorScheme.onSurface, size: 20),
             onPressed: () => context.pop(),
           ),
-          title: const Text('Settings',
+          title: Text('Settings',
               style: TextStyle(
-                  color: Color(0xFF1E293B),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.w800,
                   fontSize: 20)),
           bottom: TabBar(
@@ -235,8 +235,7 @@ class _SettingsPageState extends State<SettingsPage>
             const Text('Profile Information',
                 style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                    color: Color(0xFF1E293B))),
+                    fontSize: 16)),
             const Spacer(),
             TextButton(
               onPressed: () =>
@@ -273,8 +272,7 @@ class _SettingsPageState extends State<SettingsPage>
                   : provider.username,
               style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: Color(0xFF1E293B)),
+                  fontSize: 18),
             ),
             const SizedBox(height: 2),
             Text('@${provider.username}',
@@ -476,12 +474,12 @@ class _SettingsPageState extends State<SettingsPage>
                   decoration: BoxDecoration(
                     color: _fontSize == s
                         ? const Color(0xFFF79C42)
-                        : Colors.grey.shade100,
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: _fontSize == s
                           ? const Color(0xFFF79C42)
-                          : Colors.grey.shade300,
+                          : Theme.of(context).colorScheme.outline,
                     ),
                   ),
                   child: Text(
@@ -493,7 +491,7 @@ class _SettingsPageState extends State<SettingsPage>
                               ? 16
                               : 20,
                       color:
-                          _fontSize == s ? Colors.white : Colors.black87,
+                          _fontSize == s ? Colors.white : Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -613,12 +611,12 @@ class _SettingsPageState extends State<SettingsPage>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: selected ? chipColor : Colors.grey.shade100,
+                        color: selected ? chipColor : Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: selected
                               ? const Color(0xFFF79C42)
-                              : Colors.grey.shade300,
+                              : Theme.of(context).colorScheme.outline,
                           width: selected ? 2 : 1,
                         ),
                       ),
@@ -629,7 +627,7 @@ class _SettingsPageState extends State<SettingsPage>
                               color: selected &&
                                       o['value'] != 'none'
                                   ? Colors.white
-                                  : Colors.black87)),
+                                  : Theme.of(context).colorScheme.onSurface)),
                     ),
                   );
                 }).toList(),
@@ -670,19 +668,19 @@ class _SettingsPageState extends State<SettingsPage>
                       decoration: BoxDecoration(
                         color: sel
                             ? const Color(0xFFF79C42)
-                            : Colors.grey.shade100,
+                            : Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: sel
                               ? const Color(0xFFF79C42)
-                              : Colors.grey.shade300,
+                              : Theme.of(context).colorScheme.outline,
                         ),
                       ),
                       child: Text('$g min',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: sel ? Colors.white : Colors.black87)),
+                              color: sel ? Colors.white : Theme.of(context).colorScheme.onSurface)),
                     ),
                   ),
                 );
@@ -743,7 +741,7 @@ class _SettingsPageState extends State<SettingsPage>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+        border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.5))),
       ),
       child: Row(children: [
         const Icon(Icons.access_time, color: Colors.grey, size: 18),
@@ -755,7 +753,7 @@ class _SettingsPageState extends State<SettingsPage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(device,
@@ -783,9 +781,9 @@ class _SettingsPageState extends State<SettingsPage>
   Widget _card({required List<Widget> children}) => Container(
     margin: const EdgeInsets.only(bottom: 4),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: Colors.grey.shade200),
+      border: Border.all(color: Theme.of(context).colorScheme.outline),
     ),
     child: Column(children: children),
   );
@@ -827,15 +825,15 @@ class _SettingsPageState extends State<SettingsPage>
   }
 
   Widget _divider() => Divider(
-      height: 1, color: Colors.grey.shade100, indent: 16, endIndent: 16);
+      height: 1, color: Theme.of(context).colorScheme.outline.withOpacity(0.5), indent: 16, endIndent: 16);
 
   Widget _inputLabel(String label) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
     child: Text(label,
-        style: const TextStyle(
+        style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 13,
-            color: Color(0xFF1E293B))),
+            color: Theme.of(context).colorScheme.onSurface)),
   );
 
   Widget _textField(TextEditingController ctrl, String hint) =>
@@ -843,18 +841,18 @@ class _SettingsPageState extends State<SettingsPage>
 
   InputDecoration _inputDecoration(String hint) => InputDecoration(
     hintText: hint,
-    hintStyle: const TextStyle(color: Colors.grey),
+    hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4)),
     filled: true,
-    fillColor: Colors.grey.shade50,
+    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
     contentPadding:
         const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: BorderSide(color: Colors.grey.shade300),
+      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
-      borderSide: BorderSide(color: Colors.grey.shade300),
+      borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
