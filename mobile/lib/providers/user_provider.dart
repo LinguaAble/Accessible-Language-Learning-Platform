@@ -26,7 +26,21 @@ class UserProvider with ChangeNotifier {
   // ── Progress ──────────────────────────────────────────────────────────────
   List<dynamic> get completedLessons =>
       _user?['completedLessons'] as List<dynamic>? ?? [];
-  int get todayProgress => _user?['todayProgress'] as int? ?? 0;
+  int get todayProgress {
+    final progressDate = _user?['progressDate'] as String?;
+    if (progressDate != null) {
+      final now = DateTime.now();
+      final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final weekday = weekdays[now.weekday - 1];
+      final month = months[now.month - 1];
+      final day = now.day.toString().padLeft(2, '0');
+      final year = now.year.toString();
+      final todayStr = '$weekday $month $day $year';
+      if (progressDate != todayStr) return 0;
+    }
+    return _user?['todayProgress'] as int? ?? 0;
+  }
   List<dynamic> get dailyScores =>
       _user?['dailyScores'] as List<dynamic>? ?? [];
   List<dynamic> get dailyLessonCounts =>

@@ -295,7 +295,7 @@ final Map<int, Lesson> lessonDatabase = {
     ..._vocabPair('केला', 'Banana', 'Yellow fruit', ['Banana', 'Apple', 'Mango', 'Grapes'], ['केला', 'सेब', 'आम', 'अंगूर']),
     ..._vocabPair('आम', 'Mango', 'King of fruits', ['Mango', 'Apple', 'Banana', 'Grapes'], ['आम', 'सेब', 'केला', 'अंगूर']),
   ]),
-  27: Lesson(title: 'Recap: Vocabulary', slides: [
+  27: Lesson(title: 'Recap: Vocabulary (5-11)', slides: [
     const LessonSlide(type: 'quiz', subtype: 'char_select', question: "Select 'Mother'", options: ['माँ', 'पिता', 'भाई', 'बहन'], answer: 'माँ'),
     const LessonSlide(type: 'quiz', subtype: 'char_select', question: "Select 'Brother'", options: ['बहन', 'भाई', 'माँ', 'पिता'], answer: 'भाई'),
     const LessonSlide(type: 'quiz', subtype: 'char_select', question: "Select 'Red'", options: ['नीला', 'हरा', 'लाल', 'काला'], answer: 'लाल'),
@@ -398,8 +398,8 @@ final Map<int, Lesson> lessonDatabase = {
 // Chapter structure for lesson list display
 final List<Map<String, dynamic>> chapters = [
   {
-    'title': 'Chapter 1: The Hindi Script',
-    'subtitle': 'Master the Devanagari alphabet',
+    'title': 'Chapter 1: Mastering the Script',
+    'subtitle': 'Hindi Varnamala (Vowels & Consonants)',
     'lessons': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
   },
   {

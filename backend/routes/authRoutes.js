@@ -27,7 +27,7 @@ router.post('/register', async (req, res) => {
       email,
       username: username || email.split('@')[0],
       password: hashedPassword,
-      loginHistory: [{ timestamp: new Date(), device: 'Web Browser' }]
+      loginHistory: [{ timestamp: new Date(), device: req.body.device || 'Web Browser' }]
     });
 
     await user.save();
@@ -74,7 +74,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid email or password.' });
 
     // Build update object
-    const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: 'Web Browser' }];
+    const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: req.body.device || 'Web Browser' }];
     if (newHistory.length > 10) newHistory.shift();
 
     // Streak reset check: if last streak date is before yesterday, reset to 0
@@ -334,6 +334,7 @@ router.post('/get-user-data', async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     res.json({
+      success: true,
       user: {
         preferences: user.preferences,
         username: user.username,
