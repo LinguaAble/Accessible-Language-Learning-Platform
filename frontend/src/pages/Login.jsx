@@ -55,24 +55,40 @@ const Login = () => {
     }
   };
 
-  const handleGoogleSuccess = (credentialResponse) => {
-    const decoded = jwtDecode(credentialResponse.credential);
-    console.log("Logged in with Google:", decoded);
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      console.log("Logged in with Google:", decoded);
 
-    // Save token
-    localStorage.setItem('token', credentialResponse.credential);
+      // Save token temporarily
+      localStorage.setItem('token', credentialResponse.credential);
 
-    // Create and save user object from Google data
-    const googleUser = {
-      email: decoded.email,
-      name: decoded.name,
-      picture: decoded.picture
-    };
+      // Create user object from Google data
+      const googleUser = {
+        email: decoded.email,
+        username: decoded.email.split('@')[0],
+        fullName: decoded.name,
+        avatarUrl: decoded.picture,
+        device: 'Web Browser'
+      };
 
-    // Update persistent user state via Context
-    login(googleUser);
+      setLoading(true);
+      // Let the backend register them securely in MongoDB!
+      const res = await axios.post(`${API}/api/auth/google-login`, googleUser);
 
-    navigate('/dashboard');
+      // Update persistent token with the official backend token
+      localStorage.setItem('token', res.data.token);
+
+      // Update persistent user state via Context
+      login(res.data.user);
+
+      navigate('/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError("Failed to register Google account with our database.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleError = () => {
