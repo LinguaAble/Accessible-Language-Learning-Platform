@@ -9,10 +9,15 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://linguaable.vercel.app'  // ← paste your actual Vercel URL here
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow any localhost port (for Vite :5173, Flutter web :random port, etc.)
+    if (origin.match(/^http:\/\/localhost:\d+$/)) return callback(null, true);
+    // Allow your Vercel production URL
+    if (origin === 'https://linguaable.vercel.app') return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 

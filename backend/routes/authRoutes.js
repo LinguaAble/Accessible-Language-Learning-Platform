@@ -132,7 +132,76 @@ router.post('/login', async (req, res) => {
 });
 
 
-// 3. FORGOT PASSWORD (OTP VERSION)
+// 3. GOOGLE LOGIN/REGISTER
+router.post('/google-login', async (req, res) => {
+  try {
+    const { email, username, fullName, avatarUrl, device } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email from Google is required.' });
+    }
+
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    // If they don't exist, create them
+    if (!user) {
+      const generatedPassword = crypto.randomBytes(16).toString('hex'); // Dummy strong password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(generatedPassword, salt);
+
+      user = new User({
+        email,
+        username: username || email.split('@')[0],
+        password: hashedPassword,
+        fullName: fullName || '',
+        avatarUrl: avatarUrl || '',
+        loginHistory: [{ timestamp: new Date(), device: device || 'Web Browser' }]
+      });
+      await user.save();
+    } else {
+      // If user exists, update login history
+      const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: device || 'Web Browser' }];
+      if (newHistory.length > 10) newHistory.shift();
+
+      user.loginHistory = newHistory;
+      if (avatarUrl && !user.avatarUrl) {
+        user.avatarUrl = avatarUrl; // sync avatar if it was missing
+      }
+      await user.save();
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate,
+        streak: user.streak,
+        lastStreakDate: user.lastStreakDate,
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
+      }
+    });
+
+  } catch (err) {
+    console.error('Google Login Error:', err);
+    res.status(500).json({ message: 'Server Error during Google Authentication' });
+  }
+});
+
+// 4. FORGOT PASSWORD (OTP VERSION)
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
