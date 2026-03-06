@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
+import '../widgets/accessibility_widget.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -86,6 +87,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      floatingActionButton: const AccessibilityFab(),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _syncAndLoad,
@@ -544,6 +546,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final actions = [
       {'label': 'Lessons', 'icon': Icons.menu_book, 'path': '/lessons', 'color': const Color(0xFFE67E22)},
       {'label': 'Leaderboard', 'icon': Icons.emoji_events, 'path': '/leaderboard', 'color': const Color(0xFF9B59B6)},
+      {'label': 'Community', 'icon': Icons.people, 'path': '/community', 'color': const Color(0xFF2ECC71)},
       {'label': 'Settings', 'icon': Icons.settings, 'path': '/settings', 'color': const Color(0xFF3B82F6)},
       {'label': 'Sign Out', 'icon': Icons.logout, 'path': 'logout', 'color': const Color(0xFFEF4444)},
     ];

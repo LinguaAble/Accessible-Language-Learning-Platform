@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
+import '../widgets/accessibility_widget.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -186,6 +187,7 @@ class _SettingsPageState extends State<SettingsPage>
     return Consumer<UserProvider>(builder: (context, provider, _) {
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        floatingActionButton: const AccessibilityFab(),
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,

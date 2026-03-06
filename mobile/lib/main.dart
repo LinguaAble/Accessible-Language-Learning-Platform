@@ -10,7 +10,10 @@ import 'pages/leaderboard.dart';
 import 'pages/login.dart';
 import 'pages/settings.dart';
 import 'pages/signup.dart';
+import 'pages/community.dart';
+import 'pages/user_profile.dart';
 import 'providers/user_provider.dart';
+import 'widgets/accessibility_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +49,14 @@ final GoRouter _router = GoRouter(
     GoRoute(path: '/lessons', builder: (context, state) => const LessonsPage()),
     GoRoute(path: '/leaderboard', builder: (context, state) => const LeaderboardPage()),
     GoRoute(path: '/settings', builder: (context, state) => const SettingsPage()),
+    GoRoute(path: '/community', builder: (context, state) => const CommunityPage()),
+    GoRoute(
+      path: '/profile/:username',
+      builder: (context, state) {
+        final username = state.pathParameters['username'] ?? '';
+        return UserProfilePage(username: username);
+      },
+    ),
     GoRoute(
       path: '/lessons/:id',
       builder: (context, state) {
