@@ -145,4 +145,8 @@ class UserProvider with ChangeNotifier {
     await prefs.remove('completedLessons');
     notifyListeners();
   }
+  // ── Update preferences shortcut ────────────────────────────────────────────
+  Future<void> updatePreferences(Map<String, dynamic> prefs) async {
+    await updateUser({'preferences': prefs});
+  }
 }

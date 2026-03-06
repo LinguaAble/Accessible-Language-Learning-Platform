@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -82,6 +84,73 @@ class _SignupPageState extends State<SignupPage> {
       if (mounted) {
         setState(() {
           _errorMessage = 'Cannot connect to server. Check your connection.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignup() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: kIsWeb ? '881849579766-1gv9l5lrfs9ie0t6o13pk4v38hl74glb.apps.googleusercontent.com' : null,
+      );
+      
+      // Force the account picker instead of auto-signing in
+      await googleSignIn.signOut();
+      final GoogleSignInAccount? account = await googleSignIn.signIn();
+      if (account == null) {
+        setState(() => _isLoading = false);
+        return; // user canceled
+      }
+
+      // 2. Secretly register them on our backend !
+      final serverResult = await ApiService.googleLogin(
+        email: account.email,
+        username: account.email.split('@')[0],
+        fullName: account.displayName,
+        avatarUrl: account.photoUrl,
+      );
+
+      if (serverResult['success'] != true) {
+        await googleSignIn.signOut();
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = serverResult['message'] ?? 'Failed to complete Google registration.';
+          });
+        }
+        return;
+      }
+
+      if (!mounted) return;
+      final provider = Provider.of<UserProvider>(context, listen: false);
+      
+      // Log them in beautifully with actual server token and official user record!
+      await provider.login(
+        serverResult['token'],
+        serverResult['user'] as Map<String, dynamic>,
+        true, // always remember me on signup
+      );
+
+      if (mounted) {
+        context.go('/dashboard');
+      }
+    } catch (e) {
+      if (mounted) {
+        print('Google Sign In Error: $e');
+        setState(() {
+          _errorMessage = kIsWeb 
+              ? 'Google Sign In Failed. Wait for popup.' 
+              : 'Google Sign In Failed on Mobile. \nError: $e';
         });
       }
     } finally {
@@ -290,6 +359,42 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               ),
               const SizedBox(height: 20),
+              
+              Row(
+                children: [
+                  Expanded(child: Divider(color: cs.outline)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('OR', style: TextStyle(color: cs.onSurface.withOpacity(0.5))),
+                  ),
+                  Expanded(child: Divider(color: cs.outline)),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _handleGoogleSignup,
+                  icon: Image.network(
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
+                    height: 20,
+                  ),
+                  label: const Text(
+                    'Sign up with Google',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(color: cs.outline),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
