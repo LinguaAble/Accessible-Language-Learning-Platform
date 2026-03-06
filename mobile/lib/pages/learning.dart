@@ -143,11 +143,7 @@ class _LearningScreenState extends State<LearningScreen>
 
     final provider = Provider.of<UserProvider>(context, listen: false);
     if (provider.soundEffects) {
-        if (correct) {
-            SystemSound.play(SystemSoundType.click);
-        } else {
-            SystemSound.play(SystemSoundType.alert);
-        }
+      _playSoundEffect(correct);
     }
 
     setState(() {
