@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const UserContext = createContext();
 
 export const useUser = () => useContext(UserContext);
@@ -60,7 +60,7 @@ export const UserProvider = ({ children }) => {
 
         // Background Sync: Fetch latest data from DB
         if (savedUser.email) {
-            axios.post('http://localhost:5000/api/auth/get-user-data', { email: savedUser.email })
+            axios.post(`${API}/api/auth/get-user-data`, { email: savedUser.email })
                 .then(res => {
                     const freshData = res.data.user || res.data;
 
@@ -129,7 +129,7 @@ export const UserProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(updatedUser));
 
         if (user.email) {
-            axios.put('http://localhost:5000/api/auth/update-profile', {
+            axios.put(`${API}/api/auth/update-profile`, {
                 email: user.email,
                 preferences: updatedPrefs
             }).catch(err => console.error("Failed to sync preferences", err));
@@ -138,7 +138,7 @@ export const UserProvider = ({ children }) => {
 
     const updateProfile = async (profileData) => {
         try {
-            const response = await axios.put('http://localhost:5000/api/auth/update-profile', {
+            const response = await axios.put(`${API}/api/auth/update-profile`, {
                 email: user.email,
                 ...profileData
             });
@@ -189,7 +189,7 @@ export const UserProvider = ({ children }) => {
         if (user.email) {
             const locDate = new Date();
             const dateStr = `${locDate.getFullYear()}-${String(locDate.getMonth() + 1).padStart(2, '0')}-${String(locDate.getDate()).padStart(2, '0')}`;
-            axios.put('http://localhost:5000/api/auth/update-progress', {
+            axios.put(`${API}/api/auth/update-progress`, {
                 email: user.email,
                 todayProgress: newProgress,
                 date: dateStr
