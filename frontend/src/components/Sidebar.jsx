@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, ChevronLeft, ChevronRight, BarChart3
+    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, ChevronLeft, ChevronRight, BarChart3, Users
 } from 'lucide-react';
 
 import zebraMascot from '../assets/zebra-mascot.png';
@@ -28,7 +28,11 @@ const Sidebar = () => {
             onMouseEnter={() => setIsCollapsed(false)}
             onMouseLeave={() => setIsCollapsed(true)}
         >
-            <div className="logo-section" style={{ position: 'relative' }}>
+            <div
+                className="logo-section"
+                style={{ position: 'relative', cursor: 'pointer' }}
+                onClick={() => handleNavigation('/dashboard')}
+            >
                 <img src={zebraMascot} alt="LinguaAble Logo" className="logo-image" />
                 <div className="branding-container">
                     <h1 className="brand-name">Lingua<span className="highlight-text">Able</span></h1>
@@ -53,6 +57,14 @@ const Sidebar = () => {
                     <BookOpen size={20} /> <span>Lessons</span>
                 </button>
 
+
+                <button
+                    className={`nav-item ${location.pathname === '/community' ? 'active' : ''}`}
+                    onClick={() => handleNavigation('/community')}
+                    title="Community"
+                >
+                    <Users size={20} /> <span>Community</span>
+                </button>
 
                 <button
                     className={`nav-item ${location.pathname === '/leaderboard' ? 'active' : ''}`}

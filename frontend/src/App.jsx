@@ -10,11 +10,14 @@ import Lessons from './pages/Lessons';
 import Leaderboard from './pages/Leaderboard';
 import Settings from './pages/Settings';
 import ProgressReport from './pages/ProgressReport';
+import Community from './pages/Community';
+import UserProfile from './pages/UserProfile';
 import Layout from './components/Layout';
 import LearningScreen from './pages/LearningScreen';
 import { UserProvider, useUser } from './context/UserContext';
 import { NotificationProvider } from './context/NotificationContext';
 import NotificationToast from './components/NotificationToast';
+import AccessibilityWidget from './components/AccessibilityWidget';
 import './App.css';
 import { playClickSound, playNavigationSound } from './utils/soundUtils';
 
@@ -65,6 +68,7 @@ function AppContent() {
       <div className="color-overlay" aria-hidden="true" />
       {/* Global notification toast – renders on all pages */}
       <NotificationToast />
+      <AccessibilityWidget />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -83,6 +87,8 @@ function AppContent() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/progress" element={<ProgressReport />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/profile/:username" element={<UserProfile />} />
         </Route>
 
       </Routes>

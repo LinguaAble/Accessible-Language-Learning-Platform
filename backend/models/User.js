@@ -102,6 +102,12 @@ const UserSchema = new mongoose.Schema({
     device: { type: String, default: 'Web Browser' }
   }],
 
+  // --- NEW: Friend System ---
+  friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  friendRequestsReceived: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  friendRequestsSent: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  // --------------------------
+
   createdAt: {
     type: Date,
     default: Date.now

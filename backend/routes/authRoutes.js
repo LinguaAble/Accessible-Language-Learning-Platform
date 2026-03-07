@@ -484,6 +484,191 @@ router.get('/leaderboard', async (req, res) => {
   }
 });
 
+// 11. SEARCH USERS
+router.get('/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) return res.json([]);
 
+    // Search by username or fullName using regex (case-insensitive)
+    const regex = new RegExp(q, 'i');
+    const users = await User.find({
+      $or: [{ username: regex }, { fullName: regex }]
+    })
+      .select('username fullName avatarUrl string') // selecting limited fields
+      .limit(10);
+
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 12. GET PUBLIC PROFILE
+router.get('/profile/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { requesterEmail } = req.query;
+
+    const profileUser = await User.findOne({ username });
+    if (!profileUser) return res.status(404).json({ message: 'User not found' });
+
+    let relationship = 'none'; // none | pending_sent | pending_received | friends | self
+    let isFriend = false;
+    let isSelf = false;
+
+    // Check relationship if a logged-in user requested this profile
+    if (requesterEmail) {
+      const requester = await User.findOne({ email: requesterEmail });
+      if (requester) {
+        if (requester._id.toString() === profileUser._id.toString()) {
+          relationship = 'self';
+          isSelf = true;
+          isFriend = true; // you can see your own stats
+        } else {
+          // Check if friends
+          if (profileUser.friends.includes(requester._id)) {
+            relationship = 'friends';
+            isFriend = true;
+          } else if (profileUser.friendRequestsReceived.includes(requester._id)) {
+            relationship = 'pending_sent'; // Current user requested this profile user
+          } else if (requester.friendRequestsReceived.includes(profileUser._id)) {
+            relationship = 'pending_received'; // Profile user requested current user
+          }
+        }
+      }
+    }
+
+    // Prepare response. Hide stats if not friend/self.
+    const publicProfile = {
+      _id: profileUser._id,
+      username: profileUser.username,
+      fullName: profileUser.fullName || '',
+      bio: profileUser.bio || '',
+      avatarUrl: profileUser.avatarUrl || '',
+      relationship: relationship
+    };
+
+    if (isFriend) {
+      publicProfile.streak = profileUser.streak || 0;
+      publicProfile.completedLessons = profileUser.completedLessons ? profileUser.completedLessons.length : 0;
+      publicProfile.dailyScores = profileUser.dailyScores || [];
+      publicProfile.dailyLessonCounts = profileUser.dailyLessonCounts || [];
+    }
+
+    res.json(publicProfile);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 13. FRIEND ACTIONS
+router.post('/friend-request/send', async (req, res) => {
+  try {
+    const { requesterEmail, targetUsername } = req.body;
+    const requester = await User.findOne({ email: requesterEmail });
+    const target = await User.findOne({ username: targetUsername });
+
+    if (!requester || !target) return res.status(404).json({ message: 'User missing' });
+    if (requester._id.toString() === target._id.toString()) return res.status(400).json({ message: 'Cannot friend yourself' });
+    if (requester.friends.includes(target._id)) return res.status(400).json({ message: 'Already friends' });
+    if (requester.friendRequestsSent.includes(target._id)) return res.status(400).json({ message: 'Request already sent' });
+
+    // Add to arrays
+    requester.friendRequestsSent.push(target._id);
+    target.friendRequestsReceived.push(requester._id);
+
+    // If target also already sent request, auto accept them
+    if (requester.friendRequestsReceived.includes(target._id)) {
+      requester.friendRequestsReceived.pull(target._id);
+      requester.friendRequestsSent.pull(target._id);
+      requester.friends.push(target._id);
+
+      target.friendRequestsReceived.pull(requester._id);
+      target.friendRequestsSent.pull(requester._id);
+      target.friends.push(requester._id);
+    }
+
+    await requester.save();
+    await target.save();
+
+    res.json({ success: true, message: 'Friend request sent' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+router.post('/friend-request/accept', async (req, res) => {
+  try {
+    const { currentEmail, targetId } = req.body; // targetId is ID of the user who requested
+    const current = await User.findOne({ email: currentEmail });
+    const target = await User.findById(targetId);
+
+    if (!current || !target) return res.status(404).json({ message: 'User missing' });
+
+    // Accept logic
+    current.friendRequestsReceived.pull(target._id);
+    current.friends.push(target._id);
+
+    target.friendRequestsSent.pull(current._id);
+    target.friends.push(current._id);
+
+    await current.save();
+    await target.save();
+
+    res.json({ success: true, message: 'Friend request accepted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+router.post('/friend-request/reject', async (req, res) => {
+  try {
+    const { currentEmail, targetId } = req.body;
+    const current = await User.findOne({ email: currentEmail });
+    const target = await User.findById(targetId);
+
+    if (!current || !target) return res.status(404).json({ message: 'User missing' });
+
+    // Reject logic
+    current.friendRequestsReceived.pull(target._id);
+    target.friendRequestsSent.pull(current._id);
+
+    await current.save();
+    await target.save();
+
+    res.json({ success: true, message: 'Friend request rejected' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 14. GET COMMUNITY DATA
+router.get('/community/data', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ message: 'Email required' });
+
+    // Find the user and populate the received friend requests and their current friends
+    const user = await User.findOne({ email })
+      .populate('friendRequestsReceived', 'username fullName avatarUrl')
+      .populate('friends', 'username fullName avatarUrl completedLessons streak');
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({
+      friendRequests: user.friendRequestsReceived || [],
+      friends: user.friends || []
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
 
 module.exports = router;
