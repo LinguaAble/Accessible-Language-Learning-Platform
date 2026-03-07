@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://linguaable.vercel.app/'  // ← paste your actual Vercel URL here
+    'https://linguaable.vercel.app'  // ← paste your actual Vercel URL here
   ],
   credentials: true
 }));
