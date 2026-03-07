@@ -1,17 +1,16 @@
 import 'dart:math' show sin, pi;
 import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../data/lesson_data.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
+import '../services/google_stt_service.dart';
 
 
 class LearningScreen extends StatefulWidget {
@@ -44,10 +43,10 @@ class _LearningScreenState extends State<LearningScreen>
   // (TTS-based sound effects fail silently on Android when another TTS is speaking.)
   final AudioPlayer _sfxPlayer = AudioPlayer();
 
-  // Speech-to-text
-  final stt.SpeechToText _speech = stt.SpeechToText();
-  bool _speechAvailable = false;
+  // Speech-to-text (Google Cloud STT via record package)
+  final GoogleSttService _googleStt = GoogleSttService();
   bool _isListening = false;
+  bool _isProcessing = false;
   String _nlpFeedback = 'Tap to speak';
 
   @override
@@ -66,17 +65,15 @@ class _LearningScreenState extends State<LearningScreen>
   void dispose() {
     _flutterTts.stop();
     _sfxPlayer.dispose();
-    _speech.stop();
+    _googleStt.dispose();
     super.dispose();
   }
 
   Future<void> _initTts() async {
     await _flutterTts.setLanguage('hi-IN');
-    await _flutterTts.setSpeechRate(0.4);
-    // speech_to_text only works on native (Android/iOS), not on web Flutter
-    if (!kIsWeb) {
-      _speechAvailable = await _speech.initialize();
-    }
+    await _flutterTts.setSpeechRate(0.8);
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.setVolume(1.0);
     _playAudio();
   }
 
@@ -356,8 +353,9 @@ class _LearningScreenState extends State<LearningScreen>
 
                     const SizedBox(height: 30),
 
-                    // Main character display
-                    _buildCharDisplay(slide),
+                    // Main character display — only for intro/teach/pronounce (matches web)
+                    if (slide.subtype != 'char_select')
+                      _buildCharDisplay(slide),
 
                     const SizedBox(height: 30),
 
@@ -438,7 +436,7 @@ class _LearningScreenState extends State<LearningScreen>
                 ],
               ],
             ),
-          if (slide.hint != null)
+          if (slide.hint != null && slide.type != 'quiz')
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Text(
@@ -525,90 +523,72 @@ class _LearningScreenState extends State<LearningScreen>
   }
 
   Future<void> _startListening(LessonSlide slide) async {
-    if (kIsWeb) {
-      // On web Flutter, speech_to_text doesn't work — show text input dialog
-      await _showWebSpeechDialog(slide);
+    if (_isListening) {
+      // Already recording — stop and transcribe
+      await _stopListeningAndEvaluate(slide);
       return;
     }
-    if (!_speechAvailable || _isListening) return;
+
+    // Use Google Speech-to-Text via record package on ALL platforms
+    // (web + Android + iOS). The speech_to_text plugin's on-device
+    // recognition is unreliable for Hindi and the old code had a bug
+    // where native tapped-to-stop called _googleStt which was never started.
+    setState(() {
+      _nlpFeedback = '🎤 Starting microphone...';
+      _isCorrect = null;
+    });
+
+    final started = await _googleStt.startRecording();
+    if (!started) {
+      setState(() => _nlpFeedback = '⚠️ Could not start recording.\nCheck microphone permissions.');
+      return;
+    }
     setState(() {
       _isListening = true;
-      _nlpFeedback = '🎤 Listening...';
+      _nlpFeedback = '🎤 Listening... tap to stop';
     });
     HapticFeedback.mediumImpact();
-    await _speech.listen(
-      onResult: (result) async {
-        if (result.finalResult) {
-          await _speech.stop();
-          setState(() => _isListening = false);
-          await _evaluateWithNlp(result.recognizedWords, slide);
-        }
-      },
-      localeId: 'hi_IN',
-      listenFor: const Duration(seconds: 8),
-      pauseFor: const Duration(seconds: 2),
-    );
+
+    // Auto-stop after 8 seconds
+    Future.delayed(const Duration(seconds: 8), () {
+      if (_isListening && mounted) {
+        _stopListeningAndEvaluate(slide);
+      }
+    });
   }
 
-  Future<void> _showWebSpeechDialog(LessonSlide slide) async {
-    final ctrl = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Type what you hear',
-            style: TextStyle(fontWeight: FontWeight.w700)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Type the romanized pronunciation of "${slide.mainChar ?? ''}"',
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Hint: ${slide.hint ?? slide.answer ?? ''}',
-              style: const TextStyle(
-                  color: Color(0xFFF79C42),
-                  fontStyle: FontStyle.italic,
-                  fontSize: 13),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: ctrl,
-              autofocus: true,
-              textCapitalization: TextCapitalization.none,
-              decoration: InputDecoration(
-                hintText: 'e.g. ${slide.answer ?? ''}',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide:
-                      const BorderSide(color: Color(0xFFF79C42), width: 2),
-                ),
-              ),
-              onSubmitted: (v) => Navigator.of(ctx).pop(v),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(null),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF79C42),
-                foregroundColor: Colors.white),
-            onPressed: () => Navigator.of(ctx).pop(ctrl.text),
-            child: const Text('Check'),
-          ),
-        ],
-      ),
-    );
-    if (result != null && result.trim().isNotEmpty) {
-      await _evaluateWithNlp(result.trim(), slide);
+  Future<void> _stopListeningAndEvaluate(LessonSlide slide) async {
+    if (!_isListening) return;
+    setState(() {
+      _isListening = false;
+      _isProcessing = true;
+      _nlpFeedback = '⏳ Analyzing...';
+    });
+
+    final hints = [
+      if (slide.mainChar != null) slide.mainChar!,
+      if (slide.answer != null) slide.answer!,
+    ];
+
+    try {
+      final transcript = await _googleStt.stopAndTranscribe(hints: hints);
+      if (!mounted) return;
+
+      setState(() => _isProcessing = false);
+
+      if (transcript.isEmpty) {
+        setState(() => _nlpFeedback = '❌ No speech detected. Try again.\n(Speak clearly after the mic turns orange)');
+        return;
+      }
+      debugPrint('STT transcript: "$transcript"');
+      await _evaluateWithNlp(transcript, slide);
+    } catch (e) {
+      debugPrint('STT error: $e');
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+        _nlpFeedback = '❌ STT Error: ${e.toString().length > 80 ? e.toString().substring(0, 80) : e}';
+      });
     }
   }
 
@@ -643,31 +623,31 @@ class _LearningScreenState extends State<LearningScreen>
       children: [
         FloatingActionButton.large(
           onPressed:
-              _isCorrect != null ? null : () => _startListening(slide),
-          backgroundColor: btnColor,
+              (_isCorrect != null || _isProcessing) ? null : () => _startListening(slide),
+          backgroundColor: _isProcessing ? Colors.grey : btnColor,
           child: Icon(
             _isCorrect == true
                 ? Icons.check
-                : (kIsWeb
-                    ? Icons.keyboard_alt_outlined
-                    : (_isListening ? Icons.graphic_eq : Icons.mic)),
+                : (_isProcessing
+                    ? Icons.hourglass_top
+                    : (_isListening ? Icons.stop : Icons.mic)),
             color: Colors.white,
             size: 36,
           ),
         ),
         const SizedBox(height: 12),
         Text(
-          kIsWeb && _isCorrect == null
-              ? '⌨️ Type your answer'
+          _isProcessing
+              ? _nlpFeedback
               : (_isCorrect != null
                   ? _nlpFeedback
-                  : (_isListening ? '🎤 Listening...' : _nlpFeedback)),
+                  : (_isListening ? '🎤 Listening... tap to stop' : _nlpFeedback)),
           style: TextStyle(
             color: _isCorrect == true
                 ? const Color(0xFF10B981)
                 : (_isCorrect == false
                     ? const Color(0xFFEF4444)
-                    : (_isListening
+                    : (_isListening || _isProcessing
                         ? const Color(0xFFF59E0B)
                         : Colors.grey)),
             fontWeight: FontWeight.w600,

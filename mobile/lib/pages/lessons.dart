@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../data/lesson_data.dart';
 import '../providers/user_provider.dart';
+import '../widgets/accessibility_widget.dart';
 
 class LessonsPage extends StatelessWidget {
   const LessonsPage({super.key});
@@ -22,6 +23,7 @@ class LessonsPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      floatingActionButton: const AccessibilityFab(),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
