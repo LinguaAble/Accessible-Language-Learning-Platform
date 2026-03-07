@@ -6,7 +6,7 @@ import '../LandingPage.css';
 const LandingPage = () => {
     const navigate = useNavigate();
     const [word, setWord] = useState(0);
-    const words = ['ADHD', 'DYSLEXIA', 'AUTISM', 'YOU'];
+    const words = ['CURIOUS', 'CREATIVE', 'RESTLESS', 'BOLD'];
 
     useEffect(() => {
         const t = localStorage.getItem('token');
@@ -54,7 +54,7 @@ const LandingPage = () => {
                 <div className="zn-hero-center">
 
                     {/* tiny label above */}
-                    <p className="zn-eyebrow">— a language app built for</p>
+                    <p className="zn-eyebrow">— a language app built for ADHD learners</p>
 
                     {/* giant torn headline */}
                     <h1 className="zn-h1">
@@ -65,11 +65,12 @@ const LandingPage = () => {
                                 <path d="M4,10 C40,2 90,14 140,8 C190,2 240,13 296,7" stroke="#E8462A" strokeWidth="4" fill="none" strokeLinecap="round"/>
                             </svg>
                         </span>
-                        <span className="zn-h1-if">if your brain is</span>
+                        <span className="zn-h1-if">made for the</span>
                         <span className="zn-h1-swap-wrap">
                             <span className="zn-h1-swap" key={word}>{words[word]}</span>
                             <span className="zn-marker-box" aria-hidden="true" />
                         </span>
+                        <span className="zn-h1-if">minds</span>
                     </h1>
 
                     <p className="zn-hero-body">
