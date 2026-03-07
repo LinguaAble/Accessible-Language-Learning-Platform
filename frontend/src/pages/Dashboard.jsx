@@ -7,6 +7,8 @@ import NotificationBell from '../components/NotificationBell';
 import { BookOpen, Flame, PlayCircle, BarChart3, Bell, TrendingUp, Settings, Trophy, ChevronRight } from 'lucide-react';
 import '../Dashboard.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Dashboard = () => {
   const { user, preferences, todayProgress, streak } = useUser();
   const { triggerGoalReminder } = useNotifications();
@@ -50,7 +52,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user.email) return;
     const ll = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-    axios.put('http://localhost:5000/api/auth/update-progress', { email: user.email, completedLessons: ll })
+    axios.put(`${API}/api/auth/update-progress`, { email: user.email, completedLessons: ll })
       .then(r => { if (r.data.success && r.data.completedLessons) localStorage.setItem('completedLessons', JSON.stringify(r.data.completedLessons)); })
       .catch(e => console.error('Sync failed', e));
   }, [user.email]);

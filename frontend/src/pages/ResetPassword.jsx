@@ -5,6 +5,8 @@ import logo from '../assets/logo.png';
 import '../App.css';
 import { Eye, EyeOff } from 'lucide-react'; 
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,7 +30,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const res = await axios.put(`http://localhost:5000/api/auth/reset-password/${token}`, {
+      const res = await axios.put(`${API}/api/auth/reset-password/${token}`, {
         password
       });
 

@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import '../Dashboard.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function getWeekResetInfo() {
@@ -186,7 +188,7 @@ const Leaderboard = () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await axios.get('http://localhost:5000/api/auth/leaderboard');
+            const res = await axios.get(`${API}/api/auth/leaderboard`);
             if (res.data.success) {
                 setEntries(res.data.leaderboard);
                 setWeekInfo({ weekStart: res.data.weekStart, weekEnd: res.data.weekEnd });

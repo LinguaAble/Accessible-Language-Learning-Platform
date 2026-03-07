@@ -7,6 +7,8 @@ import { useNotifications } from '../context/NotificationContext';
 import NotificationBell from '../components/NotificationBell';
 import '../Dashboard.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Lessons = () => {
     const navigate = useNavigate();
     const { user, streak } = useUser();
@@ -23,7 +25,7 @@ const Lessons = () => {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             if (token) {
                 try {
-                    const res = await axios.get('http://localhost:5000/api/auth/me', {
+                    const res = await axios.get(`${API}/api/auth/me`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     if (res.data.completedLessons) {

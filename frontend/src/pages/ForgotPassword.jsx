@@ -5,6 +5,8 @@ import logo from '../assets/logo.png';
 import '../App.css'; 
 import { Eye, EyeOff } from 'lucide-react';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
@@ -43,7 +45,7 @@ const ForgotPassword = () => {
     setMessage('');
     
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      await axios.post(`${API}/api/auth/forgot-password`, { email });
       setMessage(`OTP sent to ${email}. Check your inbox!`);
       setStep(2);
       setTimer(60);
@@ -70,7 +72,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      await axios.put(`http://localhost:5000/api/auth/reset-password/${otp}`, {
+      await axios.put(`${API}/api/auth/reset-password/${otp}`, {
         password: newPassword
       });
 

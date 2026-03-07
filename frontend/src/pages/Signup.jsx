@@ -6,6 +6,8 @@ import logo from '../assets/logo.png';
 import { Eye, EyeOff } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Signup = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -41,7 +43,7 @@ const Signup = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
+      const res = await axios.post(`${API}/api/auth/register`, {
         email,
         password
       });

@@ -11,6 +11,8 @@ import { evaluatePronunciation, getConfidenceBadge } from '../utils/nlpEvalServi
 import logo from '../assets/logo.png';
 import '../Learning.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // --- HELPER: GENERATE SLIDES ---
 // Creates 2 slides: 1. Intro/Quiz (Hindi -> English), 2. Reverse Quiz (English -> Hindi)
 const createCharPair = (hindiChar, englishSound, hintText, optionsEnglish, optionsHindi) => {
@@ -796,7 +798,7 @@ const LearningScreen = () => {
           const today = new Date();
           const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-          axios.put('http://localhost:5000/api/auth/update-progress', {
+          axios.put(`${API}/api/auth/update-progress`, {
             email: user.email,
             completedLessons: isNewLesson ? completedLessons : undefined,
             todayProgress: newTodayProgress,
