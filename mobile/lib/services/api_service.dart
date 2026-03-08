@@ -1,13 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'; // import foundation for kIsWeb
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // adb reverse tcp:5000 tcp:5000 — tunnels phone localhost → PC backend via USB.
-  // This means we can always use localhost on both web and native Android.
-  static const String _baseUrl = 'http://localhost:5000/api/auth';
-  static const String _evalUrl = 'http://localhost:5000/api/eval';
+  // Use localhost for Web, and the PC's Wi-Fi IP for Mobile (physical device or emulator)
+  static String get _host {
+    if (kIsWeb) {
+      return 'http://localhost:5000';
+    }
+    // Your laptop's current Wi-Fi IP for physical mobile device connection
+    return 'http://10.12.227.121:5000';
+  }
+
+  static String get _baseUrl => '$_host/api/auth';
+  static String get _evalUrl => '$_host/api/eval';
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   static Future<Map<String, dynamic>> login(String email, String password) async {
@@ -45,6 +52,29 @@ class ApiService {
     return response.statusCode == 200
         ? {'success': true, ...data}
         : {'success': false, 'message': data['message'] ?? 'Registration failed'};
+  }
+
+  static Future<Map<String, dynamic>> googleLogin({
+    required String email,
+    required String username,
+    String? fullName,
+    String? avatarUrl,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/google-login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'username': username,
+        'fullName': fullName ?? '',
+        'avatarUrl': avatarUrl ?? '',
+        'device': 'Mobile App',
+      }),
+    );
+    final data = jsonDecode(response.body);
+    return response.statusCode == 200
+        ? {'success': true, ...data}
+        : {'success': false, 'message': data['message'] ?? 'Google Login failed on server'};
   }
 
   // ── Progress ──────────────────────────────────────────────────────────────
@@ -259,5 +289,97 @@ class ApiService {
       inter += [e.value, bB[e.key] ?? 0].reduce((x, y) => x < y ? x : y);
     }
     return (2.0 * inter) / ((a.length - 1) + (b.length - 1));
+  }
+
+  // ── Community ──────────────────────────────────────────────────────────────
+
+  /// Search users by username or fullName
+  static Future<List<Map<String, dynamic>>> searchUsers(String query) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/search?q=${Uri.encodeComponent(query)}'),
+      ).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data);
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Get community data (friend requests + friends list)
+  static Future<Map<String, dynamic>> getCommunityData(String email) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/community/data?email=${Uri.encodeComponent(email)}'),
+      ).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {'friendRequests': [], 'friends': []};
+    } catch (_) {
+      return {'friendRequests': [], 'friends': []};
+    }
+  }
+
+  /// Get user profile by username
+  static Future<Map<String, dynamic>> getUserProfile(String username, {String? requesterEmail}) async {
+    try {
+      String url = '$_baseUrl/profile/$username';
+      if (requesterEmail != null) {
+        url += '?requesterEmail=${Uri.encodeComponent(requesterEmail)}';
+      }
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// Send friend request
+  static Future<bool> sendFriendRequest(String requesterEmail, String targetUsername) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/friend-request/send'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'requesterEmail': requesterEmail, 'targetUsername': targetUsername}),
+      ).timeout(const Duration(seconds: 10));
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Accept friend request
+  static Future<bool> acceptFriendRequest(String currentEmail, String targetId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/friend-request/accept'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'currentEmail': currentEmail, 'targetId': targetId}),
+      ).timeout(const Duration(seconds: 10));
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Reject friend request
+  static Future<bool> rejectFriendRequest(String currentEmail, String targetId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/friend-request/reject'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'currentEmail': currentEmail, 'targetId': targetId}),
+      ).timeout(const Duration(seconds: 10));
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
 }
