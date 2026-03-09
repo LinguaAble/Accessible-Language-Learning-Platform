@@ -5,7 +5,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
 // 1. REGISTER USER
 router.post('/register', async (req, res) => {
@@ -53,8 +53,7 @@ router.post('/register', async (req, res) => {
         streak: user.streak,
         lastStreakDate: user.lastStreakDate,
         dailyLessonCounts: user.dailyLessonCounts,
-        dailyScores: user.dailyScores,
-        lessonScores: user.lessonScores
+        dailyScores: user.dailyScores
       }
     });
   } catch (err) {
@@ -123,8 +122,7 @@ router.post('/login', async (req, res) => {
         streak: updated.streak,
         lastStreakDate: updated.lastStreakDate,
         dailyLessonCounts: updated.dailyLessonCounts,
-        dailyScores: updated.dailyScores,
-        lessonScores: updated.lessonScores
+        dailyScores: updated.dailyScores
       }
     });
   } catch (err) {
@@ -134,77 +132,7 @@ router.post('/login', async (req, res) => {
 });
 
 
-// 3. GOOGLE LOGIN/REGISTER
-router.post('/google-login', async (req, res) => {
-  try {
-    const { email, username, fullName, avatarUrl, device } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: 'Email from Google is required.' });
-    }
-
-    // Check if user exists
-    let user = await User.findOne({ email });
-
-    // If they don't exist, create them
-    if (!user) {
-      const generatedPassword = crypto.randomBytes(16).toString('hex'); // Dummy strong password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(generatedPassword, salt);
-
-      user = new User({
-        email,
-        username: username || email.split('@')[0],
-        password: hashedPassword,
-        fullName: fullName || '',
-        avatarUrl: avatarUrl || '',
-        loginHistory: [{ timestamp: new Date(), device: device || 'Web Browser' }]
-      });
-      await user.save();
-    } else {
-      // If user exists, update login history
-      const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: device || 'Web Browser' }];
-      if (newHistory.length > 10) newHistory.shift();
-
-      user.loginHistory = newHistory;
-      if (avatarUrl && !user.avatarUrl) {
-        user.avatarUrl = avatarUrl; // sync avatar if it was missing
-      }
-      await user.save();
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    res.json({
-      token,
-      user: {
-        email: user.email,
-        username: user.username,
-        fullName: user.fullName,
-        age: user.age,
-        gender: user.gender,
-        bio: user.bio,
-        avatarUrl: user.avatarUrl,
-        preferences: user.preferences,
-        completedLessons: user.completedLessons,
-        loginHistory: user.loginHistory,
-        todayProgress: user.todayProgress,
-        progressDate: user.progressDate,
-        streak: user.streak,
-        lastStreakDate: user.lastStreakDate,
-        dailyLessonCounts: user.dailyLessonCounts,
-        dailyScores: user.dailyScores,
-        lessonScores: user.lessonScores
-      }
-    });
-
-  } catch (err) {
-    console.error('Google Login Error:', err);
-    res.status(500).json({ message: 'Server Error during Google Authentication' });
-  }
-});
-
-// 4. FORGOT PASSWORD (OTP VERSION)
+// 3. FORGOT PASSWORD (OTP VERSION)
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -228,15 +156,23 @@ router.post('/forgot-password', async (req, res) => {
 
     await user.save();
 
-    // C. Send Email using Resend
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    // C. Send Email using Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER, // Your email from .env
+        pass: process.env.EMAIL_PASS  // Your App Password from .env
+      }
+    });
 
-    await resend.emails.send({
-      from: 'onboarding@resend.dev',
+    const message = {
+      from: `"LinguaAble Support" <${process.env.EMAIL_USER}>`,
       to: user.email,
       subject: 'Password Reset Code',
-      text: `Your password reset OTP is: ${otp}\n\nThis code expires in 1 minute.`
-    });
+      text: `Your password reset otp is: ${otp}\n\nThis code expires in 1 minute.`
+    };
+
+    await transporter.sendMail(message);
 
     res.status(200).json({ success: true, data: "OTP sent to email" });
 
@@ -285,7 +221,7 @@ router.put('/reset-password/:token', async (req, res) => {
 // 5. UPDATE USER PROGRESS (Unified)
 router.put('/update-progress', async (req, res) => {
   try {
-    const { email, completedLessons, todayProgress, incrementLessonCount, date, lessonScore, lessonId } = req.body;
+    const { email, completedLessons, todayProgress, incrementLessonCount, date, lessonScore } = req.body;
 
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
@@ -369,19 +305,6 @@ router.put('/update-progress', async (req, res) => {
       }
     }
 
-    // E. Save per-lesson score (for AI recommendations)
-    if (lessonId !== undefined && lessonScore !== undefined) {
-      if (!user.lessonScores) user.lessonScores = [];
-      const existingLessonScore = user.lessonScores.find(e => e.lessonId === lessonId);
-      if (existingLessonScore) {
-        // Update with latest score
-        existingLessonScore.score = lessonScore;
-        existingLessonScore.date = todayStr;
-      } else {
-        user.lessonScores.push({ lessonId, score: lessonScore, date: todayStr });
-      }
-    }
-
     await user.save();
 
     res.json({
@@ -392,8 +315,7 @@ router.put('/update-progress', async (req, res) => {
       streak: user.streak,
       lastStreakDate: user.lastStreakDate,
       dailyLessonCounts: user.dailyLessonCounts,
-      dailyScores: user.dailyScores,
-      lessonScores: user.lessonScores
+      dailyScores: user.dailyScores
     });
   } catch (err) {
     console.error(err);
@@ -562,189 +484,11 @@ router.get('/leaderboard', async (req, res) => {
   }
 });
 
-// 11. SEARCH USERS
-router.get('/search', async (req, res) => {
+router.get('/me', protect, async (req, res) => {
   try {
-    const { q } = req.query;
-    if (!q) return res.json([]);
-
-    // Search by username or fullName using regex (case-insensitive)
-    const regex = new RegExp(q, 'i');
-    const users = await User.find({
-      $or: [{ username: regex }, { fullName: regex }]
-    })
-      .select('username fullName avatarUrl string') // selecting limited fields
-      .limit(10);
-
-    res.json(users);
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-// 12. GET PUBLIC PROFILE
-router.get('/profile/:username', async (req, res) => {
-  try {
-    const { username } = req.params;
-    const { requesterEmail } = req.query;
-
-    const profileUser = await User.findOne({ username });
-    if (!profileUser) return res.status(404).json({ message: 'User not found' });
-
-    let relationship = 'none'; // none | pending_sent | pending_received | friends | self
-    let isFriend = false;
-    let isSelf = false;
-
-    // Check relationship if a logged-in user requested this profile
-    if (requesterEmail) {
-      const requester = await User.findOne({ email: requesterEmail });
-      if (requester) {
-        if (requester._id.toString() === profileUser._id.toString()) {
-          relationship = 'self';
-          isSelf = true;
-          isFriend = true; // you can see your own stats
-        } else {
-          // Check if friends
-          if (profileUser.friends.includes(requester._id)) {
-            relationship = 'friends';
-            isFriend = true;
-          } else if (profileUser.friendRequestsReceived.includes(requester._id)) {
-            relationship = 'pending_sent'; // Current user requested this profile user
-          } else if (requester.friendRequestsReceived.includes(profileUser._id)) {
-            relationship = 'pending_received'; // Profile user requested current user
-          }
-        }
-      }
-    }
-
-    // Prepare response. Hide stats if not friend/self.
-    const publicProfile = {
-      _id: profileUser._id,
-      username: profileUser.username,
-      fullName: profileUser.fullName || '',
-      bio: profileUser.bio || '',
-      avatarUrl: profileUser.avatarUrl || '',
-      relationship: relationship
-    };
-
-    if (isFriend) {
-      publicProfile.streak = profileUser.streak || 0;
-      publicProfile.completedLessons = profileUser.completedLessons ? profileUser.completedLessons.length : 0;
-      publicProfile.dailyScores = profileUser.dailyScores || [];
-      publicProfile.dailyLessonCounts = profileUser.dailyLessonCounts || [];
-    }
-
-    res.json(publicProfile);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-// 13. FRIEND ACTIONS
-router.post('/friend-request/send', async (req, res) => {
-  try {
-    const { requesterEmail, targetUsername } = req.body;
-    const requester = await User.findOne({ email: requesterEmail });
-    const target = await User.findOne({ username: targetUsername });
-
-    if (!requester || !target) return res.status(404).json({ message: 'User missing' });
-    if (requester._id.toString() === target._id.toString()) return res.status(400).json({ message: 'Cannot friend yourself' });
-    if (requester.friends.includes(target._id)) return res.status(400).json({ message: 'Already friends' });
-    if (requester.friendRequestsSent.includes(target._id)) return res.status(400).json({ message: 'Request already sent' });
-
-    // Add to arrays
-    requester.friendRequestsSent.push(target._id);
-    target.friendRequestsReceived.push(requester._id);
-
-    // If target also already sent request, auto accept them
-    if (requester.friendRequestsReceived.includes(target._id)) {
-      requester.friendRequestsReceived.pull(target._id);
-      requester.friendRequestsSent.pull(target._id);
-      requester.friends.push(target._id);
-
-      target.friendRequestsReceived.pull(requester._id);
-      target.friendRequestsSent.pull(requester._id);
-      target.friends.push(requester._id);
-    }
-
-    await requester.save();
-    await target.save();
-
-    res.json({ success: true, message: 'Friend request sent' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-router.post('/friend-request/accept', async (req, res) => {
-  try {
-    const { currentEmail, targetId } = req.body; // targetId is ID of the user who requested
-    const current = await User.findOne({ email: currentEmail });
-    const target = await User.findById(targetId);
-
-    if (!current || !target) return res.status(404).json({ message: 'User missing' });
-
-    // Accept logic
-    current.friendRequestsReceived.pull(target._id);
-    current.friends.push(target._id);
-
-    target.friendRequestsSent.pull(current._id);
-    target.friends.push(current._id);
-
-    await current.save();
-    await target.save();
-
-    res.json({ success: true, message: 'Friend request accepted' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-router.post('/friend-request/reject', async (req, res) => {
-  try {
-    const { currentEmail, targetId } = req.body;
-    const current = await User.findOne({ email: currentEmail });
-    const target = await User.findById(targetId);
-
-    if (!current || !target) return res.status(404).json({ message: 'User missing' });
-
-    // Reject logic
-    current.friendRequestsReceived.pull(target._id);
-    target.friendRequestsSent.pull(current._id);
-
-    await current.save();
-    await target.save();
-
-    res.json({ success: true, message: 'Friend request rejected' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-// 14. GET COMMUNITY DATA
-router.get('/community/data', async (req, res) => {
-  try {
-    const { email } = req.query;
-    if (!email) return res.status(400).json({ message: 'Email required' });
-
-    // Find the user and populate the received friend requests and their current friends
-    const user = await User.findOne({ email })
-      .populate('friendRequestsReceived', 'username fullName avatarUrl')
-      .populate('friends', 'username fullName avatarUrl completedLessons streak');
-
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    res.json({
-      friendRequests: user.friendRequestsReceived || [],
-      friends: user.friends || []
-    });
-  } catch (err) {
-    console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 });
