@@ -368,8 +368,10 @@ router.put('/update-settings', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Merge preferences instead of replacing
-    user.preferences = { ...user.preferences, ...preferences };
+    // Merge preferences without spreading internal Mongoose object state
+    const currentPrefs = user.preferences ? user.preferences.toObject() : {};
+    user.preferences = { ...currentPrefs, ...preferences };
+    user.markModified('preferences');
     await user.save();
 
     res.json({ success: true, preferences: user.preferences });
@@ -398,7 +400,8 @@ router.put('/update-profile', async (req, res) => {
 
     // Update preferences if provided
     if (preferences !== undefined) {
-      updateQuery.$set.preferences = { ...user.preferences, ...preferences };
+      const currentPrefs = user.preferences ? user.preferences.toObject() : {};
+      updateQuery.$set.preferences = { ...currentPrefs, ...preferences };
     }
 
     // Use findOneAndUpdate to bypass validation on unrelated document fields

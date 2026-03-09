@@ -55,7 +55,9 @@ const UserSchema = new mongoose.Schema({
     soundEffects: { type: Boolean, default: false },
     animationReduced: { type: Boolean, default: false },
     fontSize: { type: String, default: 'medium' },
-    dailyGoalMinutes: { type: Number, default: 5 }
+    dailyGoalMinutes: { type: Number, default: 5 },
+    dyslexiaFont: { type: Boolean, default: false },
+    colorOverlay: { type: String, default: 'none' }
   },
 
   // Story: Track User Progress
