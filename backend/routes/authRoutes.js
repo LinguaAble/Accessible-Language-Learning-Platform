@@ -5,7 +5,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 // 1. REGISTER USER
 router.post('/register', async (req, res) => {
@@ -228,23 +228,15 @@ router.post('/forgot-password', async (req, res) => {
 
     await user.save();
 
-    // C. Send Email using Nodemailer
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER, // Your email from .env
-        pass: process.env.EMAIL_PASS  // Your App Password from .env
-      }
-    });
+    // C. Send Email using Resend
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const message = {
-      from: `"LinguaAble Support" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'onboarding@resend.dev',
       to: user.email,
       subject: 'Password Reset Code',
-      text: `Your password reset otp is: ${otp}\n\nThis code expires in 1 minute.`
-    };
-
-    await transporter.sendMail(message);
+      text: `Your password reset OTP is: ${otp}\n\nThis code expires in 1 minute.`
+    });
 
     res.status(200).json({ success: true, data: "OTP sent to email" });
 
