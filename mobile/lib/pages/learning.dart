@@ -12,7 +12,6 @@ import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import '../services/google_stt_service.dart';
 
-
 class LearningScreen extends StatefulWidget {
   final int lessonId;
   const LearningScreen({super.key, this.lessonId = 1});
@@ -56,8 +55,9 @@ class _LearningScreenState extends State<LearningScreen>
     final lesson = lessonDatabase[widget.lessonId] ?? lessonDatabase[1]!;
     _activeSlides = List.from(lesson.slides);
     _originalCount = _activeSlides.length;
-    _totalQuestions =
-        _activeSlides.where((s) => s.type == 'quiz' || s.type == 'pronounce').length;
+    _totalQuestions = _activeSlides
+        .where((s) => s.type == 'quiz' || s.type == 'pronounce')
+        .length;
     _initTts();
   }
 
@@ -87,10 +87,12 @@ class _LearningScreenState extends State<LearningScreen>
     for (var i = 0; i < n; i++) {
       // Simple ADSR-like envelope: fast attack, gentle decay at tail
       final env = i < n * 0.04
-          ? i / (n * 0.04)          // attack
+          ? i /
+                (n * 0.04) // attack
           : i > n * 0.75
-              ? (n - i) / (n * 0.25) // release
-              : 1.0;                 // sustain
+          ? (n - i) /
+                (n * 0.25) // release
+          : 1.0; // sustain
       samples[i] = (sin(2 * pi * hz * i / sr) * env * volume * 32767)
           .round()
           .clamp(-32768, 32767);
@@ -100,11 +102,19 @@ class _LearningScreenState extends State<LearningScreen>
     void le32(int v) =>
         b.add([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >> 24) & 0xFF]);
     void le16(int v) => b.add([v & 0xFF, (v >> 8) & 0xFF]);
-    b.add([82, 73, 70, 70]); le32(36 + n * 2); // 'RIFF' + file size
+    b.add([82, 73, 70, 70]);
+    le32(36 + n * 2); // 'RIFF' + file size
     b.add([87, 65, 86, 69]); // 'WAVE'
-    b.add([102, 109, 116, 32]); le32(16); le16(1); le16(1); // 'fmt ', PCM, mono
-    le32(sr); le32(sr * 2); le16(2); le16(16);  // sample rate, byte rate, block align, 16-bit
-    b.add([100, 97, 116, 97]); le32(n * 2);     // 'data' + data size
+    b.add([102, 109, 116, 32]);
+    le32(16);
+    le16(1);
+    le16(1); // 'fmt ', PCM, mono
+    le32(sr);
+    le32(sr * 2);
+    le16(2);
+    le16(16); // sample rate, byte rate, block align, 16-bit
+    b.add([100, 97, 116, 97]);
+    le32(n * 2); // 'data' + data size
     b.add(samples.buffer.asUint8List());
     return b.toBytes();
   }
@@ -113,8 +123,8 @@ class _LearningScreenState extends State<LearningScreen>
   /// Uses AudioPlayer — independent of TTS, fires instantly.
   void _playSoundEffect(bool correct) {
     final bytes = correct
-        ? _wavTone(880, 220)                    // 880 Hz — bright 'ding'
-        : _wavTone(180, 320, volume: 0.45);     // 180 Hz — low 'buzz'
+        ? _wavTone(880, 220) // 880 Hz — bright 'ding'
+        : _wavTone(180, 320, volume: 0.45); // 180 Hz — low 'buzz'
     _sfxPlayer.play(BytesSource(bytes));
   }
 
@@ -140,11 +150,11 @@ class _LearningScreenState extends State<LearningScreen>
 
     final provider = Provider.of<UserProvider>(context, listen: false);
     if (provider.soundEffects) {
-        if (correct) {
-            SystemSound.play(SystemSoundType.click);
-        } else {
-            SystemSound.play(SystemSoundType.alert);
-        }
+      if (correct) {
+        SystemSound.play(SystemSoundType.click);
+      } else {
+        SystemSound.play(SystemSoundType.alert);
+      }
     }
 
     setState(() {
@@ -208,7 +218,9 @@ class _LearningScreenState extends State<LearningScreen>
 
     if (provider.email.isNotEmpty) {
       final completed = List<int>.from(
-        (provider.completedLessons).map((e) => e is int ? e : int.tryParse('$e') ?? 0),
+        (provider.completedLessons).map(
+          (e) => e is int ? e : int.tryParse('$e') ?? 0,
+        ),
       );
       final isNew = !completed.contains(widget.lessonId);
       if (isNew) completed.add(widget.lessonId);
@@ -244,8 +256,9 @@ class _LearningScreenState extends State<LearningScreen>
     setState(() => _showSuccess = true);
   }
 
-  int _calcPercentage() =>
-      _totalQuestions > 0 ? (_firstAttemptCorrect / _totalQuestions * 100).round() : 100;
+  int _calcPercentage() => _totalQuestions > 0
+      ? (_firstAttemptCorrect / _totalQuestions * 100).round()
+      : 100;
 
   String _calcGrade() {
     final p = _calcPercentage();
@@ -272,7 +285,8 @@ class _LearningScreenState extends State<LearningScreen>
     final slide = _activeSlides[_currentIndex];
 
     return Scaffold(
-      resizeToAvoidBottomInset: false, // keyboard must not squish the fixed footer
+      resizeToAvoidBottomInset:
+          false, // keyboard must not squish the fixed footer
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -292,7 +306,9 @@ class _LearningScreenState extends State<LearningScreen>
                   value: _progress,
                   backgroundColor: Colors.grey.shade200,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    _isReviewMode ? const Color(0xFFF59E0B) : const Color(0xFF58CC02),
+                    _isReviewMode
+                        ? const Color(0xFFF59E0B)
+                        : const Color(0xFF58CC02),
                   ),
                   minHeight: 14,
                 ),
@@ -311,11 +327,14 @@ class _LearningScreenState extends State<LearningScreen>
                   children: [
                     Icon(Icons.refresh, size: 14, color: Color(0xFFF59E0B)),
                     SizedBox(width: 4),
-                    Text('Review',
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFF59E0B))),
+                    Text(
+                      'Review',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFFF59E0B),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -344,7 +363,9 @@ class _LearningScreenState extends State<LearningScreen>
                       Text(
                         slide.question!,
                         style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width < 360 ? 18 : 20,
+                          fontSize: MediaQuery.of(context).size.width < 360
+                              ? 18
+                              : 20,
                           fontWeight: FontWeight.w800,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -386,7 +407,11 @@ class _LearningScreenState extends State<LearningScreen>
       ),
       child: Text(
         text,
-        style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 13),
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+        ),
       ),
     );
   }
@@ -394,7 +419,11 @@ class _LearningScreenState extends State<LearningScreen>
   Widget _buildCharDisplay(LessonSlide slide) {
     final cs = Theme.of(context).colorScheme;
     final sw = MediaQuery.of(context).size.width;
-    final charFontSize = sw < 360 ? 48.0 : sw < 400 ? 56.0 : 64.0;
+    final charFontSize = sw < 360
+        ? 48.0
+        : sw < 400
+        ? 56.0
+        : 64.0;
     final vPad = sw < 360 ? 20.0 : 28.0;
     return Container(
       width: double.infinity,
@@ -421,16 +450,21 @@ class _LearningScreenState extends State<LearningScreen>
                   child: Text(
                     slide.mainChar!,
                     style: TextStyle(
-                        fontSize: charFontSize,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface),
+                      fontSize: charFontSize,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
                 if (slide.audioText != null) ...[
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.volume_up, color: Colors.blue, size: 30),
+                    icon: const Icon(
+                      Icons.volume_up,
+                      color: Colors.blue,
+                      size: 30,
+                    ),
                     onPressed: _playAudio,
                   ),
                 ],
@@ -442,8 +476,9 @@ class _LearningScreenState extends State<LearningScreen>
               child: Text(
                 slide.hint!,
                 style: TextStyle(
-                    fontSize: sw < 360 ? 13 : 15,
-                    color: cs.onSurface.withOpacity(0.55)),
+                  fontSize: sw < 360 ? 13 : 15,
+                  color: cs.onSurface.withOpacity(0.55),
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -453,8 +488,9 @@ class _LearningScreenState extends State<LearningScreen>
               child: Text(
                 slide.instruction!,
                 style: TextStyle(
-                    fontSize: sw < 360 ? 11 : 13,
-                    color: cs.onSurface.withOpacity(0.65)),
+                  fontSize: sw < 360 ? 11 : 13,
+                  color: cs.onSurface.withOpacity(0.65),
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -540,7 +576,10 @@ class _LearningScreenState extends State<LearningScreen>
 
     final started = await _googleStt.startRecording();
     if (!started) {
-      setState(() => _nlpFeedback = '⚠️ Could not start recording.\nCheck microphone permissions.');
+      setState(
+        () => _nlpFeedback =
+            '⚠️ Could not start recording.\nCheck microphone permissions.',
+      );
       return;
     }
     setState(() {
@@ -577,7 +616,10 @@ class _LearningScreenState extends State<LearningScreen>
       setState(() => _isProcessing = false);
 
       if (transcript.isEmpty) {
-        setState(() => _nlpFeedback = '❌ No speech detected. Try again.\n(Speak clearly after the mic turns orange)');
+        setState(
+          () => _nlpFeedback =
+              '❌ No speech detected. Try again.\n(Speak clearly after the mic turns orange)',
+        );
         return;
       }
       debugPrint('STT transcript: "$transcript"');
@@ -587,7 +629,8 @@ class _LearningScreenState extends State<LearningScreen>
       if (!mounted) return;
       setState(() {
         _isProcessing = false;
-        _nlpFeedback = '❌ STT Error: ${e.toString().length > 80 ? e.toString().substring(0, 80) : e}';
+        _nlpFeedback =
+            '❌ STT Error: ${e.toString().length > 80 ? e.toString().substring(0, 80) : e}';
       });
     }
   }
@@ -601,7 +644,8 @@ class _LearningScreenState extends State<LearningScreen>
       expectedHindi: slide.mainChar ?? '',
     );
     final isCorrect = result['isCorrect'] as bool? ?? false;
-    final feedback = result['feedback'] as String? ??
+    final feedback =
+        result['feedback'] as String? ??
         (isCorrect ? '✅ Correct!' : '❌ Try again');
     setState(() => _nlpFeedback = feedback);
     _handlePronounceResult(isCorrect);
@@ -622,15 +666,16 @@ class _LearningScreenState extends State<LearningScreen>
     return Column(
       children: [
         FloatingActionButton.large(
-          onPressed:
-              (_isCorrect != null || _isProcessing) ? null : () => _startListening(slide),
+          onPressed: (_isCorrect != null || _isProcessing)
+              ? null
+              : () => _startListening(slide),
           backgroundColor: _isProcessing ? Colors.grey : btnColor,
           child: Icon(
             _isCorrect == true
                 ? Icons.check
                 : (_isProcessing
-                    ? Icons.hourglass_top
-                    : (_isListening ? Icons.stop : Icons.mic)),
+                      ? Icons.hourglass_top
+                      : (_isListening ? Icons.stop : Icons.mic)),
             color: Colors.white,
             size: 36,
           ),
@@ -640,16 +685,18 @@ class _LearningScreenState extends State<LearningScreen>
           _isProcessing
               ? _nlpFeedback
               : (_isCorrect != null
-                  ? _nlpFeedback
-                  : (_isListening ? '🎤 Listening... tap to stop' : _nlpFeedback)),
+                    ? _nlpFeedback
+                    : (_isListening
+                          ? '🎤 Listening... tap to stop'
+                          : _nlpFeedback)),
           style: TextStyle(
             color: _isCorrect == true
                 ? const Color(0xFF10B981)
                 : (_isCorrect == false
-                    ? const Color(0xFFEF4444)
-                    : (_isListening || _isProcessing
-                        ? const Color(0xFFF59E0B)
-                        : Colors.grey)),
+                      ? const Color(0xFFEF4444)
+                      : (_isListening || _isProcessing
+                            ? const Color(0xFFF59E0B)
+                            : Colors.grey)),
             fontWeight: FontWeight.w600,
             fontSize: 13,
           ),
@@ -662,8 +709,14 @@ class _LearningScreenState extends State<LearningScreen>
   Widget _buildFooter(LessonSlide slide) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Color bgColor = isDark ? const Color(0xFF1E293B) : Colors.white;
-    if (_isCorrect == true) bgColor = isDark ? const Color(0xFF10B981).withOpacity(0.2) : const Color(0xFFD1FAE5);
-    if (_isCorrect == false) bgColor = isDark ? const Color(0xFFEF4444).withOpacity(0.2) : const Color(0xFFFEE2E2);
+    if (_isCorrect == true)
+      bgColor = isDark
+          ? const Color(0xFF10B981).withOpacity(0.2)
+          : const Color(0xFFD1FAE5);
+    if (_isCorrect == false)
+      bgColor = isDark
+          ? const Color(0xFFEF4444).withOpacity(0.2)
+          : const Color(0xFFFEE2E2);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -731,9 +784,12 @@ class _LearningScreenState extends State<LearningScreen>
                 backgroundColor: _isCorrect == false
                     ? const Color(0xFFEF4444)
                     : (_isCorrect == true
-                        ? const Color(0xFF10B981)
-                        : const Color(0xFFE5E7EB)),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFFE5E7EB)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 14,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -742,11 +798,12 @@ class _LearningScreenState extends State<LearningScreen>
                   ? _handleNext
                   : null,
               child: Text(
-                _currentIndex == _activeSlides.length - 1 && _mistakeQueue.isEmpty
+                _currentIndex == _activeSlides.length - 1 &&
+                        _mistakeQueue.isEmpty
                     ? 'FINISH'
                     : (_isCorrect == false
-                        ? 'GOT IT'
-                        : (slide.type == 'teach' ? 'CONTINUE' : 'NEXT')),
+                          ? 'GOT IT'
+                          : (slide.type == 'teach' ? 'CONTINUE' : 'NEXT')),
                 style: TextStyle(
                   color: _isCorrect != null || slide.type == 'teach'
                       ? Colors.white
@@ -781,10 +838,20 @@ class _LearningScreenState extends State<LearningScreen>
                 // Brand
                 RichText(
                   text: const TextSpan(
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
                     children: [
-                      TextSpan(text: 'Lingua', style: TextStyle(color: Color(0xFF1E3A8A))),
-                      TextSpan(text: 'Able', style: TextStyle(color: Color(0xFFF79C42))),
+                      TextSpan(
+                        text: 'Lingua',
+                        style: TextStyle(color: Color(0xFF1E3A8A)),
+                      ),
+                      TextSpan(
+                        text: 'Able',
+                        style: TextStyle(color: Color(0xFFF79C42)),
+                      ),
                     ],
                   ),
                 ),
@@ -798,13 +865,20 @@ class _LearningScreenState extends State<LearningScreen>
                     color: const Color(0xFF10B981).withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 50),
+                  child: const Icon(
+                    Icons.check_circle,
+                    color: Color(0xFF10B981),
+                    size: 50,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
                 Text(
                   'Lesson Complete! ✓',
-                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 Text(
                   lessonTitle,
@@ -816,7 +890,9 @@ class _LearningScreenState extends State<LearningScreen>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(
@@ -826,7 +902,10 @@ class _LearningScreenState extends State<LearningScreen>
                         children: [
                           Text(
                             'Grade: $grade',
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
                           ),
                           Text(
                             '$pct%',
@@ -843,8 +922,12 @@ class _LearningScreenState extends State<LearningScreen>
                         borderRadius: BorderRadius.circular(8),
                         child: LinearProgressIndicator(
                           value: pct / 100,
-                          backgroundColor: Theme.of(context).colorScheme.outline,
-                          valueColor: const AlwaysStoppedAnimation(Color(0xFFF79C42)),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.outline,
+                          valueColor: const AlwaysStoppedAnimation(
+                            Color(0xFFF79C42),
+                          ),
                           minHeight: 10,
                         ),
                       ),
@@ -882,7 +965,11 @@ class _LearningScreenState extends State<LearningScreen>
 
                 Text(
                   message,
-                  style: const TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -895,11 +982,16 @@ class _LearningScreenState extends State<LearningScreen>
                       backgroundColor: const Color(0xFFF79C42),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     child: const Text(
                       'Continue Learning',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -922,7 +1014,12 @@ class _LearningScreenState extends State<LearningScreen>
     );
   }
 
-  Widget _buildStatCard(IconData icon, String value, String label, Color color) {
+  Widget _buildStatCard(
+    IconData icon,
+    String value,
+    String label,
+    Color color,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
@@ -945,7 +1042,11 @@ class _LearningScreenState extends State<LearningScreen>
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.grey,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

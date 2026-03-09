@@ -13,12 +13,15 @@ class LessonsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<UserProvider>(context);
     final cs = Theme.of(context).colorScheme;
-    final completed = provider.completedLessons.map((e) => int.parse('$e')).toList();
+    final completed = provider.completedLessons
+        .map((e) => int.parse('$e'))
+        .toList();
     final streak = provider.streak;
 
     String effectiveAvatar = provider.avatarUrl;
-    if (effectiveAvatar.isEmpty) {
-      effectiveAvatar = 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(provider.username)}&background=F79C42&color=fff&bold=true&size=128';
+    if (effectiveAvatar.isEmpty || effectiveAvatar.contains('ui-avatars')) {
+      effectiveAvatar =
+          'https://api.dicebear.com/9.x/initials/png?seed=${Uri.encodeComponent(provider.username)}&backgroundColor=F79C42&textColor=ffffff';
     }
 
     return Scaffold(
@@ -46,8 +49,11 @@ class LessonsPage extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department,
-                    color: Colors.orange, size: 14),
+                const Icon(
+                  Icons.local_fire_department,
+                  color: Colors.orange,
+                  size: 14,
+                ),
                 const SizedBox(width: 3),
                 Text(
                   '${streak}d',
@@ -81,25 +87,31 @@ class LessonsPage extends StatelessWidget {
           children: [
             const Text(
               'Curriculum',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 5),
             Text(
               'Master the Hindi alphabet and basic conversation.',
-              style: TextStyle(fontSize: 14, color: cs.onSurface.withOpacity(0.55)),
+              style: TextStyle(
+                fontSize: 14,
+                color: cs.onSurface.withOpacity(0.55),
+              ),
             ),
             const SizedBox(height: 24),
-            ...chapters.map((chapter) => _buildChapter(context, chapter, completed)),
+            ...chapters.map(
+              (chapter) => _buildChapter(context, chapter, completed),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildChapter(BuildContext context, Map<String, dynamic> chapter, List<int> completed) {
+  Widget _buildChapter(
+    BuildContext context,
+    Map<String, dynamic> chapter,
+    List<int> completed,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final title = chapter['title'] as String;
     final subtitle = chapter['subtitle'] as String;
@@ -128,17 +140,26 @@ class LessonsPage extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                       Text(
                         subtitle,
-                        style: const TextStyle(color: Colors.grey, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: chapterColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
@@ -151,7 +172,7 @@ class LessonsPage extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -170,25 +191,26 @@ class LessonsPage extends StatelessWidget {
               final lessonId = lessons[index];
               final lessonMeta = lessonDatabase[lessonId];
               final isCompleted = completed.contains(lessonId);
-              final isLocked = lessonId != 1 && !completed.contains(lessonId - 1);
+              final isLocked =
+                  lessonId != 1 && !completed.contains(lessonId - 1);
 
               return GestureDetector(
-                onTap: isLocked ? null : () => context.push('/lessons/$lessonId'),
+                onTap: isLocked
+                    ? null
+                    : () => context.push('/lessons/$lessonId'),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isCompleted
                         ? const Color(0xFF10B981).withOpacity(0.15)
-                        : (isLocked
-                            ? cs.surfaceContainerHighest
-                            : cs.surface),
+                        : (isLocked ? cs.surfaceContainerHighest : cs.surface),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isCompleted
                           ? const Color(0xFF10B981)
                           : (isLocked
-                              ? cs.outline.withOpacity(0.3)
-                              : cs.outline),
+                                ? cs.outline.withOpacity(0.3)
+                                : cs.outline),
                       width: 2,
                     ),
                     boxShadow: isLocked || isCompleted
@@ -208,12 +230,15 @@ class LessonsPage extends StatelessWidget {
                         isCompleted
                             ? Icons.check_circle
                             : (isLocked
-                                ? Icons.lock
-                                : (lessonMeta?.title.contains('Pron') == true
-                                    ? Icons.volume_up
-                                    : (lessonMeta?.title.contains('Recap') == true
-                                        ? Icons.refresh
-                                        : Icons.play_circle_fill))),
+                                  ? Icons.lock
+                                  : (lessonMeta?.title.contains('Pron') == true
+                                        ? Icons.volume_up
+                                        : (lessonMeta?.title.contains(
+                                                    'Recap',
+                                                  ) ==
+                                                  true
+                                              ? Icons.refresh
+                                              : Icons.play_circle_fill))),
                         color: isCompleted
                             ? const Color(0xFF10B981)
                             : (isLocked ? Colors.grey.shade400 : chapterColor),
