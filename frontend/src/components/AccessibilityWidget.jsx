@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { Type, BookOpen, Layers, X, Sun, Moon } from 'lucide-react';
 import './AccessibilityWidget.css';
@@ -7,8 +8,11 @@ const AccessibilityWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
     const { preferences, updatePreferences } = useUser();
     const widgetRef = useRef(null);
+    const location = useLocation();
 
     // Close menu when clicking outside
+    // NOTE: This useEffect MUST stay before any early returns to comply
+    // with React's Rules of Hooks (hooks cannot be called conditionally).
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (widgetRef.current && !widgetRef.current.contains(event.target)) {
@@ -26,6 +30,11 @@ const AccessibilityWidget = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen]);
+
+    // Hide while taking lessons — MUST be AFTER all hooks
+    if (location.pathname === '/learn') {
+        return null;
+    }
 
     const changeFontSize = (size) => updatePreferences({ fontSize: size });
     const toggleDyslexiaFont = () => updatePreferences({ dyslexiaFont: !preferences.dyslexiaFont });

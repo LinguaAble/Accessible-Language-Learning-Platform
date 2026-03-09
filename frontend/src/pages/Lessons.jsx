@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw, Volume2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Flame, Bell, PlayCircle, Lock, CheckCircle, RotateCcw, Volume2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
@@ -10,42 +10,34 @@ import '../Dashboard.css';
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Lessons = () => {
-    const navigate = useNavigate();
     const { user, streak } = useUser();
-    // useNotifications available via context (no destructure needed here)
-    const [completedLessons, setCompletedLessons] = useState([]);
+    const navigate = useNavigate();
+
+    // Sync completedLessons from context AND localStorage for instant updates.
+    // localStorage acts as fallback when context hasn't propagated yet (navigation transitions).
+    const [localCompleted, setLocalCompleted] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('completedLessons') || '[]'); }
+        catch { return []; }
+    });
+
+    // Re-sync whenever user context updates
+    useEffect(() => {
+        if (user?.completedLessons && user.completedLessons.length > 0) {
+            setLocalCompleted(user.completedLessons);
+        } else {
+            // Fallback: read from localStorage in case context is stale
+            try {
+                const ls = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+                if (ls.length > 0) setLocalCompleted(ls);
+            } catch { /* ignore */ }
+        }
+    }, [user?.completedLessons]);
+
+    const completedLessons = localCompleted;
     const [showProfileTooltip, setShowProfileTooltip] = useState(false);
     const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
 
     const name = user?.username || (user?.email ? user.email.split('@')[0].replace(/^./, c => c.toUpperCase()) : 'Learner');
-
-    // Load progress
-    React.useEffect(() => {
-        const fetchProgress = async () => {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            if (token) {
-                try {
-                    const res = await axios.get(`${API}/api/auth/me`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (res.data.completedLessons) {
-                        setCompletedLessons(res.data.completedLessons);
-                        localStorage.setItem('completedLessons', JSON.stringify(res.data.completedLessons));
-                    }
-                } catch (err) {
-                    console.error("Error fetching progress:", err);
-                    // Fallback to local storage if API fails
-                    const stored = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-                    setCompletedLessons(stored);
-                }
-            } else {
-                const stored = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-                setCompletedLessons(stored);
-            }
-        };
-
-        fetchProgress();
-    }, []);
 
     // --- CURRICULUM DATA ---
     const chaptersData = [
@@ -118,6 +110,75 @@ const Lessons = () => {
                 { id: 44, title: "Pronunciation: Sentences", isPronunciation: true },
                 { id: 45, title: "Pronunciation: Questions & Adjectives", isPronunciation: true }
             ]
+        },
+        {
+            id: 4,
+            title: "Chapter 4: Everyday Conversations",
+            subtitle: "Greetings & Daily Interaction",
+            color: "#27ae60", // Green
+            lessons: [
+                { id: 46, title: "Greetings: Hello & Goodbye" },
+                { id: 47, title: "Introducing Yourself" },
+                { id: 48, title: "Asking Someone’s Name" },
+                { id: 49, title: "Saying Thank You & Sorry" },
+                { id: 50, title: "Yes / No Responses" },
+                { id: 51, title: "Polite Expressions" },
+                { id: 52, title: "Asking “How are you?”" },
+                { id: 53, title: "Talking About Yourself" },
+                { id: 54, title: "Talking About Friends" },
+                { id: 55, title: "Asking Simple Questions" },
+                { id: 56, title: "Everyday Phrases" },
+                { id: 57, title: "Small Conversation Practice" },
+                { id: 58, title: "Listening Practice: Greetings", isRecap: true },
+                { id: 59, title: "Speaking Practice: Introductions", isPronunciation: true },
+                { id: 60, title: "Conversation Review", isRecap: true }
+            ]
+        },
+        {
+            id: 5,
+            title: "Chapter 5: Daily Life",
+            subtitle: "Activities & Routines",
+            color: "#f1c40f", // Yellow
+            lessons: [
+                { id: 61, title: "Daily Routine Vocabulary" },
+                { id: 62, title: "Talking About Morning Activities" },
+                { id: 63, title: "Talking About Work / Study" },
+                { id: 64, title: "Talking About Food & Meals" },
+                { id: 65, title: "Talking About Time" },
+                { id: 66, title: "Talking About Places" },
+                { id: 67, title: "Talking About Hobbies" },
+                { id: 68, title: "Talking About Weather" },
+                { id: 69, title: "Talking About Family Activities" },
+                { id: 70, title: "Asking About Plans" },
+                { id: 71, title: "Describing Your Day" },
+                { id: 72, title: "Listening Practice: Daily Life", isRecap: true },
+                { id: 73, title: "Speaking Practice: Daily Routine", isPronunciation: true },
+                { id: 74, title: "Conversation Practice: Activities", isPronunciation: true },
+                { id: 75, title: "Daily Life Review", isRecap: true }
+            ]
+        },
+        {
+            id: 6,
+            title: "Chapter 6: Real World Communication",
+            subtitle: "Situations & Practical Use",
+            color: "#e74c3c", // Red
+            lessons: [
+                { id: 76, title: "Asking for Directions" },
+                { id: 77, title: "Shopping Conversation" },
+                { id: 78, title: "Ordering Food" },
+                { id: 79, title: "Asking for Help" },
+                { id: 80, title: "Talking at the Market" },
+                { id: 81, title: "Talking at a Restaurant" },
+                { id: 82, title: "Talking at the Bus / Train Station" },
+                { id: 83, title: "Talking on the Phone" },
+                { id: 84, title: "Talking About Preferences" },
+                { id: 85, title: "Making Simple Requests" },
+                { id: 86, title: "Expressing Opinions" },
+                { id: 87, title: "Listening Practice: Real Situations", isRecap: true },
+                { id: 88, title: "Speaking Practice: Role Play", isPronunciation: true },
+                { id: 89, title: "Real-Life Conversation Practice", isPronunciation: true },
+                { id: 90, title: "Final Communication Review", isRecap: true }
+            ]
         }
     ];
 
@@ -125,6 +186,12 @@ const Lessons = () => {
         <div className="lessons-container">
             <header className="content-header">
                 <div className="greeting">
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', marginBottom: '8px', cursor: 'pointer', padding: 0 }}
+                    >
+                        <ArrowLeft size={16} /> Back to Dashboard
+                    </button>
                     <h2>Lessons</h2>
                     <p>Master the Hindi alphabet and basic conversation.</p>
                 </div>
@@ -172,7 +239,7 @@ const Lessons = () => {
                                     <div
                                         key={lesson.id}
                                         className={`lesson-card ${isLocked ? 'locked' : ''} ${isCompleted ? 'completed' : ''}`}
-                                        onClick={() => !isLocked && navigate('/learn', { state: { lessonId: lesson.id } })}
+                                        onClick={() => !isLocked && navigate(`/learn?id=${lesson.id}`)}
                                     >
                                         <div className="lesson-icon">
                                             {isCompleted ? (

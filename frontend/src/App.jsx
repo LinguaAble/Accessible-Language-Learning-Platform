@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import ProgressReport from './pages/ProgressReport';
 import Community from './pages/Community';
 import UserProfile from './pages/UserProfile';
+import LearningReport from './pages/LearningReport';
 import Layout from './components/Layout';
 import LearningScreen from './pages/LearningScreen';
 import { UserProvider, useUser } from './context/UserContext';
@@ -19,6 +20,15 @@ import { NotificationProvider } from './context/NotificationContext';
 import NotificationToast from './components/NotificationToast';
 import './App.css';
 import { playClickSound, playNavigationSound } from './utils/soundUtils';
+
+// Wrapper that gives LearningScreen a unique key per lesson-id so React
+// fully unmounts / remounts it when the lesson changes (no stale state).
+function LearningScreenKeyed() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const lessonKey = params.get('id') || 'default';
+  return <LearningScreen key={lessonKey} />;
+}
 
 function AppContent() {
   const { preferences } = useUser();
@@ -76,7 +86,8 @@ function AppContent() {
 
         {/* --- 2. Learning Screen Added Here --- */}
         {/* We keep it OUTSIDE the <Layout> so it is full-screen (no sidebar) */}
-        <Route path="/learn" element={<LearningScreen />} />
+        {/* Lesson resets are handled by the useEffect watching lessonId inside LearningScreen */}
+        <Route path="/learn" element={<LearningScreenKeyed />} />
 
         {/* Protected Routes wrapped in Layout (Has Sidebar) */}
         <Route element={<Layout />}>
@@ -85,6 +96,7 @@ function AppContent() {
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/progress" element={<ProgressReport />} />
+          <Route path="/report" element={<LearningReport />} />
           <Route path="/community" element={<Community />} />
           <Route path="/profile/:username" element={<UserProfile />} />
         </Route>

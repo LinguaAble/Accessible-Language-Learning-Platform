@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, ChevronLeft, ChevronRight, BarChart3, Users
+    LayoutDashboard, BookOpen, Trophy, Settings, LogOut, ChevronLeft, ChevronRight, BarChart3, Users, TrendingUp
 } from 'lucide-react';
 
 import zebraMascot from '../assets/zebra-mascot.png';
@@ -80,6 +80,14 @@ const Sidebar = () => {
                     title="Progress"
                 >
                     <BarChart3 size={20} /> <span>Progress</span>
+                </button>
+
+                <button
+                    className={`nav-item ${location.pathname === '/report' ? 'active' : ''}`}
+                    onClick={() => handleNavigation('/report')}
+                    title="Report"
+                >
+                    <TrendingUp size={20} /> <span>Report</span>
                 </button>
             </nav>
 

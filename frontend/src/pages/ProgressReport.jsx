@@ -242,6 +242,39 @@ const ProgressReport = () => {
                 </div>
             </div>
 
+            {/* Detailed Report Navigation (User Choice) */}
+            <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center' }}>
+                <button
+                    onClick={() => navigate('/report')}
+                    className="db-card"
+                    style={{
+                        padding: '1.2rem 2rem',
+                        borderRadius: '20px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        background: 'linear-gradient(135deg, var(--card-bg) 0%, rgba(230, 126, 34, 0.05) 100%)',
+                        border: '1px solid var(--border-color)',
+                        transition: 'all 0.3s ease',
+                        fontWeight: '700',
+                        color: 'var(--text-main)'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.borderColor = 'var(--accent-color)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.borderColor = 'var(--border-color)';
+                    }}
+                >
+                    <BarChart3 size={20} color="var(--accent-color)" />
+                    View Detailed Weekly Report & Skill Analysis
+                    <ChevronRight size={18} />
+                </button>
+            </div>
+
             {/* Calm Encouragement */}
             <div className="encouragement-section" style={{ marginTop: '30px', textAlign: 'center', padding: '40px 20px', background: 'var(--card-bg)', borderRadius: '24px', border: '1px solid var(--border-color)', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
                 <p className="encouragement-text" style={{ fontSize: '1.2rem', fontWeight: 500, lineHeight: 1.6, maxWidth: '600px', margin: '0 auto', color: 'var(--text-main)' }}>
