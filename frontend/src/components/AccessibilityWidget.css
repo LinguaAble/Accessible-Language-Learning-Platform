@@ -1,14 +1,11 @@
 .accessibility-widget {
-    position: fixed;
-    bottom: 25px;
-    right: 40px;
-    /* Moved slightly more to the left */
+    position: relative;
     z-index: 9999;
 }
 
 .accessibility-fab {
-    width: 65px;
-    height: 65px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     /* using the website's native accent color */
     background-color: var(--accent-color);
@@ -34,8 +31,8 @@
 
 .accessibility-menu {
     position: absolute;
-    bottom: 80px;
-    right: 0;
+    bottom: 0;
+    right: calc(100% + 16px);
     width: 300px;
     background-color: var(--card-bg, #1a1a1a);
     border: 1px solid var(--border-color, #333);
