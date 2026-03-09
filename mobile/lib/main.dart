@@ -12,6 +12,7 @@ import 'pages/settings.dart';
 import 'pages/signup.dart';
 import 'pages/community.dart';
 import 'pages/user_profile.dart';
+import 'pages/learning_report.dart';
 import 'providers/user_provider.dart';
 import 'widgets/accessibility_widget.dart';
 
@@ -45,11 +46,27 @@ final GoRouter _router = GoRouter(
     GoRoute(path: '/', builder: (context, state) => const LandingPage()),
     GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
     GoRoute(path: '/signup', builder: (context, state) => const SignupPage()),
-    GoRoute(path: '/dashboard', builder: (context, state) => const DashboardPage()),
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const DashboardPage(),
+    ),
     GoRoute(path: '/lessons', builder: (context, state) => const LessonsPage()),
-    GoRoute(path: '/leaderboard', builder: (context, state) => const LeaderboardPage()),
-    GoRoute(path: '/settings', builder: (context, state) => const SettingsPage()),
-    GoRoute(path: '/community', builder: (context, state) => const CommunityPage()),
+    GoRoute(
+      path: '/leaderboard',
+      builder: (context, state) => const LeaderboardPage(),
+    ),
+    GoRoute(
+      path: '/report',
+      builder: (context, state) => const LearningReportPage(),
+    ),
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/community',
+      builder: (context, state) => const CommunityPage(),
+    ),
     GoRoute(
       path: '/profile/:username',
       builder: (context, state) {
@@ -69,7 +86,7 @@ final GoRouter _router = GoRouter(
 
 // ── Brand colours (shared) ────────────────────────────────────────────────────
 const _kOrange = Color(0xFFF79C42);
-const _kBlue   = Color(0xFF1E3A8A);
+const _kBlue = Color(0xFF1E3A8A);
 
 // ── LIGHT THEME ───────────────────────────────────────────────────────────────
 final _lightTheme = ThemeData(
@@ -140,15 +157,17 @@ final _lightTheme = ThemeData(
     backgroundColor: Colors.white,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
   ),
-  bottomSheetTheme: const BottomSheetThemeData(
-    backgroundColor: Colors.white,
-  ),
-  listTileTheme: const ListTileThemeData(
-    iconColor: Color(0xFF6B7280),
-  ),
+  bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white),
+  listTileTheme: const ListTileThemeData(iconColor: Color(0xFF6B7280)),
   textTheme: const TextTheme(
-    titleLarge: TextStyle(color: Color(0xFF1F2937), fontWeight: FontWeight.w800),
-    titleMedium: TextStyle(color: Color(0xFF1F2937), fontWeight: FontWeight.w700),
+    titleLarge: TextStyle(
+      color: Color(0xFF1F2937),
+      fontWeight: FontWeight.w800,
+    ),
+    titleMedium: TextStyle(
+      color: Color(0xFF1F2937),
+      fontWeight: FontWeight.w700,
+    ),
     bodyMedium: TextStyle(color: Color(0xFF374151)),
     bodySmall: TextStyle(color: Color(0xFF6B7280)),
   ),
@@ -158,15 +177,15 @@ final _lightTheme = ThemeData(
 final _darkTheme = ThemeData(
   useMaterial3: true,
   brightness: Brightness.dark,
-  scaffoldBackgroundColor: const Color(0xFF0F172A),    // deep navy/slate
+  scaffoldBackgroundColor: const Color(0xFF0F172A), // deep navy/slate
   colorScheme: const ColorScheme.dark(
     primary: _kOrange,
     onPrimary: Colors.white,
-    secondary: Color(0xFF60A5FA),                      // sky blue
+    secondary: Color(0xFF60A5FA), // sky blue
     onSecondary: Colors.white,
-    surface: Color(0xFF1E293B),                        // slate-800
-    onSurface: Color(0xFFF1F5F9),                      // slate-100
-    surfaceContainerHighest: Color(0xFF334155),         // slate-700
+    surface: Color(0xFF1E293B), // slate-800
+    onSurface: Color(0xFFF1F5F9), // slate-100
+    surfaceContainerHighest: Color(0xFF334155), // slate-700
     outline: Color(0xFF334155),
     error: Color(0xFFF87171),
     onError: Colors.white,
@@ -188,7 +207,8 @@ final _darkTheme = ThemeData(
   dividerColor: const Color(0xFF334155),
   switchTheme: SwitchThemeData(
     thumbColor: WidgetStateProperty.resolveWith(
-      (s) => s.contains(WidgetState.selected) ? _kOrange : const Color(0xFF64748B),
+      (s) =>
+          s.contains(WidgetState.selected) ? _kOrange : const Color(0xFF64748B),
     ),
     trackColor: WidgetStateProperty.resolveWith(
       (s) => s.contains(WidgetState.selected)
@@ -231,8 +251,14 @@ final _darkTheme = ThemeData(
     textColor: Color(0xFFF1F5F9),
   ),
   textTheme: const TextTheme(
-    titleLarge: TextStyle(color: Color(0xFFF1F5F9), fontWeight: FontWeight.w800),
-    titleMedium: TextStyle(color: Color(0xFFF1F5F9), fontWeight: FontWeight.w700),
+    titleLarge: TextStyle(
+      color: Color(0xFFF1F5F9),
+      fontWeight: FontWeight.w800,
+    ),
+    titleMedium: TextStyle(
+      color: Color(0xFFF1F5F9),
+      fontWeight: FontWeight.w700,
+    ),
     bodyMedium: TextStyle(color: Color(0xFFCBD5E1)),
     bodySmall: TextStyle(color: Color(0xFF94A3B8)),
   ),
@@ -251,8 +277,7 @@ class _NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
-  ) =>
-      child; // Instant — no slide, zoom, or fade
+  ) => child; // Instant — no slide, zoom, or fade
 }
 
 // ── App ───────────────────────────────────────────────────────────────────────
@@ -286,14 +311,16 @@ class LinguaAbleApp extends StatelessWidget {
         // disableAnimations alone does NOT affect them.
         const _noAnim = _NoAnimationPageTransitionsBuilder();
         final pageTransTheme = animationReduced
-            ? const PageTransitionsTheme(builders: {
-                TargetPlatform.android: _noAnim,
-                TargetPlatform.iOS: _noAnim,
-                TargetPlatform.linux: _noAnim,
-                TargetPlatform.macOS: _noAnim,
-                TargetPlatform.windows: _noAnim,
-                TargetPlatform.fuchsia: _noAnim,
-              })
+            ? const PageTransitionsTheme(
+                builders: {
+                  TargetPlatform.android: _noAnim,
+                  TargetPlatform.iOS: _noAnim,
+                  TargetPlatform.linux: _noAnim,
+                  TargetPlatform.macOS: _noAnim,
+                  TargetPlatform.windows: _noAnim,
+                  TargetPlatform.fuchsia: _noAnim,
+                },
+              )
             : null; // null keeps the theme's default transitions
 
         final activeLight = _lightTheme.copyWith(
@@ -339,10 +366,12 @@ class LinguaAbleApp extends StatelessWidget {
             );
 
             if (overlayColor != Colors.transparent) {
-              return Stack(children: [
-                wrapped,
-                IgnorePointer(child: Container(color: overlayColor)),
-              ]);
+              return Stack(
+                children: [
+                  wrapped,
+                  IgnorePointer(child: Container(color: overlayColor)),
+                ],
+              );
             }
             return wrapped;
           },
@@ -365,7 +394,8 @@ class _LandingPageState extends State<LandingPage> {
     {
       'icon': '🧠',
       'title': 'Dyslexia-Friendly Design',
-      'description': 'Clear fonts, high contrast, and customizable text spacing',
+      'description':
+          'Clear fonts, high contrast, and customizable text spacing',
     },
     {
       'icon': '⏱️',
@@ -433,8 +463,14 @@ class _LandingPageState extends State<LandingPage> {
                     letterSpacing: -1.5,
                   ),
                   children: [
-                    TextSpan(text: 'Lingua', style: TextStyle(color: _kBlue)),
-                    TextSpan(text: 'Able', style: TextStyle(color: _kOrange)),
+                    TextSpan(
+                      text: 'Lingua',
+                      style: TextStyle(color: _kBlue),
+                    ),
+                    TextSpan(
+                      text: 'Able',
+                      style: TextStyle(color: _kOrange),
+                    ),
                   ],
                 ),
               ),
@@ -454,7 +490,11 @@ class _LandingPageState extends State<LandingPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(
                   'Master Hindi with confidence! Specially designed for learners with dyslexia, ADHD, and other learning disabilities. Our accessible, multi-sensory approach makes learning Hindi engaging, effective, and stress-free.',
-                  style: TextStyle(fontSize: 16, height: 1.6, color: cs.onSurface.withOpacity(0.6)),
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.6,
+                    color: cs.onSurface.withOpacity(0.6),
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -471,21 +511,43 @@ class _LandingPageState extends State<LandingPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _kOrange,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                       elevation: 8,
                     ),
-                    child: const Text('SIGN IN', style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1)),
+                    child: const Text(
+                      'SIGN IN',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
                   ),
                   OutlinedButton(
                     onPressed: () => context.push('/signup'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: _kOrange,
                       side: const BorderSide(color: _kOrange, width: 2),
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
-                    child: const Text('CREATE ACCOUNT', style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1)),
+                    child: const Text(
+                      'CREATE ACCOUNT',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -495,7 +557,11 @@ class _LandingPageState extends State<LandingPage> {
               // Features Section
               Text(
                 'Why Choose LinguaAble?',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: cs.onSurface),
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
                 textAlign: TextAlign.center,
               ),
               Container(
@@ -503,7 +569,9 @@ class _LandingPageState extends State<LandingPage> {
                 width: 80,
                 height: 4,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF3B82F6), _kOrange]),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF3B82F6), _kOrange],
+                  ),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -514,7 +582,9 @@ class _LandingPageState extends State<LandingPage> {
                 alignment: WrapAlignment.center,
                 children: features.map((feature) {
                   return Container(
-                    width: MediaQuery.of(context).size.width > 600 ? 300 : double.infinity,
+                    width: MediaQuery.of(context).size.width > 600
+                        ? 300
+                        : double.infinity,
                     padding: const EdgeInsets.all(25),
                     decoration: BoxDecoration(
                       color: cs.surface,
@@ -531,17 +601,28 @@ class _LandingPageState extends State<LandingPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(feature['icon']!, style: const TextStyle(fontSize: 48)),
+                        Text(
+                          feature['icon']!,
+                          style: const TextStyle(fontSize: 48),
+                        ),
                         const SizedBox(height: 15),
                         Text(
                           feature['title']!,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: cs.onSurface),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
                         Text(
                           feature['description']!,
-                          style: TextStyle(fontSize: 15, color: cs.onSurface.withOpacity(0.6), height: 1.5),
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: cs.onSurface.withOpacity(0.6),
+                            height: 1.5,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ],
