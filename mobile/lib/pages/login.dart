@@ -44,8 +44,7 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (result['success'] == true && result['token'] != null) {
-        final userProvider =
-            Provider.of<UserProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
 
         await userProvider.login(
           result['token'],
@@ -82,9 +81,11 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: kIsWeb ? '881849579766-1gv9l5lrfs9ie0t6o13pk4v38hl74glb.apps.googleusercontent.com' : null,
+        clientId: kIsWeb
+            ? '881849579766-1gv9l5lrfs9ie0t6o13pk4v38hl74glb.apps.googleusercontent.com'
+            : null,
       );
-      
+
       // Force the account picker instead of auto-signing in
       await googleSignIn.signOut();
       final GoogleSignInAccount? account = await googleSignIn.signIn();
@@ -106,7 +107,8 @@ class _LoginPageState extends State<LoginPage> {
         if (mounted) {
           setState(() {
             _isLoading = false;
-            _errorMessage = serverResult['message'] ?? 'Failed to complete Google login.';
+            _errorMessage =
+                serverResult['message'] ?? 'Failed to complete Google login.';
           });
         }
         return;
@@ -114,12 +116,12 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
       final provider = Provider.of<UserProvider>(context, listen: false);
-      
+
       // Log them in beautifully with actual server token and official user record!
       await provider.login(
         serverResult['token'],
         serverResult['user'] as Map<String, dynamic>,
-        _rememberMe, 
+        _rememberMe,
       );
 
       if (mounted) {
@@ -129,8 +131,8 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         print('Google Sign In Error: $e');
         setState(() {
-          _errorMessage = kIsWeb 
-              ? 'Google Sign In Failed. Wait for popup.' 
+          _errorMessage = kIsWeb
+              ? 'Google Sign In Failed. Wait for popup.'
               : 'Google Sign In Failed on Mobile. \nError: $e';
         });
       }
@@ -184,7 +186,10 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
               Text(
                 'Welcome to',
-                style: TextStyle(fontSize: 16, color: cs.onSurface.withOpacity(0.6)),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: cs.onSurface.withOpacity(0.6),
+                ),
               ),
               RichText(
                 text: TextSpan(
@@ -196,7 +201,11 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     TextSpan(
                       text: 'Lingua',
-                      style: TextStyle(color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A)),
+                      style: TextStyle(
+                        color: isDark
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF1E3A8A),
+                      ),
                     ),
                     const TextSpan(
                       text: 'Able',
@@ -229,11 +238,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: cs.error,
-                        size: 20,
-                      ),
+                      Icon(Icons.error_outline, color: cs.error, size: 20),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -290,8 +295,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Checkbox(
                         value: _rememberMe,
-                        onChanged: (val) =>
-                            setState(() => _rememberMe = val!),
+                        onChanged: (val) => setState(() => _rememberMe = val!),
                         activeColor: const Color(0xFFF79C42),
                       ),
                       const Text('Stay signed in'),
@@ -323,8 +327,7 @@ class _LoginPageState extends State<LoginPage> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child:
-                              CircularProgressIndicator(color: Colors.white),
+                          child: CircularProgressIndicator(color: Colors.white),
                         )
                       : const Text(
                           'Sign In',
@@ -336,13 +339,16 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               Row(
                 children: [
                   Expanded(child: Divider(color: cs.outline)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('OR', style: TextStyle(color: cs.onSurface.withOpacity(0.5))),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(color: cs.onSurface.withOpacity(0.5)),
+                    ),
                   ),
                   Expanded(child: Divider(color: cs.outline)),
                 ],

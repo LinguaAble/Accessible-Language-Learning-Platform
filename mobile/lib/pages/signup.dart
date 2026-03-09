@@ -30,24 +30,22 @@ class _SignupPageState extends State<SignupPage> {
     final confirm = _confirmController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
       return;
     }
 
     if (password != confirm) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
 
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password must be at least 6 characters'),
-        ),
+        const SnackBar(content: Text('Password must be at least 6 characters')),
       );
       return;
     }
@@ -63,8 +61,7 @@ class _SignupPageState extends State<SignupPage> {
       if (!mounted) return;
 
       if (result['success'] == true && result['token'] != null) {
-        final userProvider =
-            Provider.of<UserProvider>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
 
         await userProvider.login(
           result['token'],
@@ -101,9 +98,11 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: kIsWeb ? '881849579766-1gv9l5lrfs9ie0t6o13pk4v38hl74glb.apps.googleusercontent.com' : null,
+        clientId: kIsWeb
+            ? '881849579766-1gv9l5lrfs9ie0t6o13pk4v38hl74glb.apps.googleusercontent.com'
+            : null,
       );
-      
+
       // Force the account picker instead of auto-signing in
       await googleSignIn.signOut();
       final GoogleSignInAccount? account = await googleSignIn.signIn();
@@ -125,7 +124,9 @@ class _SignupPageState extends State<SignupPage> {
         if (mounted) {
           setState(() {
             _isLoading = false;
-            _errorMessage = serverResult['message'] ?? 'Failed to complete Google registration.';
+            _errorMessage =
+                serverResult['message'] ??
+                'Failed to complete Google registration.';
           });
         }
         return;
@@ -133,7 +134,7 @@ class _SignupPageState extends State<SignupPage> {
 
       if (!mounted) return;
       final provider = Provider.of<UserProvider>(context, listen: false);
-      
+
       // Log them in beautifully with actual server token and official user record!
       await provider.login(
         serverResult['token'],
@@ -148,8 +149,8 @@ class _SignupPageState extends State<SignupPage> {
       if (mounted) {
         print('Google Sign In Error: $e');
         setState(() {
-          _errorMessage = kIsWeb 
-              ? 'Google Sign In Failed. Wait for popup.' 
+          _errorMessage = kIsWeb
+              ? 'Google Sign In Failed. Wait for popup.'
               : 'Google Sign In Failed on Mobile. \nError: $e';
         });
       }
@@ -211,7 +212,11 @@ class _SignupPageState extends State<SignupPage> {
                   children: [
                     TextSpan(
                       text: 'Lingua',
-                      style: TextStyle(color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1E3A8A)),
+                      style: TextStyle(
+                        color: isDark
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF1E3A8A),
+                      ),
                     ),
                     const TextSpan(
                       text: 'Able',
@@ -244,11 +249,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: cs.error,
-                        size: 20,
-                      ),
+                      Icon(Icons.error_outline, color: cs.error, size: 20),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -346,8 +347,7 @@ class _SignupPageState extends State<SignupPage> {
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child:
-                              CircularProgressIndicator(color: Colors.white),
+                          child: CircularProgressIndicator(color: Colors.white),
                         )
                       : const Text(
                           'Sign Up',
@@ -359,13 +359,16 @@ class _SignupPageState extends State<SignupPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+
               Row(
                 children: [
                   Expanded(child: Divider(color: cs.outline)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('OR', style: TextStyle(color: cs.onSurface.withOpacity(0.5))),
+                    child: Text(
+                      'OR',
+                      style: TextStyle(color: cs.onSurface.withOpacity(0.5)),
+                    ),
                   ),
                   Expanded(child: Divider(color: cs.outline)),
                 ],

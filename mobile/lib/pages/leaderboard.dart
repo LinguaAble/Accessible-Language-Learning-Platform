@@ -52,7 +52,8 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
 
   bool _isCurrentUser(Map<String, dynamic> entry) {
     final provider = Provider.of<UserProvider>(context, listen: false);
-    return entry['email'] == provider.email || entry['username'] == provider.username;
+    return entry['email'] == provider.email ||
+        entry['username'] == provider.username;
   }
 
   @override
@@ -61,8 +62,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     final streak = provider.streak;
 
     String effectiveAvatar = provider.avatarUrl;
-    if (effectiveAvatar.isEmpty) {
-      effectiveAvatar = 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(provider.username)}&background=F79C42&color=fff&bold=true&size=128';
+    if (effectiveAvatar.isEmpty || effectiveAvatar.contains('ui-avatars')) {
+      effectiveAvatar =
+          'https://api.dicebear.com/9.x/initials/png?seed=${Uri.encodeComponent(provider.username)}&backgroundColor=F79C42&textColor=ffffff';
     }
 
     final top3 = _entries.take(3).toList();
@@ -79,7 +81,10 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          ),
           onPressed: () => context.pop(),
         ),
         title: Row(
@@ -90,9 +95,10 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             Text(
               'Leaderboard',
               style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17),
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+              ),
             ),
           ],
         ),
@@ -107,8 +113,11 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.local_fire_department,
-                    color: Colors.orange, size: 14),
+                const Icon(
+                  Icons.local_fire_department,
+                  color: Colors.orange,
+                  size: 14,
+                ),
                 const SizedBox(width: 3),
                 Text(
                   '${streak}d',
@@ -122,9 +131,11 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.refresh,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                size: 20),
+            icon: Icon(
+              Icons.refresh,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              size: 20,
+            ),
             onPressed: _fetchLeaderboard,
             padding: const EdgeInsets.symmetric(horizontal: 6),
             constraints: const BoxConstraints(),
@@ -146,45 +157,45 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(_error!, style: const TextStyle(color: Colors.red)),
-                      const SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: _fetchLeaderboard,
-                        child: const Text('Retry'),
-                      )
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(_error!, style: const TextStyle(color: Colors.red)),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _fetchLeaderboard,
+                    child: const Text('Retry'),
                   ),
-                )
-              : _entries.isEmpty
-                  ? const Center(
-                      child: Text('No players yet! Complete a lesson to appear.'),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _fetchLeaderboard,
-                      child: ListView(
-                        padding: const EdgeInsets.all(20),
-                        children: [
-                          Text(
-                            '📅 $_weekStart → $_weekEnd',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          if (myEntry != null && (myEntry['rank'] as int) > 3)
-                            _buildMyRankBanner(myEntry),
-                          if (top3.isNotEmpty) _buildTop3Podium(top3),
-                          if (rest.isNotEmpty) _buildRankedList(rest),
-                        ],
-                      ),
+                ],
+              ),
+            )
+          : _entries.isEmpty
+          ? const Center(
+              child: Text('No players yet! Complete a lesson to appear.'),
+            )
+          : RefreshIndicator(
+              onRefresh: _fetchLeaderboard,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  Text(
+                    '📅 $_weekStart → $_weekEnd',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (myEntry != null && (myEntry['rank'] as int) > 3)
+                    _buildMyRankBanner(myEntry),
+                  if (top3.isNotEmpty) _buildTop3Podium(top3),
+                  if (rest.isNotEmpty) _buildRankedList(rest),
+                ],
+              ),
+            ),
     );
   }
 
@@ -250,9 +261,11 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (top3.length > 1) _buildPodiumColumn(top3[1], 120, const Color(0xFFC0C0C0)),
+              if (top3.length > 1)
+                _buildPodiumColumn(top3[1], 120, const Color(0xFFC0C0C0)),
               _buildPodiumColumn(top3[0], 160, const Color(0xFFFFD700)),
-              if (top3.length > 2) _buildPodiumColumn(top3[2], 90, const Color(0xFFCD7F32)),
+              if (top3.length > 2)
+                _buildPodiumColumn(top3[2], 90, const Color(0xFFCD7F32)),
             ],
           ),
         ],
@@ -260,10 +273,14 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     );
   }
 
-  Widget _buildPodiumColumn(Map<String, dynamic> entry, double height, Color color) {
+  Widget _buildPodiumColumn(
+    Map<String, dynamic> entry,
+    double height,
+    Color color,
+  ) {
     final isMe = _isCurrentUser(entry);
     final size = entry['rank'] == 1 ? 80.0 : 60.0;
-    
+
     return Expanded(
       flex: entry['rank'] == 1 ? 4 : 3,
       child: Column(
@@ -275,28 +292,21 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             size: 24,
           ),
           const SizedBox(height: 8),
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: color, width: 3),
-              image: DecorationImage(
-                image: NetworkImage(
-                  (entry['avatarUrl'] != null && (entry['avatarUrl'] as String).isNotEmpty)
-                      ? entry['avatarUrl'] as String
-                      : 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(entry["username"] ?? "U")}&background=94A3B8&color=fff&bold=true&size=128',
-                ),
-                onError: (_, __) {},
-              ),
-            ),
+          _buildAvatarWidget(
+            url: entry['avatarUrl'] as String? ?? '',
+            name: entry['username'] ?? 'U',
+            size: size,
+            borderColor: color,
+            borderWidth: 3,
           ),
           const SizedBox(height: 8),
           Text(
             '${entry['username']}${isMe ? ' (You)' : ''}',
             style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: isMe ? const Color(0xFFE67E22) : Theme.of(context).colorScheme.onSurface,
+              color: isMe
+                  ? const Color(0xFFE67E22)
+                  : Theme.of(context).colorScheme.onSurface,
               fontSize: 13,
             ),
             textAlign: TextAlign.center,
@@ -323,7 +333,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                 end: Alignment.bottomCenter,
                 colors: [color.withOpacity(0.3), color.withOpacity(0.05)],
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
               border: Border.all(color: color.withOpacity(0.4)),
             ),
             child: Center(
@@ -356,12 +368,45 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Row(
               children: [
-                const SizedBox(width: 20, child: Text('#', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey, fontSize: 12))),
+                const SizedBox(
+                  width: 20,
+                  child: Text(
+                    '#',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 16),
-                const Expanded(child: Text('PLAYER', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey, fontSize: 12))),
-                const Text('LESSONS', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey, fontSize: 12)),
+                const Expanded(
+                  child: Text(
+                    'PLAYER',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const Text(
+                  'LESSONS',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(width: 20),
-                const Text('SCORE', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.grey, fontSize: 12)),
+                const Text(
+                  'SCORE',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -374,30 +419,32 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
 
   Widget _buildListRow(Map<String, dynamic> entry) {
     final isMe = _isCurrentUser(entry);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: isMe ? const Color(0xFFE67E22).withOpacity(0.05) : Colors.transparent,
+      color: isMe
+          ? const Color(0xFFE67E22).withOpacity(0.05)
+          : Colors.transparent,
       child: Row(
         children: [
           SizedBox(
             width: 28,
             child: Text(
               '${entry['rank']}',
-              style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.grey),
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                color: Colors.grey,
+              ),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(width: 10),
-          CircleAvatar(
-            radius: 18,
-            backgroundImage: NetworkImage(
-              (entry['avatarUrl'] != null && (entry['avatarUrl'] as String).isNotEmpty)
-                  ? entry['avatarUrl'] as String
-                  : 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(entry["username"] ?? "U")}&background=94A3B8&color=fff&bold=true&size=128',
-            ),
-            onBackgroundImageError: (_, __) {},
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+          _buildAvatarWidget(
+            url: entry['avatarUrl'] as String? ?? '',
+            name: entry['username'] ?? 'U',
+            size: 36,
+            borderColor: const Color(0xFF94A3B8),
+            borderWidth: 1.5,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -405,7 +452,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               '${entry['username']}${isMe ? ' (You)' : ''}',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: isMe ? const Color(0xFFE67E22) : Theme.of(context).colorScheme.onSurface,
+                color: isMe
+                    ? const Color(0xFFE67E22)
+                    : Theme.of(context).colorScheme.onSurface,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -419,9 +468,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
           SizedBox(
             width: 50,
             child: Text(
-              (entry['weeklyScore'] ?? 0) > 0
-                  ? '${entry['weeklyScore']}'
-                  : '—',
+              (entry['weeklyScore'] ?? 0) > 0 ? '${entry['weeklyScore']}' : '—',
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 color: (entry['weeklyScore'] ?? 0) > 0
@@ -432,6 +479,56 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Robust avatar widget with text-initials fallback.
+  Widget _buildAvatarWidget({
+    required String url,
+    required String name,
+    required double size,
+    Color borderColor = const Color(0xFFF79C42),
+    double borderWidth = 2,
+  }) {
+    final effectiveUrl = (url.isNotEmpty && !url.contains('ui-avatars'))
+        ? url
+        : 'https://api.dicebear.com/9.x/initials/png?seed=${Uri.encodeComponent(name)}&backgroundColor=94A3B8&textColor=ffffff';
+
+    final initials = name.isNotEmpty
+        ? name
+              .trim()
+              .split(RegExp(r'\s+'))
+              .map((w) => w[0].toUpperCase())
+              .take(2)
+              .join()
+        : '?';
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: borderColor, width: borderWidth),
+        color: borderColor.withOpacity(0.15),
+      ),
+      child: ClipOval(
+        child: Image.network(
+          effectiveUrl,
+          fit: BoxFit.cover,
+          width: size,
+          height: size,
+          errorBuilder: (_, __, ___) => Center(
+            child: Text(
+              initials,
+              style: TextStyle(
+                color: borderColor,
+                fontWeight: FontWeight.w800,
+                fontSize: size * 0.35,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/accessibility_widget.dart';
+import '../widgets/daily_study_plan.dart';
+import '../widgets/chat_bot_widget.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -35,7 +37,8 @@ class _DashboardPageState extends State<DashboardPage> {
           final userData = Map<String, dynamic>.from(result['user'] as Map);
           // Pull streak fields from top-level (login response) if present
           if (result['streak'] != null) userData['streak'] = result['streak'];
-          if (result['lastStreakDate'] != null) userData['lastStreakDate'] = result['lastStreakDate'];
+          if (result['lastStreakDate'] != null)
+            userData['lastStreakDate'] = result['lastStreakDate'];
           // updateUser calls notifyListeners() → triggers build() → re-computes chart
           await provider.updateUser(userData);
         }
@@ -76,18 +79,27 @@ class _DashboardPageState extends State<DashboardPage> {
     final displayName = provider.username;
     final todayProgress = provider.todayProgress;
     final dailyGoal = provider.dailyGoalMinutes;
-    final goalPct =
-        dailyGoal > 0 ? (todayProgress / dailyGoal * 100).round().clamp(0, 100) : 0;
+    final goalPct = dailyGoal > 0
+        ? (todayProgress / dailyGoal * 100).round().clamp(0, 100)
+        : 0;
 
     // Computed live from provider — auto-refreshes when provider notifies
     final totalLessonsCompleted = provider.completedLessons.length;
     final weeklyData = _computeWeeklyData(provider);
-    final maxVal =
-        weeklyData.isEmpty ? 1 : weeklyData.map((d) => d['value'] as int).reduce(max).clamp(1, 999);
+    final maxVal = weeklyData.isEmpty
+        ? 1
+        : weeklyData.map((d) => d['value'] as int).reduce(max).clamp(1, 999);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      floatingActionButton: const AccessibilityFab(),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          ChatBotWidget(),
+          SizedBox(height: 16),
+          AccessibilityFab(),
+        ],
+      ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _syncAndLoad,
@@ -100,17 +112,33 @@ class _DashboardPageState extends State<DashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // --- HEADER ---
-                  _buildHeader(context, displayName, user, totalLessonsCompleted, provider),
+                  _buildHeader(
+                    context,
+                    displayName,
+                    user,
+                    totalLessonsCompleted,
+                    provider,
+                  ),
                   const SizedBox(height: 24),
 
                   // --- HERO CARD ---
                   _buildHeroCard(),
                   const SizedBox(height: 20),
 
+                  // --- AI STUDY PLAN ---
+                  const DailyStudyPlanWidget(),
+                  const SizedBox(height: 20),
+
                   // --- DAILY GOAL + LESSONS ROW ---
                   Row(
                     children: [
-                      Expanded(child: _buildGoalCard(goalPct, todayProgress, dailyGoal)),
+                      Expanded(
+                        child: _buildGoalCard(
+                          goalPct,
+                          todayProgress,
+                          dailyGoal,
+                        ),
+                      ),
                       const SizedBox(width: 14),
                       Expanded(child: _buildLessonsCard(totalLessonsCompleted)),
                     ],
@@ -191,8 +219,11 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.local_fire_department,
-                      color: Colors.orange, size: 14),
+                  const Icon(
+                    Icons.local_fire_department,
+                    color: Colors.orange,
+                    size: 14,
+                  ),
                   const SizedBox(width: 3),
                   Text(
                     '${provider.streak}d',
@@ -211,30 +242,21 @@ class _DashboardPageState extends State<DashboardPage> {
               children: [
                 GestureDetector(
                   onTap: () => context.push('/settings'),
-                  child: const Icon(Icons.notifications_none,
-                      size: 22, color: Colors.blueGrey),
+                  child: const Icon(
+                    Icons.notifications_none,
+                    size: 22,
+                    color: Colors.blueGrey,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () => context.push('/settings'),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border:
-                          Border.all(color: const Color(0xFFF79C42), width: 2),
-                    ),
-                    child: ClipOval(
-                      child: Image.network(
-                        user['avatarUrl'] != null && (user['avatarUrl'] as String).isNotEmpty
-                            ? user['avatarUrl'] as String
-                            : 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(name)}&background=F79C42&color=fff&bold=true&size=128',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.person, size: 20, color: Color(0xFFF79C42)),
-                      ),
-                    ),
+                  child: _buildAvatarWidget(
+                    url: user['avatarUrl'] as String? ?? '',
+                    name: name,
+                    size: 36,
+                    borderColor: const Color(0xFFF79C42),
+                    borderWidth: 2,
                   ),
                 ),
               ],
@@ -242,6 +264,58 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
         ),
       ],
+    );
+  }
+
+  /// Robust avatar widget with text-initials fallback.
+  Widget _buildAvatarWidget({
+    required String url,
+    required String name,
+    required double size,
+    Color borderColor = const Color(0xFFF79C42),
+    double borderWidth = 2,
+  }) {
+    // Determine the effective URL
+    final effectiveUrl = (url.isNotEmpty && !url.contains('ui-avatars'))
+        ? url
+        : 'https://api.dicebear.com/9.x/initials/png?seed=${Uri.encodeComponent(name)}&backgroundColor=F79C42&textColor=ffffff';
+
+    // Build initials for fallback
+    final initials = name.isNotEmpty
+        ? name
+              .trim()
+              .split(RegExp(r'\s+'))
+              .map((w) => w[0].toUpperCase())
+              .take(2)
+              .join()
+        : '?';
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: borderColor, width: borderWidth),
+        color: borderColor.withOpacity(0.15),
+      ),
+      child: ClipOval(
+        child: Image.network(
+          effectiveUrl,
+          fit: BoxFit.cover,
+          width: size,
+          height: size,
+          errorBuilder: (_, __, ___) => Center(
+            child: Text(
+              initials,
+              style: TextStyle(
+                color: borderColor,
+                fontWeight: FontWeight.w800,
+                fontSize: size * 0.35,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -333,17 +407,29 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             child: const Text(
               '→ CONTINUE LEARNING',
-              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(height: 15),
           const Text(
             'Common Phrases',
-            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const Text(
             'आम वाक्यांश',
-            style: TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 10),
           const Text(
@@ -358,7 +444,9 @@ class _DashboardPageState extends State<DashboardPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: const Color(0xFF1D4ED8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
@@ -386,7 +474,10 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       child: Column(
         children: [
-          const Text('Daily Goal', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+          const Text(
+            'Daily Goal',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          ),
           const SizedBox(height: 12),
           Stack(
             alignment: Alignment.center,
@@ -403,12 +494,18 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               Text(
                 '$goalPct%',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(status, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(
+            status,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 4),
           Text(
             'Target: $goal min',
@@ -440,7 +537,11 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 4),
             const Text(
               'Lessons Completed',
-              style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 8),
             const Row(
@@ -492,7 +593,9 @@ class _DashboardPageState extends State<DashboardPage> {
               children: weeklyData.map((data) {
                 final val = data['value'] as int;
                 final isToday = data['isToday'] as bool;
-                final barHeight = maxVal > 0 ? (val / maxVal * 100).clamp(4.0, 100.0) : 4.0;
+                final barHeight = maxVal > 0
+                    ? (val / maxVal * 100).clamp(4.0, 100.0)
+                    : 4.0;
 
                 return Expanded(
                   child: Column(
@@ -525,7 +628,9 @@ class _DashboardPageState extends State<DashboardPage> {
                         data['day'],
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: isToday ? FontWeight.w800 : FontWeight.w600,
+                          fontWeight: isToday
+                              ? FontWeight.w800
+                              : FontWeight.w600,
                           color: isToday
                               ? const Color(0xFFF79C42)
                               : Colors.grey.shade500,
@@ -544,11 +649,42 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildQuickActions() {
     final actions = [
-      {'label': 'Lessons', 'icon': Icons.menu_book, 'path': '/lessons', 'color': const Color(0xFFE67E22)},
-      {'label': 'Leaderboard', 'icon': Icons.emoji_events, 'path': '/leaderboard', 'color': const Color(0xFF9B59B6)},
-      {'label': 'Community', 'icon': Icons.people, 'path': '/community', 'color': const Color(0xFF2ECC71)},
-      {'label': 'Settings', 'icon': Icons.settings, 'path': '/settings', 'color': const Color(0xFF3B82F6)},
-      {'label': 'Sign Out', 'icon': Icons.logout, 'path': 'logout', 'color': const Color(0xFFEF4444)},
+      {
+        'label': 'Lessons',
+        'icon': Icons.menu_book,
+        'path': '/lessons',
+        'color': const Color(0xFFE67E22),
+      },
+      {
+        'label': 'Leaderboard',
+        'icon': Icons.emoji_events,
+        'path': '/leaderboard',
+        'color': const Color(0xFF9B59B6),
+      },
+      {
+        'label': 'Community',
+        'icon': Icons.people,
+        'path': '/community',
+        'color': const Color(0xFF2ECC71),
+      },
+      {
+        'label': 'Learning Report',
+        'icon': Icons.analytics,
+        'path': '/report',
+        'color': const Color(0xFF10B981),
+      },
+      {
+        'label': 'Settings',
+        'icon': Icons.settings,
+        'path': '/settings',
+        'color': const Color(0xFF3B82F6),
+      },
+      {
+        'label': 'Sign Out',
+        'icon': Icons.logout,
+        'path': 'logout',
+        'color': const Color(0xFFEF4444),
+      },
     ];
 
     return Column(
@@ -565,7 +701,10 @@ class _DashboardPageState extends State<DashboardPage> {
             child: InkWell(
               onTap: () async {
                 if (action['path'] == 'logout') {
-                  final provider = Provider.of<UserProvider>(context, listen: false);
+                  final provider = Provider.of<UserProvider>(
+                    context,
+                    listen: false,
+                  );
                   await provider.logout();
                   if (mounted) context.go('/');
                 } else {
@@ -574,11 +713,16 @@ class _DashboardPageState extends State<DashboardPage> {
               },
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -589,15 +733,26 @@ class _DashboardPageState extends State<DashboardPage> {
                         color: (action['color'] as Color).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(action['icon'] as IconData, color: action['color'] as Color, size: 20),
+                      child: Icon(
+                        action['icon'] as IconData,
+                        color: action['color'] as Color,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Text(
                       action['label'] as String,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
                     ),
                     const Spacer(),
-                    Icon(Icons.chevron_right, size: 18, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 18,
+                      color: Colors.grey.shade400,
+                    ),
                   ],
                 ),
               ),

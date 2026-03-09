@@ -44,7 +44,9 @@ class _CommunityPageState extends State<CommunityPage> {
     final data = await ApiService.getCommunityData(provider.email);
     if (mounted) {
       setState(() {
-        _friendRequests = List<Map<String, dynamic>>.from(data['friendRequests'] ?? []);
+        _friendRequests = List<Map<String, dynamic>>.from(
+          data['friendRequests'] ?? [],
+        );
         _friends = List<Map<String, dynamic>>.from(data['friends'] ?? []);
         _isLoading = false;
       });
@@ -63,7 +65,9 @@ class _CommunityPageState extends State<CommunityPage> {
       final results = await ApiService.searchUsers(query);
       if (mounted) {
         setState(() {
-          _searchResults = results.where((u) => u['username'] != provider.username).toList();
+          _searchResults = results
+              .where((u) => u['username'] != provider.username)
+              .toList();
           _isSearching = false;
         });
       }
@@ -81,7 +85,10 @@ class _CommunityPageState extends State<CommunityPage> {
 
     if (success && mounted) {
       if (action == 'accept') {
-        final accepted = _friendRequests.firstWhere((u) => u['_id'] == targetId, orElse: () => {});
+        final accepted = _friendRequests.firstWhere(
+          (u) => u['_id'] == targetId,
+          orElse: () => {},
+        );
         setState(() {
           _friendRequests.removeWhere((u) => u['_id'] == targetId);
           if (accepted.isNotEmpty) _friends.add(accepted);
@@ -113,9 +120,22 @@ class _CommunityPageState extends State<CommunityPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                Text('Community', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: cs.onSurface)),
+                Text(
+                  'Community',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('Connect with other learners', style: TextStyle(fontSize: 14, color: cs.onSurface.withOpacity(0.5))),
+                Text(
+                  'Connect with other learners',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: cs.onSurface.withOpacity(0.5),
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 // Search Bar
@@ -150,12 +170,26 @@ class _CommunityPageState extends State<CommunityPage> {
 
                 // Content
                 if (isSearchActive) ...[
-                  Text('Search Results', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: cs.onSurface)),
+                  Text(
+                    'Search Results',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   if (_isSearching)
-                    const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
                   else if (_searchResults.isEmpty)
-                    _buildEmptyState('No learners found matching "${_searchController.text}"')
+                    _buildEmptyState(
+                      'No learners found matching "${_searchController.text}"',
+                    )
                   else
                     ..._searchResults.map((u) => _buildUserCard(u)),
                 ] else ...[
@@ -163,14 +197,38 @@ class _CommunityPageState extends State<CommunityPage> {
                   if (_friendRequests.isNotEmpty) ...[
                     Row(
                       children: [
-                        Icon(Icons.people, color: const Color(0xFFF79C42), size: 20),
+                        Icon(
+                          Icons.people,
+                          color: const Color(0xFFF79C42),
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
-                        Text('Friend Requests', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: cs.onSurface)),
+                        Text(
+                          'Friend Requests',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
+                        ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(color: const Color(0xFFEF4444), borderRadius: BorderRadius.circular(12)),
-                          child: Text('${_friendRequests.length}', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${_friendRequests.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -180,12 +238,26 @@ class _CommunityPageState extends State<CommunityPage> {
                   ],
 
                   // Friends List
-                  Text('Your Friends (${_friends.length})', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: cs.onSurface)),
+                  Text(
+                    'Your Friends (${_friends.length})',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   if (_isLoading)
-                    const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
                   else if (_friends.isEmpty)
-                    _buildEmptyState("You don't have any friends yet.\nUse the search bar to find someone!")
+                    _buildEmptyState(
+                      "You don't have any friends yet.\nUse the search bar to find someone!",
+                    )
                   else
                     ..._friends.map((friend) => _buildFriendCard(friend)),
                 ],
@@ -206,7 +278,13 @@ class _CommunityPageState extends State<CommunityPage> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
-      child: Text(message, textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        ),
+      ),
     );
   }
 
@@ -230,8 +308,20 @@ class _CommunityPageState extends State<CommunityPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user['fullName'] ?? user['username'] ?? '', style: TextStyle(fontWeight: FontWeight.w700, color: cs.onSurface)),
-                  Text('@${user['username'] ?? ''}', style: TextStyle(fontSize: 13, color: cs.onSurface.withOpacity(0.5))),
+                  Text(
+                    user['fullName'] ?? user['username'] ?? '',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  Text(
+                    '@${user['username'] ?? ''}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: cs.onSurface.withOpacity(0.5),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -263,8 +353,20 @@ class _CommunityPageState extends State<CommunityPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(req['fullName'] ?? req['username'] ?? '', style: TextStyle(fontWeight: FontWeight.w700, color: cs.onSurface)),
-                    Text('@${req['username'] ?? ''}', style: TextStyle(fontSize: 13, color: cs.onSurface.withOpacity(0.5))),
+                    Text(
+                      req['fullName'] ?? req['username'] ?? '',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    Text(
+                      '@${req['username'] ?? ''}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: cs.onSurface.withOpacity(0.5),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -274,13 +376,19 @@ class _CommunityPageState extends State<CommunityPage> {
           IconButton(
             onPressed: () => _handleAction(req['_id'], 'accept'),
             icon: const Icon(Icons.check, color: Colors.white, size: 18),
-            style: IconButton.styleFrom(backgroundColor: const Color(0xFF2ECC71), shape: const CircleBorder()),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFF2ECC71),
+              shape: const CircleBorder(),
+            ),
           ),
           const SizedBox(width: 4),
           IconButton(
             onPressed: () => _handleAction(req['_id'], 'reject'),
             icon: const Icon(Icons.close, color: Colors.white, size: 18),
-            style: IconButton.styleFrom(backgroundColor: const Color(0xFFEF4444), shape: const CircleBorder()),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              shape: const CircleBorder(),
+            ),
           ),
         ],
       ),
@@ -307,8 +415,20 @@ class _CommunityPageState extends State<CommunityPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(friend['fullName'] ?? friend['username'] ?? '', style: TextStyle(fontWeight: FontWeight.w700, color: cs.onSurface)),
-                  Text('@${friend['username'] ?? ''}', style: TextStyle(fontSize: 13, color: cs.onSurface.withOpacity(0.5))),
+                  Text(
+                    friend['fullName'] ?? friend['username'] ?? '',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  Text(
+                    '@${friend['username'] ?? ''}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: cs.onSurface.withOpacity(0.5),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -316,9 +436,20 @@ class _CommunityPageState extends State<CommunityPage> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if ((friend['streak'] ?? 0) > 0)
-                  Text('🔥 ${friend['streak']} Streak', style: const TextStyle(fontSize: 12, color: Color(0xFFEF4444))),
-                Text('📚 ${(friend['completedLessons'] is List ? (friend['completedLessons'] as List).length : friend['completedLessons'] ?? 0)} Lessons',
-                    style: TextStyle(fontSize: 12, color: cs.onSurface.withOpacity(0.5))),
+                  Text(
+                    '🔥 ${friend['streak']} Streak',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFFEF4444),
+                    ),
+                  ),
+                Text(
+                  '📚 ${(friend['completedLessons'] is List ? (friend['completedLessons'] as List).length : friend['completedLessons'] ?? 0)} Lessons',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: cs.onSurface.withOpacity(0.5),
+                  ),
+                ),
               ],
             ),
           ],
@@ -335,8 +466,14 @@ class _CommunityPageState extends State<CommunityPage> {
       radius: 22,
       backgroundColor: const Color(0xFFF79C42).withOpacity(0.2),
       child: ClipOval(
-        child: Image.network(url, width: 44, height: 44, fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const Icon(Icons.person, color: Color(0xFFF79C42))),
+        child: Image.network(
+          url,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) =>
+              const Icon(Icons.person, color: Color(0xFFF79C42)),
+        ),
       ),
     );
   }
