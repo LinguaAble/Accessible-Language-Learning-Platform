@@ -99,7 +99,9 @@ class GoogleSttService {
     try {
       // Stop JS MediaRecorder — returns base64 audio string directly
       final base64Audio = await jsStopRecording();
-      debugPrint('GoogleStt [web]: got base64 audio, length=${base64Audio.length}');
+      debugPrint(
+        'GoogleStt [web]: got base64 audio, length=${base64Audio.length}',
+      );
 
       if (base64Audio.isEmpty) {
         throw Exception('Empty recording from browser');
@@ -156,7 +158,9 @@ class GoogleSttService {
     }
   }
 
-  Future<String> _stopNativeAndTranscribe({List<String> hints = const []}) async {
+  Future<String> _stopNativeAndTranscribe({
+    List<String> hints = const [],
+  }) async {
     final path = await _recorder.stop();
     _isRecording = false;
 
@@ -199,7 +203,9 @@ class GoogleSttService {
     List<String> hints = const [],
   }) async {
     final speechContexts = hints.isNotEmpty
-        ? [{'phrases': hints, 'boost': 20.0}]
+        ? [
+            {'phrases': hints, 'boost': 20.0},
+          ]
         : [];
 
     final config = <String, dynamic>{
@@ -220,8 +226,11 @@ class GoogleSttService {
 
     debugPrint('GoogleStt: sending to API as $encoding...');
     final response = await http
-        .post(Uri.parse(_url),
-            headers: {'Content-Type': 'application/json'}, body: body)
+        .post(
+          Uri.parse(_url),
+          headers: {'Content-Type': 'application/json'},
+          body: body,
+        )
         .timeout(const Duration(seconds: 15));
 
     debugPrint('GoogleStt: API status=${response.statusCode}');
@@ -240,7 +249,8 @@ class GoogleSttService {
       return ''; // No speech detected — not an error, just silence
     } else {
       throw Exception(
-          'Google STT API ${response.statusCode}: ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}');
+        'Google STT API ${response.statusCode}: ${response.body.length > 200 ? response.body.substring(0, 200) : response.body}',
+      );
     }
   }
 

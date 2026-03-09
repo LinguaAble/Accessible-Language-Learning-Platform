@@ -31,7 +31,20 @@ class UserProvider with ChangeNotifier {
     if (progressDate != null) {
       final now = DateTime.now();
       final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       final weekday = weekdays[now.weekday - 1];
       final month = months[now.month - 1];
       final day = now.day.toString().padLeft(2, '0');
@@ -41,6 +54,7 @@ class UserProvider with ChangeNotifier {
     }
     return _user?['todayProgress'] as int? ?? 0;
   }
+
   List<dynamic> get dailyScores =>
       _user?['dailyScores'] as List<dynamic>? ?? [];
   List<dynamic> get dailyLessonCounts =>
@@ -65,18 +79,13 @@ class UserProvider with ChangeNotifier {
     };
   }
 
-  int get dailyGoalMinutes =>
-      (preferences['dailyGoalMinutes'] as int?) ?? 5;
-  bool get soundEffects =>
-      preferences['soundEffects'] as bool? ?? false;
+  int get dailyGoalMinutes => (preferences['dailyGoalMinutes'] as int?) ?? 5;
+  bool get soundEffects => preferences['soundEffects'] as bool? ?? false;
   bool get animationReduced =>
       preferences['animationReduced'] as bool? ?? false;
-  String get fontSize =>
-      preferences['fontSize'] as String? ?? 'medium';
-  bool get dyslexiaFont =>
-      preferences['dyslexiaFont'] as bool? ?? false;
-  String get colorOverlay =>
-      preferences['colorOverlay'] as String? ?? 'none';
+  String get fontSize => preferences['fontSize'] as String? ?? 'medium';
+  bool get dyslexiaFont => preferences['dyslexiaFont'] as bool? ?? false;
+  String get colorOverlay => preferences['colorOverlay'] as String? ?? 'none';
 
   // ── Login history ─────────────────────────────────────────────────────────
   List<dynamic> get loginHistory =>
@@ -123,8 +132,7 @@ class UserProvider with ChangeNotifier {
         _user!.containsKey('preferences')) {
       final merged = Map<String, dynamic>.from(preferences)
         ..addAll(
-          Map<String, dynamic>.from(
-              updatedFields['preferences'] as Map? ?? {}),
+          Map<String, dynamic>.from(updatedFields['preferences'] as Map? ?? {}),
         );
       updatedFields = {...updatedFields, 'preferences': merged};
     }
@@ -145,6 +153,7 @@ class UserProvider with ChangeNotifier {
     await prefs.remove('completedLessons');
     notifyListeners();
   }
+
   // ── Update preferences shortcut ────────────────────────────────────────────
   Future<void> updatePreferences(Map<String, dynamic> prefs) async {
     await updateUser({'preferences': prefs});

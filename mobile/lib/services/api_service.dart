@@ -9,15 +9,18 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:5000';
     }
-    // Your laptop's current Wi-Fi IP for physical mobile device connection
-    return 'http://10.12.227.121:5000';
+    // Connected via USB + 'adb reverse tcp:5000 tcp:5000' covers the mobile app!
+    return 'http://localhost:5000';
   }
 
   static String get _baseUrl => '$_host/api/auth';
   static String get _evalUrl => '$_host/api/eval';
 
   // ── Auth ──────────────────────────────────────────────────────────────────
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+    String email,
+    String password,
+  ) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
@@ -51,7 +54,10 @@ class ApiService {
     final data = jsonDecode(response.body);
     return response.statusCode == 200
         ? {'success': true, ...data}
-        : {'success': false, 'message': data['message'] ?? 'Registration failed'};
+        : {
+            'success': false,
+            'message': data['message'] ?? 'Registration failed',
+          };
   }
 
   static Future<Map<String, dynamic>> googleLogin({
@@ -74,7 +80,10 @@ class ApiService {
     final data = jsonDecode(response.body);
     return response.statusCode == 200
         ? {'success': true, ...data}
-        : {'success': false, 'message': data['message'] ?? 'Google Login failed on server'};
+        : {
+            'success': false,
+            'message': data['message'] ?? 'Google Login failed on server',
+          };
   }
 
   // ── Progress ──────────────────────────────────────────────────────────────
@@ -89,7 +98,8 @@ class ApiService {
     final body = <String, dynamic>{'email': email};
     if (completedLessons != null) body['completedLessons'] = completedLessons;
     if (todayProgress != null) body['todayProgress'] = todayProgress;
-    if (incrementLessonCount != null) body['incrementLessonCount'] = incrementLessonCount;
+    if (incrementLessonCount != null)
+      body['incrementLessonCount'] = incrementLessonCount;
     if (lessonScore != null) body['lessonScore'] = lessonScore;
     if (date != null) body['date'] = date;
 
@@ -203,11 +213,17 @@ class ApiService {
 
   // ── Local 7-layer NLP (mirrors web nlpEvalService.js) ─────────────────────
   static Map<String, dynamic> _localEval(
-      String transcript, String expectedAnswer, String expectedHindi) {
+    String transcript,
+    String expectedAnswer,
+    String expectedHindi,
+  ) {
     if (transcript.trim().isEmpty) {
       return {
-        'success': true, 'isCorrect': false, 'confidence': 0.0,
-        'feedback': 'No speech detected. Please try again.', 'matchType': 'none',
+        'success': true,
+        'isCorrect': false,
+        'confidence': 0.0,
+        'feedback': 'No speech detected. Please try again.',
+        'matchType': 'none',
       };
     }
     final t = transcript.trim();
@@ -228,9 +244,14 @@ class ApiService {
       return _ok(0.90, '✅ Good pronunciation!', 'phonetic_norm');
     }
     // 4. Levenshtein >=75%
-    final maxLen = [normT.length, normE.length, 1].reduce((a, b) => a > b ? a : b);
+    final maxLen = [
+      normT.length,
+      normE.length,
+      1,
+    ].reduce((a, b) => a > b ? a : b);
     final lSim = 1.0 - _lev(normT, normE) / maxLen;
-    if (lSim >= 0.75) return _ok(lSim, '✅ Very close! Minor difference.', 'fuzzy_levenshtein');
+    if (lSim >= 0.75)
+      return _ok(lSim, '✅ Very close! Minor difference.', 'fuzzy_levenshtein');
     // 5. Dice >=70%
     final dice = _dice(normT, normE);
     if (dice >= 0.70) return _ok(dice, '✅ Almost there!', 'dice_similarity');
@@ -242,7 +263,9 @@ class ApiService {
     // Fail
     final best = lSim > dice ? lSim : dice;
     return {
-      'success': true, 'isCorrect': false, 'confidence': best,
+      'success': true,
+      'isCorrect': false,
+      'confidence': best,
       'feedback': best > 0.5
           ? '❌ Almost! You said "$transcript" — try "$expectedAnswer".'
           : '❌ Not quite. The correct sound is "$expectedAnswer".',
@@ -250,8 +273,13 @@ class ApiService {
     };
   }
 
-  static Map<String, dynamic> _ok(double c, String f, String m) =>
-      {'success': true, 'isCorrect': true, 'confidence': c, 'feedback': f, 'matchType': m};
+  static Map<String, dynamic> _ok(double c, String f, String m) => {
+    'success': true,
+    'isCorrect': true,
+    'confidence': c,
+    'feedback': f,
+    'matchType': m,
+  };
 
   static String _phonNorm(String s) => s
       .replaceAll(RegExp(r'[^a-z0-9\s]'), '')
@@ -260,13 +288,20 @@ class ApiService {
       .trim();
 
   static int _lev(String a, String b) {
-    final dp = List.generate(a.length + 1,
-        (i) => List.generate(b.length + 1, (j) => j == 0 ? i : (i == 0 ? j : 0)));
+    final dp = List.generate(
+      a.length + 1,
+      (i) => List.generate(b.length + 1, (j) => j == 0 ? i : (i == 0 ? j : 0)),
+    );
     for (var i = 1; i <= a.length; i++) {
       for (var j = 1; j <= b.length; j++) {
         dp[i][j] = a[i - 1] == b[j - 1]
             ? dp[i - 1][j - 1]
-            : 1 + [dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]].reduce((x, y) => x < y ? x : y);
+            : 1 +
+                  [
+                    dp[i - 1][j],
+                    dp[i][j - 1],
+                    dp[i - 1][j - 1],
+                  ].reduce((x, y) => x < y ? x : y);
       }
     }
     return dp[a.length][b.length];
@@ -283,6 +318,7 @@ class ApiService {
       }
       return m;
     }
+
     final aB = bg(a), bB = bg(b);
     var inter = 0;
     for (final e in aB.entries) {
@@ -296,9 +332,9 @@ class ApiService {
   /// Search users by username or fullName
   static Future<List<Map<String, dynamic>>> searchUsers(String query) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/search?q=${Uri.encodeComponent(query)}'),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(Uri.parse('$_baseUrl/search?q=${Uri.encodeComponent(query)}'))
+          .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return List<Map<String, dynamic>>.from(data);
@@ -312,9 +348,13 @@ class ApiService {
   /// Get community data (friend requests + friends list)
   static Future<Map<String, dynamic>> getCommunityData(String email) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl/community/data?email=${Uri.encodeComponent(email)}'),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(
+            Uri.parse(
+              '$_baseUrl/community/data?email=${Uri.encodeComponent(email)}',
+            ),
+          )
+          .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
@@ -325,13 +365,18 @@ class ApiService {
   }
 
   /// Get user profile by username
-  static Future<Map<String, dynamic>> getUserProfile(String username, {String? requesterEmail}) async {
+  static Future<Map<String, dynamic>> getUserProfile(
+    String username, {
+    String? requesterEmail,
+  }) async {
     try {
       String url = '$_baseUrl/profile/$username';
       if (requesterEmail != null) {
         url += '?requesterEmail=${Uri.encodeComponent(requesterEmail)}';
       }
-      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
@@ -342,13 +387,21 @@ class ApiService {
   }
 
   /// Send friend request
-  static Future<bool> sendFriendRequest(String requesterEmail, String targetUsername) async {
+  static Future<bool> sendFriendRequest(
+    String requesterEmail,
+    String targetUsername,
+  ) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/friend-request/send'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'requesterEmail': requesterEmail, 'targetUsername': targetUsername}),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/friend-request/send'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'requesterEmail': requesterEmail,
+              'targetUsername': targetUsername,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
       return response.statusCode == 200;
     } catch (_) {
       return false;
@@ -356,13 +409,21 @@ class ApiService {
   }
 
   /// Accept friend request
-  static Future<bool> acceptFriendRequest(String currentEmail, String targetId) async {
+  static Future<bool> acceptFriendRequest(
+    String currentEmail,
+    String targetId,
+  ) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/friend-request/accept'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'currentEmail': currentEmail, 'targetId': targetId}),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/friend-request/accept'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'currentEmail': currentEmail,
+              'targetId': targetId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
       return response.statusCode == 200;
     } catch (_) {
       return false;
@@ -370,16 +431,88 @@ class ApiService {
   }
 
   /// Reject friend request
-  static Future<bool> rejectFriendRequest(String currentEmail, String targetId) async {
+  static Future<bool> rejectFriendRequest(
+    String currentEmail,
+    String targetId,
+  ) async {
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/friend-request/reject'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'currentEmail': currentEmail, 'targetId': targetId}),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/friend-request/reject'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'currentEmail': currentEmail,
+              'targetId': targetId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
       return response.statusCode == 200;
     } catch (_) {
       return false;
+    }
+  }
+
+  // ── AI Services ───────────────────────────────────────────────────────────
+
+  static Future<Map<String, dynamic>> getDailyPlan({
+    required List<int> completedLessons,
+    required int streak,
+    required int dailyGoalMinutes,
+    required List<dynamic> lessonScores,
+    required int todayProgress,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_host/api/ai/daily-plan'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'completedLessons': completedLessons,
+              'streak': streak,
+              'dailyGoalMinutes': dailyGoalMinutes,
+              'lessonScores': lessonScores,
+              'todayProgress': todayProgress,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+      final data = jsonDecode(response.body);
+      return response.statusCode == 200
+          ? {'success': true, ...data}
+          : {
+              'success': false,
+              'message': data['error'] ?? 'Failed to fetch AI plan',
+            };
+    } catch (e) {
+      return {'success': false, 'message': 'Network error'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> chatWithAI({
+    required String message,
+    required List<Map<String, String>> history,
+    required Map<String, dynamic> userProgress,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_host/api/ai/chat'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'message': message,
+              'history': history,
+              'userProgress': userProgress,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+      final data = jsonDecode(response.body);
+      return response.statusCode == 200
+          ? {'success': true, ...data}
+          : {
+              'success': false,
+              'message': data['message'] ?? 'Failed to chat with AI',
+            };
+    } catch (e) {
+      return {'success': false, 'message': 'Network error'};
     }
   }
 }
