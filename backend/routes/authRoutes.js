@@ -53,7 +53,8 @@ router.post('/register', async (req, res) => {
         streak: user.streak,
         lastStreakDate: user.lastStreakDate,
         dailyLessonCounts: user.dailyLessonCounts,
-        dailyScores: user.dailyScores
+        dailyScores: user.dailyScores,
+        lessonScores: user.lessonScores
       }
     });
   } catch (err) {
@@ -122,7 +123,8 @@ router.post('/login', async (req, res) => {
         streak: updated.streak,
         lastStreakDate: updated.lastStreakDate,
         dailyLessonCounts: updated.dailyLessonCounts,
-        dailyScores: updated.dailyScores
+        dailyScores: updated.dailyScores,
+        lessonScores: updated.lessonScores
       }
     });
   } catch (err) {
@@ -191,7 +193,8 @@ router.post('/google-login', async (req, res) => {
         streak: user.streak,
         lastStreakDate: user.lastStreakDate,
         dailyLessonCounts: user.dailyLessonCounts,
-        dailyScores: user.dailyScores
+        dailyScores: user.dailyScores,
+        lessonScores: user.lessonScores
       }
     });
 
@@ -290,7 +293,7 @@ router.put('/reset-password/:token', async (req, res) => {
 // 5. UPDATE USER PROGRESS (Unified)
 router.put('/update-progress', async (req, res) => {
   try {
-    const { email, completedLessons, todayProgress, incrementLessonCount, date, lessonScore } = req.body;
+    const { email, completedLessons, todayProgress, incrementLessonCount, date, lessonScore, lessonId } = req.body;
 
     if (!email) {
       return res.status(400).json({ message: "Email is required" });
@@ -374,6 +377,19 @@ router.put('/update-progress', async (req, res) => {
       }
     }
 
+    // E. Save per-lesson score (for AI recommendations)
+    if (lessonId !== undefined && lessonScore !== undefined) {
+      if (!user.lessonScores) user.lessonScores = [];
+      const existingLessonScore = user.lessonScores.find(e => e.lessonId === lessonId);
+      if (existingLessonScore) {
+        // Update with latest score
+        existingLessonScore.score = lessonScore;
+        existingLessonScore.date = todayStr;
+      } else {
+        user.lessonScores.push({ lessonId, score: lessonScore, date: todayStr });
+      }
+    }
+
     await user.save();
 
     res.json({
@@ -384,7 +400,8 @@ router.put('/update-progress', async (req, res) => {
       streak: user.streak,
       lastStreakDate: user.lastStreakDate,
       dailyLessonCounts: user.dailyLessonCounts,
-      dailyScores: user.dailyScores
+      dailyScores: user.dailyScores,
+      lessonScores: user.lessonScores
     });
   } catch (err) {
     console.error(err);

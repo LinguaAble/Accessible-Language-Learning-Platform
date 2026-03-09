@@ -804,6 +804,7 @@ const LearningScreen = () => {
             todayProgress: newTodayProgress,
             incrementLessonCount: isNewLesson ? 1 : undefined,
             lessonScore,
+            lessonId,
             date: formattedDate
           })
             .then(res => {
@@ -817,7 +818,8 @@ const LearningScreen = () => {
                   todayProgress: res.data.todayProgress,
                   progressDate: res.data.progressDate,
                   streak: res.data.streak,
-                  lastStreakDate: res.data.lastStreakDate
+                  lastStreakDate: res.data.lastStreakDate,
+                  lessonScores: res.data.lessonScores
                 });
               }
             })

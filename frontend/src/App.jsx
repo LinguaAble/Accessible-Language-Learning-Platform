@@ -18,6 +18,7 @@ import { UserProvider, useUser } from './context/UserContext';
 import { NotificationProvider } from './context/NotificationContext';
 import NotificationToast from './components/NotificationToast';
 import AccessibilityWidget from './components/AccessibilityWidget';
+import ChatBot from './components/ChatBot';
 import './App.css';
 import { playClickSound, playNavigationSound } from './utils/soundUtils';
 
@@ -69,6 +70,7 @@ function AppContent() {
       {/* Global notification toast – renders on all pages */}
       <NotificationToast />
       <AccessibilityWidget />
+      <ChatBot />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />

@@ -96,6 +96,13 @@ const UserSchema = new mongoose.Schema({
     score: { type: Number, default: 0 }      // sum of all lesson scores that day
   }],
 
+  // Per-lesson score tracking (for AI recommendations)
+  lessonScores: [{
+    lessonId: { type: Number, required: true },
+    score: { type: Number, default: 0 },       // 0-100 percentage
+    date: { type: String, required: true }      // YYYY-MM-DD
+  }],
+
   // Story: Login History
   loginHistory: [{
     timestamp: { type: Date, default: Date.now },

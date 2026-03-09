@@ -80,7 +80,7 @@ function evaluatePronunciation(transcript, expectedAnswer, expectedHindi) {
 
   // 5. Double Metaphone (English phonetic algorithm — great for romanized Hindi)
   // 5. Double Metaphone — only accept if Levenshtein is also close
-  const metaphone = new natural.DoubleMetaphone();
+  const metaphone = natural.DoubleMetaphone;
   const tCodes = metaphone.process(normT.replace(/\s+/g, ''));
   const eCodes = metaphone.process(normE.replace(/\s+/g, ''));
   const metaphoneMatch = tCodes[0] === eCodes[0] || tCodes[1] === eCodes[1] || tCodes[0] === eCodes[1];

@@ -5,6 +5,7 @@ import { useUser } from '../context/UserContext';
 import { useNotifications } from '../context/NotificationContext';
 import NotificationBell from '../components/NotificationBell';
 import { BookOpen, Flame, PlayCircle, BarChart3, Bell, TrendingUp, Settings, Trophy, ChevronRight } from 'lucide-react';
+import DailyStudyPlan from '../components/DailyStudyPlan';
 import '../Dashboard.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -184,6 +185,9 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
+
+      {/* AI Daily Study Plan */}
+      <DailyStudyPlan />
 
       {/* Quick Actions */}
       <div>
