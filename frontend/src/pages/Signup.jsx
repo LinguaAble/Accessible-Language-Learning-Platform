@@ -5,6 +5,8 @@ import '../App.css';
 import logo from '../assets/logo.png';
 import { Eye, EyeOff } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -25,6 +27,29 @@ const Signup = () => {
   const { login } = useUser();
 
   const { email, password, confirmPassword } = formData;
+
+  const handleGoogleSuccess = (credentialResponse) => {
+    const decoded = jwtDecode(credentialResponse.credential);
+
+    // Save token
+    localStorage.setItem('token', credentialResponse.credential);
+
+    // Create user object from Google data
+    const googleUser = {
+      email: decoded.email,
+      username: decoded.name,
+      fullName: decoded.name,
+      avatarUrl: decoded.picture
+    };
+
+    // Update persistent user state via Context
+    login(googleUser);
+    navigate('/dashboard');
+  };
+
+  const handleGoogleError = () => {
+    setError('Google Sign Up failed. Please try again.');
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -76,7 +101,12 @@ const Signup = () => {
           <img src={logo} alt="LinguaAble Zebra Mascot" className="app-logo" />
         </div>
 
-        <h1 className="brand-title">LinguaAble</h1>
+        <h2 className="welcome-text">Welcome to</h2>
+        <h1 className="brand-title">
+          <span className="text-brand-blue">Lingua</span>
+          <span className="text-brand-red">Able</span>
+        </h1>
+        <p className="subtitle">Built Around Learners, Not Limitations!</p>
         <h2 className="page-title">Create Account</h2>
 
         {error && <div className="error-message" role="alert">{error}</div>}
@@ -191,10 +221,25 @@ const Signup = () => {
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
+
+          <div style={{ margin: '20px 0', textAlign: 'center', color: '#6b7280', fontSize: '0.9rem' }}>
+            OR
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="filled_blue"
+              shape="pill"
+              text="signup_with"
+              width="250"
+            />
+          </div>
         </form>
 
         <p className="signup-text">
-          Already have an account? <Link to="/">Sign In</Link>
+          Already have an account? <Link to="/login">Sign In</Link>
         </p>
       </div>
     </div>
