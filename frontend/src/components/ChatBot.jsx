@@ -57,6 +57,13 @@ const ChatBot = () => {
           streak: user.streak || 0,
           todayProgress: parseInt(localStorage.getItem('todayProgress'), 10) || 0,
           dailyGoalMinutes: preferences?.dailyGoalMinutes || 5
+        },
+        userInfo: {
+          fullName: user.fullName || '',
+          username: user.username || '',
+          age: user.age || '',
+          gender: user.gender || '',
+          bio: user.bio || ''
         }
       });
 
