@@ -7,6 +7,32 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
+// Helper: Generate OTP, hash it, save to user, and send email
+async function sendMfaOtp(user) {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  user.mfaToken = crypto.createHash('sha256').update(otp).digest('hex');
+  user.mfaTokenExpire = Date.now() + 5 * 60 * 1000; // 5 minutes
+  await user.save();
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+
+  await transporter.sendMail({
+    from: `"LinguaAble Security" <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: 'Your LinguaAble Verification Code',
+    text: `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.`
+  });
+
+  return otp; // returned only for testing; not sent to client
+}
+
 // 1. REGISTER USER
 router.post('/register', async (req, res) => {
   try {
@@ -32,7 +58,78 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    // Create Token
+    // Send MFA OTP
+    await sendMfaOtp(user);
+
+    res.json({ pendingMFA: true, email: user.email });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 2. LOGIN USER
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'Invalid email or password.' });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid email or password.' });
+
+    // Send MFA OTP (login history & streak updated after OTP verification)
+    await sendMfaOtp(user);
+
+    res.json({ pendingMFA: true, email: user.email });
+  } catch (err) {
+    console.error('Login error:', err.message, err.stack);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 2b. VERIFY MFA OTP
+router.post('/verify-mfa', async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required.' });
+
+    const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
+
+    const user = await User.findOne({
+      email,
+      mfaToken: hashedOtp,
+      mfaTokenExpire: { $gt: Date.now() }
+    });
+
+    if (!user) return res.status(400).json({ message: 'Invalid or expired verification code.' });
+
+    // Clear MFA fields
+    user.mfaToken = undefined;
+    user.mfaTokenExpire = undefined;
+
+    // Update login history
+    const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: req.body.device || 'Web Browser' }];
+    if (newHistory.length > 10) newHistory.shift();
+    user.loginHistory = newHistory;
+
+    // Streak reset check
+    let newStreak = user.streak || 0;
+    const lastStreakDate = user.lastStreakDate || '';
+    if (lastStreakDate) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (lastStreakDate < yesterdayStr && lastStreakDate !== todayStr) {
+        newStreak = 0;
+      }
+    }
+    user.streak = newStreak;
+
+    await user.save();
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
@@ -57,76 +154,25 @@ router.post('/register', async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
+    console.error('MFA verify error:', err.message, err.stack);
     res.status(500).json({ message: 'Server Error' });
   }
 });
 
-// 2. LOGIN USER
-router.post('/login', async (req, res) => {
+// 2c. RESEND MFA OTP
+router.post('/resend-mfa', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required.' });
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid email or password.' });
+    if (!user) return res.status(404).json({ message: 'User not found.' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid email or password.' });
+    await sendMfaOtp(user);
 
-    // Build update object
-    const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: req.body.device || 'Web Browser' }];
-    if (newHistory.length > 10) newHistory.shift();
-
-    // Streak reset check: if last streak date is before yesterday, reset to 0
-    let newStreak = user.streak || 0;
-    const lastStreakDate = user.lastStreakDate || '';
-    if (lastStreakDate) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-      const todayStr = new Date().toISOString().split('T')[0];
-      if (lastStreakDate < yesterdayStr && lastStreakDate !== todayStr) {
-        newStreak = 0;
-      }
-    }
-
-    // Use findOneAndUpdate to avoid validation errors on existing documents
-    const updated = await User.findOneAndUpdate(
-      { email },
-      {
-        $set: {
-          loginHistory: newHistory,
-          streak: newStreak
-        }
-      },
-      { returnDocument: 'after' }
-    );
-
-    const token = jwt.sign({ id: updated._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    res.json({
-      token,
-      user: {
-        email: updated.email,
-        username: updated.username,
-        fullName: updated.fullName,
-        age: updated.age,
-        gender: updated.gender,
-        bio: updated.bio,
-        avatarUrl: updated.avatarUrl,
-        preferences: updated.preferences,
-        completedLessons: updated.completedLessons,
-        loginHistory: updated.loginHistory,
-        todayProgress: updated.todayProgress,
-        progressDate: updated.progressDate,
-        streak: updated.streak,
-        lastStreakDate: updated.lastStreakDate,
-        dailyLessonCounts: updated.dailyLessonCounts,
-        dailyScores: updated.dailyScores
-      }
-    });
+    res.json({ success: true, message: 'Verification code re-sent to your email.' });
   } catch (err) {
-    console.error('Login error:', err.message, err.stack);
+    console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
 });

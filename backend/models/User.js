@@ -49,6 +49,11 @@ const UserSchema = new mongoose.Schema({
   resetPasswordExpire: Date,
   // ----------------------------------
 
+  // --- MFA Fields ---
+  mfaToken: String,       // SHA-256 hashed OTP
+  mfaTokenExpire: Date,   // 5-minute expiry
+  // ------------------
+
   // Story 8: Default ADHD-friendly settings applied automatically
   preferences: {
     theme: { type: String, default: 'dark' },
