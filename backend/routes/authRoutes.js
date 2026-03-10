@@ -158,13 +158,14 @@ router.post('/forgot-password', async (req, res) => {
 
     // C. Send Email using Nodemailer
     const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',
-  port: 587,
-  auth: {
-    user: process.env.BREVO_USER,
-    pass: process.env.BREVO_PASS
-  }
-});
+      host: 'smtp-relay.brevo.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.BREVO_USER,
+        pass: process.env.BREVO_PASS
+      }
+  });
 
 const message = {
   from: `"LinguaAble Support" <${process.env.BREVO_USER}>`,
