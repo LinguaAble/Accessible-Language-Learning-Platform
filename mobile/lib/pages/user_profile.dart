@@ -277,7 +277,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       child: _buildStatCard(
                         '📚',
                         'Lessons',
-                        '${profile['completedLessons'] ?? 0}',
+                        '${(profile['completedLessons'] is List ? (profile['completedLessons'] as List).length : profile['completedLessons'] ?? 0)}',
                         'Lessons finished',
                       ),
                     ),

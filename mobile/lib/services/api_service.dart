@@ -9,8 +9,8 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:5000';
     }
-    // Connected via USB + 'adb reverse tcp:5000 tcp:5000' covers the mobile app!
-    return 'http://localhost:5000';
+    // Use your machine's IP address instead of localhost for mobile devices
+    return 'http://10.12.227.158:5000';
   }
 
   static String get _baseUrl => '$_host/api/auth';

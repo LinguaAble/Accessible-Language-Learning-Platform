@@ -668,7 +668,13 @@ class _DashboardPageState extends State<DashboardPage> {
         'color': const Color(0xFF2ECC71),
       },
       {
-        'label': 'Learning Report',
+        'label': 'Progress 🌱',
+        'icon': Icons.track_changes,
+        'path': '/progress',
+        'color': const Color(0xFFF79C42),
+      },
+      {
+        'label': 'Performance Report',
         'icon': Icons.analytics,
         'path': '/report',
         'color': const Color(0xFF10B981),

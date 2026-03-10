@@ -437,16 +437,18 @@ router.put('/update-profile', async (req, res) => {
 // 10. LEADERBOARD — Weekly Score Rankings
 router.get('/leaderboard', async (req, res) => {
   try {
-    // Build the date strings for this Mon–Sun week
+    // Build the date strings for this Mon–Sun week using UTC to avoid timezone shifts
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-    monday.setHours(0, 0, 0, 0);
+    // Use UTC methods for consistent results across servers
+    const dayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const diff = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+
+    const monday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - diff));
+    monday.setUTCHours(0, 0, 0, 0);
 
     const weekDates = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
+      d.setUTCDate(monday.getUTCDate() + i);
       return d.toISOString().split('T')[0]; // YYYY-MM-DD
     });
 
@@ -487,16 +489,18 @@ router.get('/leaderboard', async (req, res) => {
 // 11. SEARCH USERS
 router.get('/search', async (req, res) => {
   try {
-    const { q } = req.query;
-    if (!q) return res.json([]);
+    const query = req.query.q?.toString().trim() || req.query.q;
+    if (!query) return res.json([]);
 
-    // Search by username or fullName using regex (case-insensitive)
-    const regex = new RegExp(q, 'i');
     const users = await User.find({
-      $or: [{ username: regex }, { fullName: regex }]
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { fullName: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
+      ]
     })
-      .select('username fullName avatarUrl streak _id')
-      .limit(10);
+      .select('username fullName avatarUrl email streak _id')
+      .limit(20);
 
     res.json(users);
   } catch (err) {
@@ -522,13 +526,13 @@ router.get('/profile/:username', async (req, res) => {
     if (requesterEmail) {
       const requester = await User.findOne({ email: requesterEmail });
       if (requester) {
-        if (requester._id.toString() === profileUser._id.toString()) {
+        if (requester._id.toString() === profileUser._id.toString() || requester.email === profileUser.email) {
           relationship = 'self';
           isSelf = true;
           isFriend = true; // you can see your own stats
         } else {
           // Check if friends
-          if (profileUser.friends.includes(requester._id)) {
+          if (profileUser.friends && profileUser.friends.includes(requester._id)) {
             relationship = 'friends';
             isFriend = true;
           } else if (profileUser.friendRequestsReceived && profileUser.friendRequestsReceived.includes(requester._id)) {
@@ -545,6 +549,7 @@ router.get('/profile/:username', async (req, res) => {
       _id: profileUser._id,
       username: profileUser.username,
       fullName: profileUser.fullName || '',
+      email: profileUser.email || '',
       bio: profileUser.bio || '',
       avatarUrl: profileUser.avatarUrl || '',
       relationship: relationship
@@ -557,7 +562,11 @@ router.get('/profile/:username', async (req, res) => {
       publicProfile.dailyLessonCounts = profileUser.dailyLessonCounts || [];
     }
 
-    res.json(publicProfile);
+    res.json({
+      success: true,
+      ...publicProfile,
+      relationship // also passed as top level just in case
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -573,7 +582,7 @@ router.post('/friend-request/send', async (req, res) => {
 
     if (!requester || !target) return res.status(404).json({ message: 'User missing' });
     if (requester._id.toString() === target._id.toString()) return res.status(400).json({ message: 'Cannot friend yourself' });
-    if (requester.friends.includes(target._id)) return res.status(400).json({ message: 'Already friends' });
+    if (requester.friends && requester.friends.includes(target._id)) return res.status(400).json({ message: 'Already friends' });
     if (requester.friendRequestsSent && requester.friendRequestsSent.includes(target._id)) return res.status(400).json({ message: 'Request already sent' });
 
     // Initialize arrays if they don't exist
