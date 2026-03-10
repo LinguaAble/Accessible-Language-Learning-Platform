@@ -438,16 +438,18 @@ router.put('/update-profile', async (req, res) => {
 // 10. LEADERBOARD — Weekly Score Rankings
 router.get('/leaderboard', async (req, res) => {
   try {
-    // Build the date strings for this Mon–Sun week
+    // Build the date strings for this Mon–Sun week using UTC to avoid timezone shifts
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-    monday.setHours(0, 0, 0, 0);
+    // Use UTC methods for consistent results across servers
+    const dayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const diff = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+
+    const monday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - diff));
+    monday.setUTCHours(0, 0, 0, 0);
 
     const weekDates = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(monday);
-      d.setDate(monday.getDate() + i);
+      d.setUTCDate(monday.getUTCDate() + i);
       return d.toISOString().split('T')[0]; // YYYY-MM-DD
     });
 
@@ -479,6 +481,218 @@ router.get('/leaderboard', async (req, res) => {
     }));
 
     res.json({ success: true, leaderboard, weekStart: weekDates[0], weekEnd: weekDates[6] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 11. SEARCH USERS
+router.get('/search', async (req, res) => {
+  try {
+    const query = req.query.q?.toString().trim() || req.query.q;
+    if (!query) return res.json([]);
+
+    const users = await User.find({
+      $or: [
+        { username: { $regex: query, $options: 'i' } },
+        { fullName: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } }
+      ]
+    })
+      .select('username fullName avatarUrl email streak _id')
+      .limit(20);
+
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 12. GET PUBLIC PROFILE
+router.get('/profile/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { requesterEmail } = req.query;
+
+    const profileUser = await User.findOne({ username });
+    if (!profileUser) return res.status(404).json({ message: 'User not found' });
+
+    let relationship = 'none'; // none | pending_sent | pending_received | friends | self
+    let isFriend = false;
+    let isSelf = false;
+
+    // Check relationship if a logged-in user requested this profile
+    if (requesterEmail) {
+      const requester = await User.findOne({ email: requesterEmail });
+      if (requester) {
+        if (requester._id.toString() === profileUser._id.toString() || requester.email === profileUser.email) {
+          relationship = 'self';
+          isSelf = true;
+          isFriend = true; // you can see your own stats
+        } else {
+          // Check if friends
+          if (profileUser.friends && profileUser.friends.includes(requester._id)) {
+            relationship = 'friends';
+            isFriend = true;
+          } else if (profileUser.friendRequestsReceived && profileUser.friendRequestsReceived.includes(requester._id)) {
+            relationship = 'pending_sent'; // Current user requested this profile user
+          } else if (requester.friendRequestsReceived && requester.friendRequestsReceived.includes(profileUser._id)) {
+            relationship = 'pending_received'; // Profile user requested current user
+          }
+        }
+      }
+    }
+
+    // Prepare response. Hide stats if not friend/self.
+    const publicProfile = {
+      _id: profileUser._id,
+      username: profileUser.username,
+      fullName: profileUser.fullName || '',
+      email: profileUser.email || '',
+      bio: profileUser.bio || '',
+      avatarUrl: profileUser.avatarUrl || '',
+      relationship: relationship
+    };
+
+    if (isFriend || relationship === 'friends' || relationship === 'self') {
+      publicProfile.streak = profileUser.streak || 0;
+      publicProfile.completedLessons = profileUser.completedLessons ? profileUser.completedLessons.length : 0;
+      publicProfile.dailyScores = profileUser.dailyScores || [];
+      publicProfile.dailyLessonCounts = profileUser.dailyLessonCounts || [];
+    }
+
+    res.json({
+      success: true,
+      ...publicProfile,
+      relationship // also passed as top level just in case
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 13. FRIEND ACTIONS
+router.post('/friend-request/send', async (req, res) => {
+  try {
+    const { requesterEmail, targetUsername } = req.body;
+    const requester = await User.findOne({ email: requesterEmail });
+    const target = await User.findOne({ username: targetUsername });
+
+    if (!requester || !target) return res.status(404).json({ message: 'User missing' });
+    if (requester._id.toString() === target._id.toString()) return res.status(400).json({ message: 'Cannot friend yourself' });
+    if (requester.friends && requester.friends.includes(target._id)) return res.status(400).json({ message: 'Already friends' });
+    if (requester.friendRequestsSent && requester.friendRequestsSent.includes(target._id)) return res.status(400).json({ message: 'Request already sent' });
+
+    // Initialize arrays if they don't exist
+    if (!requester.friendRequestsSent) requester.friendRequestsSent = [];
+    if (!requester.friendRequestsReceived) requester.friendRequestsReceived = [];
+    if (!target.friendRequestsSent) target.friendRequestsSent = [];
+    if (!target.friendRequestsReceived) target.friendRequestsReceived = [];
+    if (!requester.friends) requester.friends = [];
+    if (!target.friends) target.friends = [];
+
+    // Add to arrays
+    requester.friendRequestsSent.push(target._id);
+    target.friendRequestsReceived.push(requester._id);
+
+    // If target also already sent request, auto accept them
+    if (requester.friendRequestsReceived.includes(target._id)) {
+      requester.friendRequestsReceived.pull(target._id);
+      requester.friendRequestsSent.pull(target._id);
+      requester.friends.push(target._id);
+
+      target.friendRequestsReceived.pull(requester._id);
+      target.friendRequestsSent.pull(requester._id);
+      target.friends.push(requester._id);
+    }
+
+    await requester.save();
+    await target.save();
+
+    res.json({ success: true, message: 'Friend request sent' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+router.post('/friend-request/accept', async (req, res) => {
+  try {
+    const { currentEmail, targetId } = req.body; // targetId is ID of the user who requested
+    const current = await User.findOne({ email: currentEmail });
+    const target = await User.findById(targetId);
+
+    if (!current || !target) return res.status(404).json({ message: 'User missing' });
+
+    // Initialize arrays if they don't exist
+    if (!current.friendRequestsReceived) current.friendRequestsReceived = [];
+    if (!current.friends) current.friends = [];
+    if (!target.friendRequestsSent) target.friendRequestsSent = [];
+    if (!target.friends) target.friends = [];
+
+    // Accept logic
+    current.friendRequestsReceived.pull(target._id);
+    current.friends.push(target._id);
+
+    target.friendRequestsSent.pull(current._id);
+    target.friends.push(current._id);
+
+    await current.save();
+    await target.save();
+
+    res.json({ success: true, message: 'Friend request accepted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+router.post('/friend-request/reject', async (req, res) => {
+  try {
+    const { currentEmail, targetId } = req.body;
+    const current = await User.findOne({ email: currentEmail });
+    const target = await User.findById(targetId);
+
+    if (!current || !target) return res.status(404).json({ message: 'User missing' });
+
+    // Initialize arrays if they don't exist
+    if (!current.friendRequestsReceived) current.friendRequestsReceived = [];
+    if (!target.friendRequestsSent) target.friendRequestsSent = [];
+
+    // Reject logic
+    current.friendRequestsReceived.pull(target._id);
+    target.friendRequestsSent.pull(current._id);
+
+    await current.save();
+    await target.save();
+
+    res.json({ success: true, message: 'Friend request rejected' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// 14. GET COMMUNITY DATA
+router.get('/community/data', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.status(400).json({ message: 'Email required' });
+
+    // Find the user and populate the received friend requests and their current friends
+    const user = await User.findOne({ email })
+      .populate('friendRequestsReceived', 'username fullName avatarUrl')
+      .populate('friends', 'username fullName avatarUrl completedLessons streak dailyScores');
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({
+      friendRequests: user.friendRequestsReceived || [],
+      friends: user.friends || []
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });

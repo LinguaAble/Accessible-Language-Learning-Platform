@@ -13,6 +13,7 @@ import 'pages/signup.dart';
 import 'pages/community.dart';
 import 'pages/user_profile.dart';
 import 'pages/learning_report.dart';
+import 'pages/progress_report.dart';
 import 'providers/user_provider.dart';
 import 'widgets/accessibility_widget.dart';
 
@@ -58,6 +59,10 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/report',
       builder: (context, state) => const LearningReportPage(),
+    ),
+    GoRoute(
+      path: '/progress',
+      builder: (context, state) => const ProgressReportPage(),
     ),
     GoRoute(
       path: '/settings',

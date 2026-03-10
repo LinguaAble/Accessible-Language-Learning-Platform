@@ -191,7 +191,7 @@ const UserProfile = () => {
                                 <BookOpen size={24} color="#3498db" />
                                 <h3>Lessons</h3>
                             </div>
-                            <div className="stat-number">{profile.completedLessons || 0}</div>
+                            <div className="stat-number">{profile.completedLessons?.length || 0}</div>
                             <div className="stat-description">Lessons finished</div>
                         </div>
 
