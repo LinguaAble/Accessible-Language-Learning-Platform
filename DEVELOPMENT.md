@@ -12,6 +12,12 @@ Complete guide for setting up your local development environment for the **Acces
 | [Git](https://git-scm.com/) | 2.30+ | Version control |
 | [VS Code](https://code.visualstudio.com/) | Latest | Recommended IDE |
 
+### Optional (For Mobile Development)
+| Software | Version | Purpose |
+|----------|---------|---------|
+| [Flutter SDK](https://flutter.dev/) | Latest | Mobile app development |
+| [Android Studio](https://developer.android.com/studio) | Latest | Android emulator & tools |
+
 ---
 
 ## 🚀 Installation Steps
@@ -46,17 +52,31 @@ You must create `.env` files in both the `frontend` and `backend` directories.
 
 ### Frontend (`frontend/.env`)
 ```env
-VITE_API_URL=http://localhost:5000
+# Google OAuth - Client ID for Sign-In with Google
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+
+# Google Cloud Speech-to-Text API Key (for pronunciation practice)
+VITE_GOOGLE_SPEECH_KEY=your_google_speech_api_key
 ```
-> Note: If you use Firebase or Google Auth, add those keys here as well (e.g., `VITE_GOOGLE_CLIENT_ID`).
+> Note: The frontend auto-detects the backend URL. If you need to override it, add `VITE_API_URL=http://localhost:5000`.
 
 ### Backend (`backend/.env`)
 ```env
-port=5000
+# Server Port
+PORT=5000
+
+# Database Connection
 MONGO_URI=mongodb://localhost:27017/linguaable
+
+# JWT Authentication Secret (any long random string)
 JWT_SECRET=your_super_secret_key_change_me
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
+
+# Email Service (Brevo SMTP for password reset OTPs)
+BREVO_USER=your_brevo_email
+BREVO_PASS=your_brevo_smtp_password
+
+# AI Service (GROQ API for chatbot and daily study plans)
+GROQ_API_KEY=your_groq_api_key
 ```
 
 ---
@@ -70,6 +90,8 @@ To run the full stack application, you need to open **two terminal windows**.
 cd backend
 npm run dev
 # Server should start on http://localhost:5000
+# You should see: ✅ MongoDB Connected (LinguaAble)
+# And: 🚀 Server running on port 5000 (0.0.0.0)
 ```
 
 ### Terminal 2: Frontend Client
@@ -77,6 +99,13 @@ npm run dev
 cd frontend
 npm run dev
 # Vite server should start on http://localhost:5173
+```
+
+### Optional: Mobile App
+```bash
+cd mobile
+flutter pub get
+flutter run
 ```
 
 ---
@@ -89,16 +118,39 @@ npm run dev
 
 ---
 
+## 🧪 Running Tests
+
+### Backend Tests (Jest + Supertest)
+```bash
+cd backend
+npm test                        # Run all 141 tests
+npm test -- auth.test.js        # Run specific test file
+npm run test:watch              # Watch mode
+npm test -- --coverage          # Coverage report
+```
+
+### Frontend Tests (Vitest + React Testing Library)
+```bash
+cd frontend
+npm test                        # Run all ~200+ tests (watch mode)
+npm test -- run                 # Run once
+npm run test:ui                 # Interactive test browser UI
+npm run test:coverage           # Coverage report
+```
+
+---
+
 ## 🧰 Development Tools
 
 ### Code Quality
-- **ESLint**: Installed in frontend for code linting.
+- **ESLint**: Installed in frontend for code linting (`npm run lint`).
 - **Prettier**: Recommended for consistent formatting.
 
 ### VS Code Extensions (Recommended)
 - **ES7+ React/Redux/React-Native snippets**
 - **Prettier - Code formatter**
 - **MongoDB for VS Code**
+- **ESLint**
 
 ---
 
@@ -109,7 +161,13 @@ npm run dev
 - **MongoDB Connection Error**: Check if your local MongoDB service is running or your Atlas IP whitelist allows your connection.
 
 **Frontend Issues:**
-- If styles are missing or quirky, ensure you haven't deleted strictly required global CSS files.
+- If styles are missing or quirky, ensure you haven't deleted global CSS files (`App.css`, `index.css`, `Dashboard.css`, `Learning.css`, `LandingPage.css`).
+- If Google Sign-In doesn't work, verify `VITE_GOOGLE_CLIENT_ID` in `frontend/.env`.
 
 **Backend Issues:**
-- `nodemon` not found? Install it globally (`npm install -g nodemon`) or ensure it's in `devDependencies`.
+- `nodemon` not found? It's in `devDependencies`, so `npm run dev` should work. If not, install globally: `npm install -g nodemon`.
+- GROQ API errors? Verify `GROQ_API_KEY` in `backend/.env`.
+- Email sending fails? Verify `BREVO_USER` and `BREVO_PASS` in `backend/.env`.
+
+**CORS Errors:**
+- The backend allows any `localhost` port and `https://linguaable.vercel.app`. Check `backend/index.js` for CORS configuration.

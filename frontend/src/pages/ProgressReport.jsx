@@ -79,7 +79,20 @@ const ProgressReport = () => {
     }, [user]);
 
     const { totalScore, totalLessons, activeSessions, maxLessonCompleted, currentLesson } = performanceData;
-    const maxVal = Math.max(...weeklyData.map(d => d.value), 1);
+    const rawMax = Math.max(...weeklyData.map(d => d.value), 1);
+
+    // Compute a nice rounded ceiling for the Y-axis so bars never touch the top
+    const niceMax = (() => {
+        if (rawMax <= 10) return 10;
+        const magnitude = Math.pow(10, Math.floor(Math.log10(rawMax)));
+        return Math.ceil(rawMax / magnitude) * magnitude;
+    })();
+
+    // Format large numbers for compact labels (e.g., 1863 → "1.9K")
+    const formatScore = (v) => {
+        if (v >= 1000) return (v / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        return v;
+    };
 
     // Since the backend doesn't explicitly store skill breakdown, deduce it smoothly using activeSessions, lessons, & streaks
     const baseProgress = activeSessions * 10;
@@ -165,20 +178,52 @@ const ProgressReport = () => {
                         <h3 className="db-card-title">Weekly Activity & Study Session</h3>
                         <BarChart3 size={16} color="var(--text-muted)" />
                     </div>
-                    <div className="weekly-chart">
-                        {weeklyData.map((item, i) => (
-                            <div key={i} className="bar-wrapper">
-                                <div className={`bar${item.isToday ? ' bar-today' : ''}`}
-                                    style={{ height: `${Math.min(85, (item.value / Math.max(maxVal, 5)) * 85)}%`, opacity: item.value === 0 ? 0.3 : 1 }}
-                                    title={`Score: ${item.value}`}>
-                                    {item.value > 0 && <span className="bar-score-label" style={{ fontSize: '10px' }}>{item.value}</span>}
-                                </div>
-                                <span className="day-label" style={{
-                                    fontWeight: item.isToday ? 800 : 600,
-                                    color: item.isToday ? 'var(--accent-color)' : 'var(--text-muted)'
-                                }}>{item.day}</span>
-                            </div>
-                        ))}
+                    {/* Y-axis + Bars container */}
+                    <div className="progress-chart-container">
+                        {/* Y-axis labels */}
+                        <div className="progress-y-axis">
+                            <span>{formatScore(niceMax)}</span>
+                            <span>{formatScore(Math.round(niceMax * 0.75))}</span>
+                            <span>{formatScore(Math.round(niceMax * 0.5))}</span>
+                            <span>{formatScore(Math.round(niceMax * 0.25))}</span>
+                            <span>0</span>
+                        </div>
+
+                        {/* Chart area with gridlines */}
+                        <div className="progress-chart-area">
+                            {/* Gridlines */}
+                            <div className="progress-gridline" style={{ bottom: '100%' }} />
+                            <div className="progress-gridline" style={{ bottom: '75%' }} />
+                            <div className="progress-gridline" style={{ bottom: '50%' }} />
+                            <div className="progress-gridline" style={{ bottom: '25%' }} />
+                            <div className="progress-gridline" style={{ bottom: '0%' }} />
+
+                            {/* Bars */}
+                            {weeklyData.map((item, i) => {
+                                const barPercent = niceMax > 0 ? (item.value / niceMax) * 100 : 0;
+                                return (
+                                    <div key={i} className="progress-bar-col">
+                                        <div className="progress-bar-track">
+                                            {item.value > 0 && (
+                                                <span className="progress-bar-label">{formatScore(item.value)}</span>
+                                            )}
+                                            <div
+                                                className={`progress-bar-fill${item.isToday ? ' bar-today' : ''}`}
+                                                style={{
+                                                    height: `${Math.max(barPercent, item.value > 0 ? 3 : 1)}%`,
+                                                    opacity: item.value === 0 ? 0.25 : 1
+                                                }}
+                                                title={`Score: ${item.value}`}
+                                            />
+                                        </div>
+                                        <span className="progress-day-label" style={{
+                                            fontWeight: item.isToday ? 800 : 600,
+                                            color: item.isToday ? 'var(--accent-color)' : 'var(--text-muted)'
+                                        }}>{item.day}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 

@@ -20,16 +20,20 @@ const Lessons = () => {
         catch { return []; }
     });
 
-    // Re-sync whenever user context updates
+    // Re-sync whenever user context updates, but merge with localStorage
+    // to prevent stale context from overwriting newly completed lessons
     useEffect(() => {
+        let ls = [];
+        try {
+            ls = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+        } catch { /* ignore */ }
+
         if (user?.completedLessons && user.completedLessons.length > 0) {
-            setLocalCompleted(user.completedLessons);
-        } else {
-            // Fallback: read from localStorage in case context is stale
-            try {
-                const ls = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-                if (ls.length > 0) setLocalCompleted(ls);
-            } catch { /* ignore */ }
+            // merge them uniquely
+            const merged = [...new Set([...user.completedLessons, ...ls])];
+            setLocalCompleted(merged);
+        } else if (ls.length > 0) {
+            setLocalCompleted(ls);
         }
     }, [user?.completedLessons]);
 

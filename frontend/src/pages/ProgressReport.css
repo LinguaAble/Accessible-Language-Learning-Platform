@@ -194,3 +194,128 @@
     box-shadow: none;
     border: 1px solid #333;
 }
+
+/* ═══════════════════════════════════════════════
+   Progress Report — Proper Bar Graph Styles
+   ═══════════════════════════════════════════════ */
+
+.progress-chart-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* Y-Axis labels column */
+.progress-y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 28px;
+    /* match day-label height */
+    min-width: 36px;
+    flex-shrink: 0;
+}
+
+.progress-y-axis span {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    line-height: 1;
+    opacity: 0.7;
+}
+
+/* Chart area (holds gridlines + bars) */
+.progress-chart-area {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    position: relative;
+    height: 220px;
+    border-left: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Horizontal gridlines */
+.progress-gridline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-color);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Each bar column (bar + day label) */
+.progress-bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 60px;
+    height: 100%;
+}
+
+/* Track sits inside the column, grows from bottom */
+.progress-bar-track {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+    padding-top: 22px;
+    /* space for score label above bar */
+}
+
+/* Score label above the bar */
+.progress-bar-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    white-space: nowrap;
+    margin-bottom: 4px;
+    letter-spacing: 0.2px;
+    text-align: center;
+    animation: labelFadeIn 0.6s ease;
+}
+
+@keyframes labelFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* The actual colored bar */
+.progress-bar-fill {
+    width: 20px;
+    background: var(--accent-color);
+    border-radius: 6px 6px 2px 2px;
+    min-height: 3px;
+    transition: height 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(230, 126, 34, 0.25);
+}
+
+.progress-bar-fill.bar-today {
+    background: var(--accent-color) !important;
+    box-shadow: 0 0 14px rgba(230, 126, 34, 0.55) !important;
+    width: 24px;
+}
+
+/* Day label below the bar */
+.progress-day-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 8px;
+    padding-bottom: 2px;
+}

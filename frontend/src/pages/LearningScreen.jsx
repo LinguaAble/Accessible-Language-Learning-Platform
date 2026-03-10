@@ -740,8 +740,7 @@ const lessonDatabase = {
       ...createVocabPair("समय", "Time", "Concept", ["Time", "Clock", "Day", "Night"], ["समय", "घड़ी", "दिन", "रात"]),
       ...createVocabPair("घड़ी", "Clock", "Object", ["Clock", "Time", "Watch", "Hand"], ["घड़ी", "समय", "घड़ी", "हाथ"]),
       ...createVocabPair("बजे", "O'clock", "Time-telling", ["O'clock", "Hour", "Minute", "Second"], ["बजे", "घंटा", "मिनट", "सेकंड"]),
-      { type: 'pronounce', question: "Say 'What time is it?'", mainChar: "कितने बजे हैं?", answer: "kitne baje hain", hint: "Kitne baje hain" },
-      { type: 'pronounce', question: "Say 'It is five o'clock'", mainChar: "पाँच बजे हैं", answer: "paanch baje hain", hint: "Paanch baje hain" }
+      { type: 'pronounce', question: "Say 'What time is it?'", mainChar: "कितने बजे हैं?", answer: "kitne baje hain", hint: "Kitne baje hain" }
     ]
   },
   66: {
@@ -813,38 +812,43 @@ const lessonDatabase = {
   73: {
     title: "Speaking Practice: Daily Routine",
     slides: [
-      { type: 'pronounce', question: "Say 'I wake up at six'", mainChar: "मैं छह बजे उठता हूँ", answer: "main chheh baje uthta hoon", hint: "Main chheh baje uthta hoon" },
-      { type: 'pronounce', question: "Say 'I eat breakfast'", mainChar: "मैं नाश्ता करता हूँ", answer: "main nashta karta hoon", hint: "Main nashta karta hoon" },
-      { type: 'pronounce', question: "Say 'I go to work'", mainChar: "मैं काम पर जाता हूँ", answer: "main kaam par jata hoon", hint: "Main kaam par jata hoon" },
-      { type: 'pronounce', question: "Say 'I read a book'", mainChar: "मैं किताब पढ़ता हूँ", answer: "main kitaab padhta hoon", hint: "Main kitaab padhta hoon" },
-      { type: 'pronounce', question: "Say 'I sleep at ten'", mainChar: "मैं दस बजे सोता हूँ", answer: "main das baje sota hoon", hint: "Main das baje sota hoon" }
+      { type: 'pronounce', question: "Say 'Morning'", mainChar: "सुबह", answer: "subah", hint: "Subah" },
+      { type: 'pronounce', question: "Say 'Evening'", mainChar: "शाम", answer: "shaam", hint: "Shaam" },
+      { type: 'pronounce', question: "Say 'Breakfast'", mainChar: "नाश्ता", answer: "nashta", hint: "Nashta" },
+      { type: 'pronounce', question: "Say 'To read'", mainChar: "पढ़ना", answer: "padhna", hint: "Padhna" },
+      { type: 'pronounce', question: "Say 'To write'", mainChar: "लिखना", answer: "likhna", hint: "Likhna" },
+      { type: 'pronounce', question: "Say 'Work'", mainChar: "काम", answer: "kaam", hint: "Kaam" },
+      { type: 'pronounce', question: "Say 'Every day'", mainChar: "रोज़", answer: "roz", hint: "Roz" }
     ]
   },
   74: {
     title: "Conversation Practice: Activities",
     slides: [
-      { type: 'pronounce', question: "Say 'I play football'", mainChar: "मैं फुटबॉल खेलता हूँ", answer: "main football khelta hoon", hint: "Main football khelta hoon" },
-      { type: 'pronounce', question: "Say 'She sings well'", mainChar: "वह अच्छा गाती है", answer: "vah achha gaati hai", hint: "Vah achha gaati hai" },
-      { type: 'pronounce', question: "Say 'We dance together'", mainChar: "हम साथ में नाचते हैं", answer: "hum saath mein naachte hain", hint: "Hum saath mein naachte hain" },
-      { type: 'pronounce', question: "Say 'They are playing'", mainChar: "वे खेल रहे हैं", answer: "ve khel rahe hain", hint: "Ve khel rahe hain" },
-      { type: 'pronounce', question: "Say 'Let's go to the park'", mainChar: "चलो पार्क चलते हैं", answer: "chalo park chalte hain", hint: "Chalo park chalte hain" }
+      { type: 'pronounce', question: "Say 'To play'", mainChar: "खेलना", answer: "khelna", hint: "Khelna" },
+      { type: 'pronounce', question: "Say 'To sing'", mainChar: "गाना", answer: "gaana", hint: "Gaana" },
+      { type: 'pronounce', question: "Say 'To dance'", mainChar: "नाचना", answer: "naachna", hint: "Naachna" },
+      { type: 'pronounce', question: "Say 'Together'", mainChar: "साथ में", answer: "saath mein", hint: "Saath mein" },
+      { type: 'pronounce', question: "Say 'Market'", mainChar: "बाज़ार", answer: "bazaar", hint: "Bazaar" },
+      { type: 'pronounce', question: "Say 'Weather'", mainChar: "मौसम", answer: "mausam", hint: "Mausam" },
+      { type: 'pronounce', question: "Say 'Rain'", mainChar: "बारिश", answer: "baarish", hint: "Baarish" }
     ]
   },
   75: {
     title: "Daily Life Review",
     slides: [
       { type: 'quiz', subtype: 'char_select', question: "Select 'Market'", audioText: null, options: ["बाज़ार", "स्कूल", "पार्क", "घर"], answer: "बाज़ार" },
-      { type: 'pronounce', question: "Final Test: Say 'Today is a good day'", mainChar: "आज अच्छा दिन है", answer: "aaj achha din hai", hint: "Aaj achha din hai" },
-      { type: 'pronounce', question: "Final Test: Say 'What time do you eat?'", mainChar: "आप कितने बजे खाते हैं?", answer: "aap kitne baje khaate hain", hint: "Aap kitne baje khaate hain" },
-      { type: 'pronounce', question: "Final Test: Say 'The weather is good'", mainChar: "मौसम अच्छा है", answer: "mausam achha hai", hint: "Mausam achha hai" },
-      { type: 'pronounce', question: "Final Test: Say 'I am ready'", mainChar: "मैं तैयार हूँ", answer: "main taiyaar hoon", hint: "Main taiyaar hoon" }
+      { type: 'pronounce', question: "Say 'Happy'", mainChar: "खुश", answer: "khush", hint: "Khush" },
+      { type: 'pronounce', question: "Say 'School'", mainChar: "स्कूल", answer: "school", hint: "School" },
+      { type: 'pronounce', question: "Say 'Time'", mainChar: "समय", answer: "samay", hint: "Samay" },
+      { type: 'pronounce', question: "Say 'Busy'", mainChar: "व्यस्त", answer: "vyast", hint: "Vyast" },
+      { type: 'pronounce', question: "Say 'Ready'", mainChar: "तैयार", answer: "taiyaar", hint: "Taiyaar" },
+      { type: 'pronounce', question: "Say 'Good day'", mainChar: "अच्छा दिन", answer: "achha din", hint: "Achha din" }
     ]
   },
 
   76: {
     title: "Asking for Directions",
     slides: [
-      ...createVocabPair("रास्ता", "Direction/Path", "Concept", ["Path", "House", "City", "Country"], ["रास्ता", "घर", "शहर", "देश"]),
       ...createVocabPair("कहाँ है?", "Where is?", "Question", ["Where is?", "What is?", "Who is?", "How is?"], ["कहाँ है?", "क्या है?", "कौन है?", "कैसे है?"]),
       { type: 'pronounce', question: "Ask 'Where is the station?'", mainChar: "स्टेशन कहाँ है?", answer: "station kahaan hai", hint: "Station kahaan hai" },
       { type: 'pronounce', question: "Say 'Straight'", mainChar: "सीधे", answer: "seedhe", hint: "Seedhe" },
@@ -877,8 +881,7 @@ const lessonDatabase = {
     slides: [
       ...createVocabPair("मदद", "Help", "Concept", ["Help", "Work", "Play", "Sleep"], ["मदद", "काम", "खेल", "नींद"]),
       ...createVocabPair("पुलिस", "Police", "Object", ["Police", "Doctor", "Teacher", "Friend"], ["पुलिस", "डॉक्टर", "शिक्षक", "दोस्त"]),
-      { type: 'pronounce', question: "Say 'Help me!'", mainChar: "मेरी मदद करो!", answer: "meri madad karo", hint: "Meri madad karo" },
-      { type: 'pronounce', question: "Say 'I am lost'", mainChar: "मैं खो गया हूँ", answer: "main kho gaya hoon", hint: "Main kho gaya hoon" }
+      { type: 'pronounce', question: "Say 'Help me!'", mainChar: "मेरी मदद करो!", answer: "meri madad karo", hint: "Meri madad karo" }
     ]
   },
   80: {
@@ -886,16 +889,13 @@ const lessonDatabase = {
     slides: [
       ...createVocabPair("ताज़ा", "Fresh", "Adjective", ["Fresh", "Stale", "Good", "Bad"], ["ताज़ा", "बासी", "अच्छा", "बुरा"]),
       ...createVocabPair("फल", "Fruits", "Object", ["Fruits", "Vegetables", "Milk", "Bread"], ["फल", "सब्ज़ियाँ", "दूध", "रोटी"]),
-      ...createVocabPair("सब्ज़ियाँ", "Vegetables", "Object", ["Vegetables", "Fruits", "Meat", "Eggs"], ["सब्ज़ियाँ", "फल", "मांस", "अंडे"]),
-      { type: 'pronounce', question: "Say 'Give me fresh fruits'", mainChar: "मुझे ताज़ा फल दें", answer: "mujhe taaza phal dein", hint: "Mujhe taaza phal dein" }
+      ...createVocabPair("सब्ज़ियाँ", "Vegetables", "Object", ["Vegetables", "Fruits", "Meat", "Eggs"], ["सब्ज़ियाँ", "फल", "मांस", "अंडे"])
     ]
   },
   81: {
     title: "Talking at a Restaurant",
     slides: [
       ...createVocabPair("बिल", "Bill", "Object", ["Bill", "Menu", "Food", "Water"], ["बिल", "मेनू", "खाना", "पानी"]),
-      ...createVocabPair("खाना बहुत स्वादिष्ट है", "The food is very delicious", "Compliment", ["Food is delicious", "Food is bad", "Food is cold", "Food is hot"], ["खाना स्वादिष्ट है", "खाना बुरा है", "खाना ठंडा है", "खाना गर्म है"]),
-      { type: 'pronounce', question: "Say 'Check please'", mainChar: "बिल मंगाएँ", answer: "bill mangayein", hint: "Bill mangayein" },
       { type: 'pronounce', question: "Say 'Delicious'", mainChar: "स्वादिष्ट", answer: "swadisht", hint: "Swadisht" }
     ]
   },
@@ -903,7 +903,6 @@ const lessonDatabase = {
     title: "Bus / Train Station",
     slides: [
       ...createVocabPair("टिकट", "Ticket", "Object", ["Ticket", "Money", "Bag", "Seat"], ["टिकट", "पैसा", "बैग", "सीट"]),
-      ...createVocabPair("गाड़ी", "Train/Vehicle", "Vehicle", ["Train", "Bus", "Car", "Plane"], ["गाड़ी", "बस", "कार", "हवाई जहाज़"]),
       { type: 'pronounce', question: "Ask 'Where is the bus?'", mainChar: "बस कहाँ है?", answer: "bus kahaan hai", hint: "Bus kahaan hai" },
       { type: 'pronounce', question: "Say 'One ticket'", mainChar: "एक टिकट", answer: "ek ticket", hint: "Ek ticket" }
     ]
@@ -911,7 +910,6 @@ const lessonDatabase = {
   83: {
     title: "Talking on the Phone",
     slides: [
-      ...createVocabPair("हैलो", "Hello (Phone)", "Greeting", ["Hello", "Bye", "Who?", "What?"], ["हैलो", "बाय", "कौन?", "क्या?"]),
       ...createVocabPair("कौन बोल रहा है?", "Who is speaking?", "Phone Question", ["Who is speaking?", "What are you doing?", "Where are you?", "Why?"], ["कौन बोल रहा है?", "आप क्या कर रहे हैं?", "आप कहाँ हैं?", "क्यों?"]),
       { type: 'pronounce', question: "Say 'Hold on'", mainChar: "थोड़ी देर रुकिए", answer: "thodi der rukiye", hint: "Thodi der rukiye" },
       { type: 'pronounce', question: "Say 'Who is this?'", mainChar: "आप कौन हैं?", answer: "aap kaun hain", hint: "Aap kaun hain" }
@@ -930,57 +928,43 @@ const lessonDatabase = {
     title: "Simple Requests",
     slides: [
       ...createVocabPair("कृपया यहाँ आएँ", "Please come here", "Request", ["Please come here", "Please go there", "Please sit", "Please stand"], ["कृपया यहाँ आएँ", "कृपया वहाँ जाएँ", "कृपया बैठें", "कृपया खड़े हों"]),
-      ...createVocabPair("एक मिनट", "One minute", "Request", ["One minute", "One hour", "One day", "Wait"], ["एक मिनट", "एक घंटा", "एक दिन", "रुकिए"]),
-      { type: 'pronounce', question: "Say 'Please sit down'", mainChar: "कृपया बैठिए", answer: "kripya baithiye", hint: "Kripya baithiye" },
-      { type: 'pronounce', question: "Say 'Please wait'", mainChar: "कृपया इंतज़ार कीजिये", answer: "kripya intezaar kijiye", hint: "Kripya intezaar kijiye" }
+      ...createVocabPair("एक मिनट", "One minute", "Request", ["One minute", "One hour", "One day", "Wait"], ["एक मिनट", "एक घंटा", "एक दिन", "रुकिए"])
     ]
   },
   86: {
     title: "Opinions",
     slides: [
-      ...createVocabPair("मेरा विचार है", "My opinion is", "Statement", ["My opinion is", "I don't know", "I think", "I am sure"], ["मेरा विचार है", "मुझे नहीं पता", "मुझे लगता है", "मुझे यकीन है"]),
-      ...createVocabPair("सही", "Right/Correct", "Opinion", ["Correct", "Wrong", "True", "False"], ["सही", "गलत", "सच", "झूठ"]),
-      { type: 'pronounce', question: "Say 'I think so'", mainChar: "मुझे ऐसा लगता है", answer: "mujhe aisa lagta hai", hint: "Mujhe aisa lagta hai" },
-      { type: 'pronounce', question: "Say 'You are right'", mainChar: "आप सही हैं", answer: "aap sahi hain", hint: "Aap sahi hain" }
+      ...createVocabPair("मेरा विचार है", "My opinion is", "Statement", ["My opinion is", "I don't know", "I think", "I am sure"], ["मेरा विचार है", "मुझे नहीं पता", "मुझे लगता है", "मुझे यकीन है"])
     ]
   },
   87: {
     title: "Listening Practice: Real Situations",
     slides: [
-      { type: 'quiz', subtype: 'intro', badge: "Review", title: "World Review", question: "What does this mean?", mainChar: "मदद", audioText: "मदद", hint: "Support", options: ["Help", "Work", "Play", "Sleep"], answer: "Help" },
-      { type: 'pronounce', question: "Listen and Repeat: Path", mainChar: "रास्ता", answer: "raasta", hint: "Raasta" },
-      { type: 'pronounce', question: "Listen and Repeat: Price", mainChar: "कीमत", answer: "keemat", hint: "Keemat" },
-      { type: 'pronounce', question: "Listen and Repeat: Fresh", mainChar: "ताज़ा", answer: "taaza", hint: "Taaza" }
+      { type: 'quiz', subtype: 'intro', badge: "Review", title: "Word Review", question: "What does this mean?", mainChar: "मदद", audioText: "मदद", hint: "Support", options: ["Help", "Work", "Play", "Sleep"], answer: "Help" },
+      ...createVocabPair("कीमत", "Price", "Noun", ["Price", "Time", "Food", "Water"], ["कीमत", "समय", "खाना", "पानी"])
     ]
   },
   88: {
-    title: "Speaking Practice: Role Play",
+    title: "Role Play Review",
     slides: [
-      { type: 'pronounce', question: "Say 'Please help me'", mainChar: "कृपया मेरी मदद करें", answer: "kripya meri madad karein", hint: "Kripya meri madad karein" },
-      { type: 'pronounce', question: "Say 'Where is the hospital?'", mainChar: "अस्पताल कहाँ है?", answer: "aspataal kahaan hai", hint: "Aspataal kahaan hai" },
-      { type: 'pronounce', question: "Say 'I want a ticket'", mainChar: "मुझे एक टिकट चाहिए", answer: "mujhe ek ticket chahiye", hint: "Mujhe ek ticket chahiye" },
-      { type: 'pronounce', question: "Say 'How much is it?'", mainChar: "यह कितने का है?", answer: "yeh kitne ka hai", hint: "Yeh kitne ka hai" },
-      { type: 'pronounce', question: "Say 'Thank you very much'", mainChar: "आपका बहुत धन्यवाद", answer: "aapka bahut dhanyavaad", hint: "Aapka bahut dhanyavaad" }
+      ...createVocabPair("अस्पताल", "Hospital", "Noun", ["Hospital", "School", "Market", "House"], ["अस्पताल", "स्कूल", "बाज़ार", "घर"]),
+      ...createVocabPair("मदद", "Help", "Request", ["Help", "Stop", "Go", "Come"], ["मदद", "रुको", "जाओ", "आओ"])
     ]
   },
   89: {
     title: "Real-Life Conversation",
     slides: [
+      ...createVocabPair("पुलिस", "Police", "Noun", ["Police", "Doctor", "Teacher", "Driver"], ["पुलिस", "डॉक्टर", "शिक्षक", "ड्राइवर"]),
       { type: 'pronounce', question: "Say 'Call the police'", mainChar: "पुलिस को बुलाओ", answer: "police ko bulao", hint: "Police ko bulao" },
-      { type: 'pronounce', question: "Say 'I don't understand'", mainChar: "मुझे समझ नहीं आया", answer: "mujhe samajh nahi aaya", hint: "Mujhe samajh nahi aaya" },
-      { type: 'pronounce', question: "Say 'Speak slowly please'", mainChar: "कृपया धीरे बोलें", answer: "kripya dheere bolein", hint: "Kripya dheere bolein" },
-      { type: 'pronounce', question: "Say 'Is it fresh?'", mainChar: "क्या यह ताज़ा है?", answer: "kya yeh taaza hai", hint: "Kya yeh taaza hai" },
-      { type: 'pronounce', question: "Say 'I am waiting'", mainChar: "मैं इंतज़ार कर रहा हूँ", answer: "main intezaar kar raha hoon", hint: "Main intezaar kar raha hoon" }
+      { type: 'pronounce', question: "Say 'Speak slowly please'", mainChar: "कृपया धीरे बोलें", answer: "kripya dheere bolein", hint: "Kripya dheere bolein" }
     ]
   },
   90: {
     title: "Final Communication Review",
     slides: [
       { type: 'quiz', subtype: 'char_select', question: "Select 'I want'", audioText: null, options: ["मुझे चाहिए", "मुझे दो", "यह लो", "वहाँ जाओ"], answer: "मुझे चाहिए" },
-      { type: 'pronounce', question: "Final Mastery: Say 'I can speak Hindi'", mainChar: "मैं हिंदी बोल सकता हूँ", answer: "main hindi bol sakta hoon", hint: "Main hindi bol sakta hoon" },
-      { type: 'pronounce', question: "Final Mastery: Say 'I love learning'", mainChar: "मुझे सीखना पसंद है", answer: "mujhe seekhna pasand hai", hint: "Mujhe seekhna pasand hai" },
-      { type: 'pronounce', question: "Final Mastery: Say 'See you tomorrow'", mainChar: "कल मिलेंगे", answer: "kal milenge", hint: "Kal milenge" },
-      { type: 'pronounce', question: "Final Mastery: Say 'Have a nice day'", mainChar: "आपका दिन शुभ हो", answer: "aapka din shubh ho", hint: "Aapka din shubh ho" }
+      { type: 'quiz', subtype: 'intro', badge: "Review", title: "Review", question: "What does this mean?", mainChar: "कल मिलेंगे", audioText: "कल मिलेंगे", hint: "See you tomorrow", options: ["See you tomorrow", "See you later", "Goodbye", "Hello"], answer: "See you tomorrow" },
+      { type: 'pronounce', question: "Final Mastery: Say 'Hindi'", mainChar: "हिंदी", answer: "hindi", hint: "Hindi" }
     ]
   },
 };

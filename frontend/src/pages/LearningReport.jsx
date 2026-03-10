@@ -113,7 +113,7 @@ const LearningReport = () => {
                 <button className="lr-back-btn" onClick={() => navigate('/dashboard')}>
                     <ArrowLeft size={18} /> Back to Dashboard
                 </button>
-                <div style={{ padding: '6px 14px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>
+                <div style={{ padding: '6px 14px', background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>
                     LAST SYNCED: JUST NOW
                 </div>
             </div>
@@ -121,7 +121,7 @@ const LearningReport = () => {
             {/* Main Title */}
             <div className="lr-main-title">
                 <h1>Performance Report</h1>
-                <p style={{ color: '#64748b', fontSize: '1.1rem', marginTop: '8px' }}>Tracking your journey to language mastery.</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '8px' }}>Tracking your journey to language mastery.</p>
             </div>
 
             {/* View Toggle */}
@@ -200,13 +200,13 @@ const LearningReport = () => {
                     </div>
 
                     {/* Insights Block */}
-                    <div style={{ marginTop: '2rem', background: 'rgba(56, 189, 248, 0.03)', border: '1px dashed #38bdf8', padding: '1.5rem', borderRadius: '24px', display: 'flex', gap: '20px', alignItems: 'center' }}>
-                        <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#38bdf8', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ marginTop: '2rem', background: 'var(--card-bg)', border: '1px dashed var(--accent-color)', padding: '1.5rem', borderRadius: '24px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+                        <div style={{ width: 50, height: 50, borderRadius: '50%', background: 'var(--accent-color)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Sparkles size={24} />
                         </div>
                         <div>
-                            <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>Weekly Recommendation</h4>
-                            <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.95rem' }}>
+                            <h4 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>Weekly Recommendation</h4>
+                            <p style={{ margin: '4px 0 0', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
                                 {weeklyPoints > 50 ? "You're showing incredible momentum! Keep this pace and you'll hit your monthly target 3 days early." : "Consistency is key. Try to dedicate just 5 minutes today to keep your streak alive and build long-term memory."}
                             </p>
                         </div>
@@ -221,7 +221,7 @@ const LearningReport = () => {
                         <div className="lr-glass-card">
                             <div className="lr-skill-header">
                                 <h3 className="lr-chart-title"><Trophy size={24} color="#fbbf24" /> Skill Proficiency</h3>
-                                <span style={{ padding: '4px 12px', background: 'rgba(251, 191, 36, 0.1)', borderRadius: '20px', color: '#fbbf24', fontSize: '0.75rem', fontWeight: 800 }}>GLOBAL RANK: B1</span>
+                                <span style={{ padding: '4px 12px', background: 'rgba(251, 191, 36, 0.1)', borderRadius: '20px', color: '#fbbf24', fontSize: '0.75rem', fontWeight: 800, border: '1px solid rgba(251, 191, 36, 0.2)' }}>GLOBAL RANK: B1</span>
                             </div>
                             <div className="lr-skill-list">
                                 {skillProgress.map((s, i) => (
