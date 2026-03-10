@@ -488,7 +488,7 @@ router.get('/search', async (req, res) => {
     const users = await User.find({
       $or: [{ username: regex }, { fullName: regex }]
     })
-      .select('username fullName avatarUrl string') // selecting limited fields
+      .select('username fullName avatarUrl streak _id') // fixed typo
       .limit(10);
 
     res.json(users);
@@ -662,6 +662,14 @@ router.get('/community/data', async (req, res) => {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
   }
+});
+
+// 15. GET ME
+router.get('/me', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch(err) {}
 });
 
 module.exports = router;
