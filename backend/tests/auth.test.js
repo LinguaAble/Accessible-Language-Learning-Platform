@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const authRoutes = require('../routes/authRoutes');
 const User = require('../models/User');
+const OTP = require('../models/OTP');
 require('./setup'); // Import test database setup
 
 // Create Express app for testing
@@ -43,10 +44,15 @@ describe('Authentication API Tests', () => {
             expect(response.body).toHaveProperty('email', 'newuser@example.com');
             expect(response.body).not.toHaveProperty('token');
 
-            // Verify MFA token was saved in DB
+            // Verify User was NOT created yet
             const user = await User.findOne({ email: 'newuser@example.com' });
-            expect(user.mfaToken).toBeDefined();
-            expect(user.mfaTokenExpire).toBeDefined();
+            expect(user).toBeNull();
+
+            // Verify OTP token was saved in DB
+            const otpRecord = await OTP.findOne({ email: 'newuser@example.com' });
+            expect(otpRecord).toBeDefined();
+            expect(otpRecord.signupData).toBeDefined();
+            expect(otpRecord.signupData.username).toBe('newuser');
         });
 
         test('Should hash password in database', async () => {
@@ -58,12 +64,13 @@ describe('Authentication API Tests', () => {
                     username: 'hashtest'
                 });
 
-            const user = await User.findOne({ email: 'hashtest@example.com' });
-            expect(user.password).not.toBe('MyPassword123'); // Password should be hashed
-            expect(user.password.length).toBeGreaterThan(20); // Bcrypt hash is long
+            // User is not created yet, so check OTP collection
+            const otpRecord = await OTP.findOne({ email: 'hashtest@example.com' });
+            expect(otpRecord.signupData.password).not.toBe('MyPassword123'); // Password should be hashed
+            expect(otpRecord.signupData.password.length).toBeGreaterThan(20); // Bcrypt hash is long
 
             // Verify password can be compared
-            const isMatch = await bcrypt.compare('MyPassword123', user.password);
+            const isMatch = await bcrypt.compare('MyPassword123', otpRecord.signupData.password);
             expect(isMatch).toBe(true);
         });
 
@@ -76,11 +83,12 @@ describe('Authentication API Tests', () => {
                     username: 'loginhistory'
                 });
 
-            const user = await User.findOne({ email: 'loginhistory@example.com' });
-            expect(user.loginHistory).toBeDefined();
-            expect(user.loginHistory.length).toBe(1);
-            expect(user.loginHistory[0]).toHaveProperty('timestamp');
-            expect(user.loginHistory[0].device).toBe('Web Browser');
+            const otpRecord = await OTP.findOne({ email: 'loginhistory@example.com' });
+            expect(otpRecord).toBeDefined();
+            
+            // Note: loginHistory is no longer initialized in OTP, it's initialized on creation inside verify-mfa.
+            // But we can check if it exists in DB as an OTP record.
+            expect(otpRecord.signupData).toBeDefined();
         });
 
         test('Should return 400 if email already exists', async () => {
@@ -164,63 +172,95 @@ describe('Authentication API Tests', () => {
     describe('POST /api/auth/verify-mfa & resend-mfa', () => {
 
         beforeEach(async () => {
-            // Create and mock MFA user
+            // Mock an existing user for login MFA tests
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash('TestPass123', salt);
             
-            const hashedOtp = crypto.createHash('sha256').update('123456').digest('hex');
-            
             await User.create({
-                email: 'mfatest@example.com',
+                email: 'mfalogin@example.com',
                 password: hashedPassword,
-                username: 'mfatest',
-                mfaToken: hashedOtp,
-                mfaTokenExpire: Date.now() + 60000 // 1 min validity
+                username: 'mfalogin'
+            });
+
+            // Mock OTP for login
+            const hashedOtpLogin = crypto.createHash('sha256').update('123456').digest('hex');
+            
+            await OTP.create({
+                email: 'mfalogin@example.com',
+                otp: hashedOtpLogin
+            });
+
+            // Mock OTP for signup (user doesn't exist yet)
+            const hashedOtpSignup = crypto.createHash('sha256').update('654321').digest('hex');
+            await OTP.create({
+                email: 'mfasignup@example.com',
+                otp: hashedOtpSignup,
+                signupData: {
+                    password: hashedPassword,
+                    username: 'mfasignup'
+                }
             });
         });
 
-        test('Should verify correct OTP and return token', async () => {
+        test('Should verify correct login OTP and return token', async () => {
             const response = await request(app)
                 .post('/api/auth/verify-mfa')
                 .send({
-                    email: 'mfatest@example.com',
+                    email: 'mfalogin@example.com',
                     otp: '123456'
                 });
 
             expect(response.status).toBe(200);
             expect(response.body).toHaveProperty('token');
             expect(response.body).toHaveProperty('user');
-            expect(response.body.user.email).toBe('mfatest@example.com');
+            expect(response.body.user.email).toBe('mfalogin@example.com');
 
-            // Verify MFA fields are cleared in DB
-            const user = await User.findOne({ email: 'mfatest@example.com' });
-            expect(user.mfaToken).toBeUndefined();
-            expect(user.mfaTokenExpire).toBeUndefined();
+            // Verify OTP record is deleted
+            const otpRecord = await OTP.findOne({ email: 'mfalogin@example.com' });
+            expect(otpRecord).toBeNull();
+        });
+
+        test('Should verify correct signup OTP, create user, and return token', async () => {
+            const response = await request(app)
+                .post('/api/auth/verify-mfa')
+                .send({
+                    email: 'mfasignup@example.com',
+                    otp: '654321'
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('token');
+            expect(response.body.user.email).toBe('mfasignup@example.com');
+
+            // Verify User is created
+            const user = await User.findOne({ email: 'mfasignup@example.com' });
+            expect(user).toBeDefined();
+
+            // Verify OTP record is deleted
+            const otpRecord = await OTP.findOne({ email: 'mfasignup@example.com' });
+            expect(otpRecord).toBeNull();
         });
 
         test('Should return 400 with incorrect OTP', async () => {
             const response = await request(app)
                 .post('/api/auth/verify-mfa')
                 .send({
-                    email: 'mfatest@example.com',
-                    otp: '654321' // Wrong OTP
+                    email: 'mfalogin@example.com',
+                    otp: '000000' // Wrong OTP
                 });
 
             expect(response.status).toBe(400);
             expect(response.body.message).toBe('Invalid or expired verification code.');
         });
 
-        test('Should return 400 with expired OTP', async () => {
-            // Expire the token
-            await User.findOneAndUpdate(
-                { email: 'mfatest@example.com' },
-                { mfaTokenExpire: Date.now() - 1000 }
-            );
+        test('Should return 400 with expired OTP (not found in DB)', async () => {
+            // Delete the token to simulate expiry
+            await OTP.deleteOne({ email: 'mfalogin@example.com' });
 
             const response = await request(app)
                 .post('/api/auth/verify-mfa')
                 .send({
-                    email: 'mfatest@example.com',
+                    email: 'mfalogin@example.com',
                     otp: '123456'
                 });
 
@@ -232,17 +272,15 @@ describe('Authentication API Tests', () => {
             const response = await request(app)
                 .post('/api/auth/resend-mfa')
                 .send({
-                    email: 'mfatest@example.com'
+                    email: 'mfalogin@example.com'
                 });
 
             expect(response.status).toBe(200);
             expect(response.body.success).toBe(true);
             
-            // Wait for DB save (async usually fast enough, but just in case)
-            const user = await User.findOne({ email: 'mfatest@example.com' });
-            
-            // Check if OTP was updated (might be slightly different due to random regeneration)
-            expect(user.mfaTokenExpire.getTime()).toBeGreaterThan(Date.now() + 4 * 60 * 1000); // Should be a ~5m expiry
+            const otpRecord = await OTP.findOne({ email: 'mfalogin@example.com' });
+            expect(otpRecord).toBeDefined();
+            expect(otpRecord.createdAt.getTime()).toBeGreaterThan(Date.now() - 5000); 
         });
     });
 

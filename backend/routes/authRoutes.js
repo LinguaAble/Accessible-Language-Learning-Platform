@@ -4,16 +4,26 @@ const { protect } = require('../middleware/authMiddleware'); // Import protect m
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const OTP = require('../models/OTP'); // Import OTP model for temporary MFA storage
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-// Helper: Generate OTP, hash it, save to user, and send email
-async function sendMfaOtp(user) {
+// Helper: Generate OTP, hash it, save to OTP collection, and send email
+async function sendMfaOtp(email, signupData = null) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-  user.mfaToken = crypto.createHash('sha256').update(otp).digest('hex');
-  user.mfaTokenExpire = Date.now() + 5 * 60 * 1000; // 5 minutes
-  await user.save();
+  // UPSERT the OTP record for the user's email
+  await OTP.findOneAndUpdate(
+    { email },
+    { 
+      otp: hashedOtp, 
+      createdAt: Date.now(),
+      // Only set signupData if it's passed (during registration)
+      ...(signupData ? { signupData } : { $unset: { signupData: 1 } })
+    },
+    { upsert: true, returnDocument: 'after' }
+  );
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -25,7 +35,7 @@ async function sendMfaOtp(user) {
 
   await transporter.sendMail({
     from: `"LinguaAble Security" <${process.env.EMAIL_USER}>`,
-    to: user.email,
+    to: email,
     subject: 'Your LinguaAble Verification Code',
     text: `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.`
   });
@@ -38,7 +48,7 @@ router.post('/register', async (req, res) => {
   try {
     const { email, password, username } = req.body;
 
-    // Check if user exists
+    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ message: 'This email is already registered.' });
@@ -48,20 +58,14 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create User
-    user = new User({
-      email,
-      username: username || email.split('@')[0],
+    // Instead of creating the user NOW, we store pending data in the OTP collection.
+    // The user is actually created ONLY upon OTP verification.
+    await sendMfaOtp(email, {
       password: hashedPassword,
-      loginHistory: [{ timestamp: new Date(), device: req.body.device || 'Web Browser' }]
+      username: username || email.split('@')[0]
     });
 
-    await user.save();
-
-    // Send MFA OTP
-    await sendMfaOtp(user);
-
-    res.json({ pendingMFA: true, email: user.email });
+    res.json({ pendingMFA: true, email });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -79,8 +83,8 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid email or password.' });
 
-    // Send MFA OTP (login history & streak updated after OTP verification)
-    await sendMfaOtp(user);
+    // Send MFA OTP. We don't send signupData because they already exist.
+    await sendMfaOtp(email);
 
     res.json({ pendingMFA: true, email: user.email });
   } catch (err) {
@@ -97,38 +101,55 @@ router.post('/verify-mfa', async (req, res) => {
 
     const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-    const user = await User.findOne({
-      email,
-      mfaToken: hashedOtp,
-      mfaTokenExpire: { $gt: Date.now() }
-    });
-
-    if (!user) return res.status(400).json({ message: 'Invalid or expired verification code.' });
-
-    // Clear MFA fields
-    user.mfaToken = undefined;
-    user.mfaTokenExpire = undefined;
-
-    // Update login history
-    const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: req.body.device || 'Web Browser' }];
-    if (newHistory.length > 10) newHistory.shift();
-    user.loginHistory = newHistory;
-
-    // Streak reset check
-    let newStreak = user.streak || 0;
-    const lastStreakDate = user.lastStreakDate || '';
-    if (lastStreakDate) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-      const todayStr = new Date().toISOString().split('T')[0];
-      if (lastStreakDate < yesterdayStr && lastStreakDate !== todayStr) {
-        newStreak = 0;
-      }
+    // Find the OTP record
+    const otpRecord = await OTP.findOne({ email, otp: hashedOtp });
+    
+    if (!otpRecord) {
+      return res.status(400).json({ message: 'Invalid or expired verification code.' });
     }
-    user.streak = newStreak;
 
+    let user;
+
+    // A. Registration Verification (signupData exists)
+    if (otpRecord.signupData && otpRecord.signupData.password) {
+      // Create User NOW
+      user = new User({
+        email: otpRecord.email,
+        username: otpRecord.signupData.username,
+        password: otpRecord.signupData.password,
+        loginHistory: [{ timestamp: new Date(), device: req.body.device || 'Web Browser' }]
+      });
+    } 
+    // B. Login Verification
+    else {
+      user = await User.findOne({ email });
+      if (!user) return res.status(404).json({ message: 'User not found.' });
+
+      // Update login history
+      const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: req.body.device || 'Web Browser' }];
+      if (newHistory.length > 10) newHistory.shift();
+      user.loginHistory = newHistory;
+
+      // Streak reset check
+      let newStreak = user.streak || 0;
+      const lastStreakDate = user.lastStreakDate || '';
+      if (lastStreakDate) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (lastStreakDate < yesterdayStr && lastStreakDate !== todayStr) {
+          newStreak = 0;
+        }
+      }
+      user.streak = newStreak;
+    }
+
+    // Save newly created or updated user
     await user.save();
+
+    // Verification successful—delete the OTP record
+    await OTP.deleteOne({ _id: otpRecord._id });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
@@ -165,10 +186,20 @@ router.post('/resend-mfa', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email is required.' });
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found.' });
+    // Check if an OTP record already exists to preserve signupData
+    const existingOtp = await OTP.findOne({ email });
 
-    await sendMfaOtp(user);
+    if (existingOtp) {
+      // Re-send and update OTP preserving existing signupData
+      await sendMfaOtp(email, existingOtp.signupData);
+    } else {
+      // If no OTP record exists, maybe it's a login attempt.
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: 'Session expired. Please try again.' });
+      }
+      await sendMfaOtp(email);
+    }
 
     res.json({ success: true, message: 'Verification code re-sent to your email.' });
   } catch (err) {
