@@ -88,7 +88,7 @@ const LearningReport = () => {
     }, [user]);
 
     const { totalScore, totalLessons, weeklyPoints, weeklyLessonCount, activeSessions } = analytics;
-    const maxWeeklyVal = Math.max(...weeklyData.map(d => d.value), 20);
+    const maxWeeklyVal = Math.max(20, Math.max(...weeklyData.map(d => d.value)) * 1.2);
 
     // Skill Deduction (Mocked but consistent with data)
     const skillProgress = [
@@ -159,18 +159,82 @@ const LearningReport = () => {
                                 </div>
                             </div>
 
-                            <div className="lr-bar-container">
-                                {weeklyData.map((d, i) => (
-                                    <div key={i} className="lr-bar-wrapper">
-                                        <div
-                                            className={`lr-bar-fill ${d.isToday ? 'today' : ''}`}
-                                            style={{ height: `${(d.value / maxWeeklyVal) * 100}%` }}
-                                        >
-                                            <span className="lr-bar-tip">{d.value > 0 ? d.value : ''}</span>
+                            <div style={{ position: 'relative', height: '240px', width: '100%', marginTop: '20px' }}>
+                                {/* SVG Line */}
+                                <svg style={{ position: 'absolute', top: '40px', left: '5%', width: '90%', height: '140px', overflow: 'visible' }}>
+                                    <defs>
+                                        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stopColor="#38bdf8" />
+                                            <stop offset="50%" stopColor="#818cf8" />
+                                            <stop offset="100%" stopColor="#a855f7" />
+                                        </linearGradient>
+                                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                            <feGaussianBlur stdDeviation="4" result="blur" />
+                                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                        </filter>
+                                    </defs>
+                                    {weeklyData.map((d, i) => {
+                                        if (i === 0) return null;
+                                        const prev = weeklyData[i - 1];
+                                        return (
+                                            <line
+                                                key={`line-${i}`}
+                                                x1={`${((i - 1) / 6) * 100}%`}
+                                                y1={`${100 - (prev.value / maxWeeklyVal * 100)}%`}
+                                                x2={`${(i / 6) * 100}%`}
+                                                y2={`${100 - (d.value / maxWeeklyVal * 100)}%`}
+                                                stroke="url(#lineGrad)"
+                                                strokeWidth="4"
+                                                strokeLinecap="round"
+                                                filter="url(#glow)"
+                                            />
+                                        );
+                                    })}
+                                </svg>
+
+                                {/* Labels & Dots Overlay */}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', position: 'absolute', top: 0, left: '5%', width: '90%', height: '100%', pointerEvents: 'none' }}>
+                                    {weeklyData.map((d, i) => (
+                                        <div key={`col-${i}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 0, position: 'relative' }}>
+
+                                            {/* Tip / Value */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: `calc(40px + ${140 * (1 - (d.value / maxWeeklyVal))}px - 32px)`,
+                                                fontSize: '0.8rem',
+                                                fontWeight: 800,
+                                                color: d.isToday ? '#38bdf8' : 'var(--text-main)',
+                                                opacity: d.value > 0 || d.isToday ? 1 : 0
+                                            }}>
+                                                {d.value}
+                                            </div>
+
+                                            {/* Dot */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: `calc(40px + ${140 * (1 - (d.value / maxWeeklyVal))}px - 6px)`,
+                                                width: '12px', height: '12px',
+                                                borderRadius: '50%',
+                                                background: d.isToday ? '#38bdf8' : 'var(--card-bg)',
+                                                border: `3px solid ${d.isToday ? '#fff' : '#818cf8'}`,
+                                                boxShadow: d.isToday ? '0 0 12px rgba(56, 189, 248, 0.8)' : 'none',
+                                                zIndex: 2,
+                                                transform: d.isToday ? 'scale(1.2)' : 'scale(1)'
+                                            }} />
+
+                                            {/* Day Name */}
+                                            <div style={{
+                                                position: 'absolute',
+                                                bottom: '10px',
+                                                fontSize: '0.85rem',
+                                                fontWeight: 700,
+                                                color: d.isToday ? '#38bdf8' : 'var(--text-muted)'
+                                            }}>
+                                                {d.day}
+                                            </div>
                                         </div>
-                                        <span className="lr-day-name" style={{ color: d.isToday ? '#38bdf8' : '#64748b' }}>{d.day}</span>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
@@ -179,7 +243,7 @@ const LearningReport = () => {
                                 <div className="lr-mini-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
                                     <Target size={22} />
                                 </div>
-                                <span className="lr-mini-val">{Math.min(100, (weeklyPoints / 100 * 10)).toFixed(0)}%</span>
+                                <span className="lr-mini-val">{Math.min(100, Math.round(((user?.todayProgress || 0) / (user?.preferences?.dailyGoalMinutes || 5)) * 100))}%</span>
                                 <span className="lr-mini-lbl">Goal Completed</span>
                             </div>
                             <div className="lr-mini-card">
