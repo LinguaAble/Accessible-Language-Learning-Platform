@@ -221,6 +221,21 @@ const UserProfile = () => {
                     grid-template-columns: repeat(2, 1fr);
                     gap: 20px;
                 }
+                .dashboard-grid > .stat-card {
+                    animation: scaleIn 0.5s ease-out both;
+                    transition: transform 0.25s ease, box-shadow 0.25s ease;
+                }
+                .dashboard-grid > .stat-card:nth-child(1) { animation-delay: 0.05s; }
+                .dashboard-grid > .stat-card:nth-child(2) { animation-delay: 0.15s; }
+                .dashboard-grid > .stat-card:nth-child(3) { animation-delay: 0.25s; }
+                .dashboard-grid > .stat-card:nth-child(4) { animation-delay: 0.35s; }
+                .dashboard-grid > .stat-card:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
+                }
+                .stat-number {
+                    animation: countUp 0.6s ease-out 0.3s both;
+                }
             `}</style>
         </div>
     );

@@ -768,7 +768,13 @@ const Settings = () => {
                     align-items: center;
                     padding: 15px 0;
                     border-bottom: 1px solid var(--border-color);
+                    animation: fadeInUp 0.4s ease-out both;
                 }
+                .settings-row:nth-child(1) { animation-delay: 0.05s; }
+                .settings-row:nth-child(2) { animation-delay: 0.1s; }
+                .settings-row:nth-child(3) { animation-delay: 0.15s; }
+                .settings-row:nth-child(4) { animation-delay: 0.2s; }
+                .settings-row:nth-child(5) { animation-delay: 0.25s; }
                 .setting-info {
                     display: flex;
                     flex-direction: column;
@@ -793,12 +799,28 @@ const Settings = () => {
                     display: flex;
                     align-items: center;
                     gap: 5px;
-                    transition: all 0.3s ease;
+                    transition: all 0.3s ease, transform 0.15s ease;
+                }
+                .toggle-btn:active {
+                    transform: scale(0.93);
                 }
                 .toggle-btn.active {
                     background: #2ecc71;
                     border-color: #27ae60;
                     color: white;
+                }
+                .stat-card {
+                    animation: scaleIn 0.5s ease-out both;
+                    transition: transform 0.25s ease, box-shadow 0.25s ease;
+                }
+                .stat-card:nth-child(1) { animation-delay: 0.05s; }
+                .stat-card:nth-child(2) { animation-delay: 0.12s; }
+                .stat-card:nth-child(3) { animation-delay: 0.19s; }
+                .stat-card:nth-child(4) { animation-delay: 0.26s; }
+                .stat-card:nth-child(5) { animation-delay: 0.33s; }
+                .stat-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
                 }
                 .history-item {
                     display: flex;
@@ -810,6 +832,15 @@ const Settings = () => {
                     border-radius: 8px;
                     margin-bottom: 8px;
                     color: var(--text-main);
+                    animation: fadeInUp 0.3s ease-out both;
+                    transition: transform 0.2s ease, background 0.2s ease;
+                }
+                .history-item:nth-child(1) { animation-delay: 0.05s; }
+                .history-item:nth-child(2) { animation-delay: 0.1s; }
+                .history-item:nth-child(3) { animation-delay: 0.15s; }
+                .history-item:hover {
+                    transform: translateX(4px);
+                    background: rgba(230, 126, 34, 0.05);
                 }
                 .history-time {
                     font-weight: 500;

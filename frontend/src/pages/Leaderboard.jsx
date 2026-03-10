@@ -51,7 +51,7 @@ const PodiumCard = ({ entry, isCurrentUser }) => {
             order: entry.rank === 2 ? 0 : entry.rank === 1 ? 1 : 2,
         }}>
             {/* Crown / medal */}
-            <div style={{ color, fontSize: 22 }}>{icon}</div>
+            <div className="lb-crown-icon" style={{ color, fontSize: 22 }}>{icon}</div>
 
             {/* Avatar */}
             <div style={{
@@ -87,7 +87,7 @@ const PodiumCard = ({ entry, isCurrentUser }) => {
             </div>
 
             {/* Pedestal */}
-            <div style={{
+            <div className="lb-pedestal" style={{
                 width: '100%',
                 height,
                 background: `linear-gradient(180deg, ${color}33, ${color}11)`,
@@ -107,7 +107,7 @@ const PodiumCard = ({ entry, isCurrentUser }) => {
 };
 
 const LeaderRow = ({ entry, isCurrentUser }) => (
-    <div style={{
+    <div className="lb-row" style={{
         display: 'flex',
         alignItems: 'center',
         gap: 16,
@@ -300,7 +300,7 @@ const Leaderboard = () => {
                     <>
                         {/* ── Your Rank banner (if not top 3) ── */}
                         {myEntry && myEntry.rank > 3 && (
-                            <div style={{
+                            <div className="lb-my-rank" style={{
                                 display: 'flex', alignItems: 'center', gap: 12,
                                 background: 'rgba(230, 126, 34, 0.08)',
                                 border: '1px solid rgba(230, 126, 34, 0.4)',
@@ -331,7 +331,7 @@ const Leaderboard = () => {
                                 }}>
                                     Top Performers
                                 </h3>
-                                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+                                <div className="lb-podium-area" style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
                                     {top3.map(entry => (
                                         <PodiumCard key={entry.email} entry={entry} isCurrentUser={isCurrentUser(entry)} />
                                     ))}
@@ -382,8 +382,37 @@ const Leaderboard = () => {
                 )}
             </div>
 
-            {/* Spin keyframe */}
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            {/* Animation keyframes */}
+            <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+
+                /* Podium slide-up with stagger */
+                .lb-podium-area { animation: fadeIn 0.4s ease-out; }
+                .lb-podium-area > div:nth-child(1) { animation: slideUp 0.6s ease-out 0.1s both; }
+                .lb-podium-area > div:nth-child(2) { animation: slideUp 0.6s ease-out 0.25s both; }
+                .lb-podium-area > div:nth-child(3) { animation: slideUp 0.6s ease-out 0.15s both; }
+
+                /* Ranked list rows stagger */
+                .lb-row { animation: fadeInUp 0.4s ease-out both; }
+                .lb-row:nth-child(1) { animation-delay: 0.05s; }
+                .lb-row:nth-child(2) { animation-delay: 0.1s; }
+                .lb-row:nth-child(3) { animation-delay: 0.15s; }
+                .lb-row:nth-child(4) { animation-delay: 0.2s; }
+                .lb-row:nth-child(5) { animation-delay: 0.25s; }
+                .lb-row:nth-child(6) { animation-delay: 0.3s; }
+
+                /* Your-rank banner */
+                .lb-my-rank { animation: fadeIn 0.5s ease-out, pulseGlow 2s ease-in-out 1s infinite; }
+
+                /* Crown/medal icon bounce */
+                .lb-crown-icon { animation: bounceIn 0.6s ease-out 0.3s both; }
+
+                /* Pedestal grow-up */
+                .lb-pedestal {
+                    transform-origin: bottom;
+                    animation: fillBar 0.8s ease-out 0.3s both;
+                }
+            `}</style>
         </div>
     );
 };

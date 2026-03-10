@@ -4,6 +4,7 @@
     margin: 0 auto;
     font-family: 'Inter', sans-serif;
     color: var(--text-color);
+    animation: fadeIn 0.4s ease-out;
 }
 
 .report-header {
@@ -13,6 +14,7 @@
     padding: 2rem;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    animation: fadeInDown 0.5s ease-out;
 }
 
 .report-title {
@@ -44,13 +46,20 @@
     padding: 1.8rem;
     text-align: center;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
+    animation: scaleIn 0.5s ease-out both;
 }
 
+.report-card:nth-child(1) { animation-delay: 0.05s; }
+.report-card:nth-child(2) { animation-delay: 0.15s; }
+.report-card:nth-child(3) { animation-delay: 0.25s; }
+.report-card:nth-child(4) { animation-delay: 0.35s; }
+
 .report-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
 .report-card::before {
@@ -83,6 +92,11 @@
     display: inline-flex;
     border-radius: 50%;
     padding: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.report-card:hover .report-icon {
+    transform: scale(1.1);
 }
 
 .report-card.total-score .report-icon {
@@ -110,12 +124,37 @@
     font-weight: 800;
     margin-bottom: 0.2rem;
     color: var(--text-color);
+    animation: countUp 0.6s ease-out 0.4s both;
 }
 
 .card-label {
     font-size: 0.9rem;
     color: var(--text-muted);
     font-weight: 500;
+}
+
+/* Skill progress bar fill animation */
+.skills-container .skill-row {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+.skills-container .skill-row:nth-child(1) { animation-delay: 0.1s; }
+.skills-container .skill-row:nth-child(2) { animation-delay: 0.2s; }
+.skills-container .skill-row:nth-child(3) { animation-delay: 0.3s; }
+.skills-container .skill-row:nth-child(4) { animation-delay: 0.4s; }
+
+/* Learning path nodes */
+.path-container .path-node {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+.path-container .path-node:nth-child(1) { animation-delay: 0.1s; }
+.path-container .path-node:nth-child(2) { animation-delay: 0.25s; }
+.path-container .path-node:nth-child(3) { animation-delay: 0.4s; }
+
+/* Pulse animation for current lesson icon */
+.pulse-icon {
+    animation: subtlePulse 2s ease-in-out infinite;
 }
 
 .encouragement-section {
@@ -125,6 +164,7 @@
     text-align: center;
     margin-top: 2rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    animation: fadeIn 0.6s ease-out 0.5s both;
 }
 
 .encouragement-text {

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App.jsx';
 import './index.css';
+import './animations.css';
 
 // Get your Client ID from the .env file
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;

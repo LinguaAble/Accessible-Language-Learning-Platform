@@ -1,0 +1,203 @@
+/* ============================================================
+   GLOBAL ANIMATIONS & INTERACTIVITY SYSTEM
+   Reusable keyframes, utility classes, and hover states.
+   Respects reduce-motion via existing reduce-motion.css
+   ============================================================ */
+
+/* ── Keyframes ──────────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.4); }
+  50%      { box-shadow: 0 0 0 10px rgba(230, 126, 34, 0); }
+}
+
+@keyframes fillBar {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes fillWidth {
+  from { width: 0; }
+}
+
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.3); }
+  50%  { opacity: 1; transform: scale(1.05); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes subtlePulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.02); }
+}
+
+@keyframes ringProgress {
+  from { stroke-dashoffset: 188; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-3deg); }
+  75%      { transform: rotate(3deg); }
+}
+
+/* ── Utility Animation Classes ──────────────────────────────── */
+
+.anim-fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.anim-fade-in-down {
+  animation: fadeInDown 0.6s ease-out both;
+}
+
+.anim-fade-in-left {
+  animation: fadeInLeft 0.6s ease-out both;
+}
+
+.anim-fade-in-right {
+  animation: fadeInRight 0.6s ease-out both;
+}
+
+.anim-fade-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+.anim-scale-in {
+  animation: scaleIn 0.5s ease-out both;
+}
+
+.anim-slide-up {
+  animation: slideUp 0.6s ease-out both;
+}
+
+.anim-bounce-in {
+  animation: bounceIn 0.6s ease-out both;
+}
+
+/* ── Stagger Delay Classes ──────────────────────────────────── */
+
+.anim-delay-1 { animation-delay: 0.1s; }
+.anim-delay-2 { animation-delay: 0.2s; }
+.anim-delay-3 { animation-delay: 0.3s; }
+.anim-delay-4 { animation-delay: 0.4s; }
+.anim-delay-5 { animation-delay: 0.5s; }
+.anim-delay-6 { animation-delay: 0.6s; }
+.anim-delay-7 { animation-delay: 0.7s; }
+.anim-delay-8 { animation-delay: 0.8s; }
+
+/* ── Hover Utility Classes ──────────────────────────────────── */
+
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+.hover-glow {
+  transition: box-shadow 0.3s ease;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(230, 126, 34, 0.25);
+}
+
+/* ── Interactive Button Class ───────────────────────────────── */
+
+.btn-interactive {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.btn-interactive:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Card Hover Effect ──────────────────────────────────────── */
+
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-color);
+}
+
+/* ── Float Animation (for mascots, decorative elements) ────── */
+
+.anim-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ── Subtle pulse for active/important elements ─────────────── */
+
+.anim-pulse {
+  animation: subtlePulse 2s ease-in-out infinite;
+}
+
+.anim-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}

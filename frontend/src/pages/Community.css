@@ -1,5 +1,6 @@
 .community-container {
     padding: 10px 0;
+    animation: fadeIn 0.4s ease-out;
 }
 
 .search-bar-wrapper {
@@ -11,6 +12,7 @@
 .search-icon {
     position: absolute;
     left: 15px;
+    transition: color 0.3s ease;
 }
 
 .community-search-input {
@@ -21,19 +23,26 @@
     border-radius: 8px;
     background-color: var(--input-bg, var(--bg-color));
     color: var(--text-main);
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .community-search-input:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2), 0 4px 16px rgba(249, 115, 22, 0.1);
+    transform: scale(1.01);
+}
+
+.community-search-input:focus ~ .search-icon,
+.search-bar-wrapper:focus-within .search-icon {
+    color: var(--accent-color) !important;
 }
 
 .search-results {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    animation: fadeInUp 0.4s ease-out;
 }
 
 .user-result-card {
@@ -41,13 +50,25 @@
     align-items: center;
     gap: 15px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    animation: fadeInUp 0.4s ease-out both;
 }
 
+.user-result-card:nth-child(1) { animation-delay: 0.05s; }
+.user-result-card:nth-child(2) { animation-delay: 0.1s; }
+.user-result-card:nth-child(3) { animation-delay: 0.15s; }
+.user-result-card:nth-child(4) { animation-delay: 0.2s; }
+.user-result-card:nth-child(5) { animation-delay: 0.25s; }
+
 .user-result-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     border-color: var(--accent-color);
-    box-shadow: 0 6px 15px var(--shadow-color);
+    box-shadow: 0 8px 24px var(--shadow-color);
+}
+
+.user-result-card:hover .user-avatar {
+    border-color: var(--accent-color);
+    transform: scale(1.08);
 }
 
 .user-avatar {
@@ -56,6 +77,7 @@
     border-radius: 50%;
     border: 2px solid var(--border-color);
     object-fit: cover;
+    transition: transform 0.25s ease, border-color 0.25s ease;
 }
 
 .user-details {
@@ -79,4 +101,18 @@
     text-align: center;
     color: var(--text-muted);
     font-size: 1.1rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Friend requests & friends grid entrance */
+.friend-requests-section {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.friends-list-section {
+    animation: fadeInUp 0.5s ease-out 0.15s both;
+}
+
+.request-card {
+    animation: slideUp 0.4s ease-out both;
 }
