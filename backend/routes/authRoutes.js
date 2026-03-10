@@ -156,25 +156,24 @@ router.post('/forgot-password', async (req, res) => {
 
     await user.save();
 
-    // C. Send Email using Nodemailer
+    // C. Send Email using Nodemailer (Brevo)
     const transporter = nodemailer.createTransport({
       host: 'smtp-relay.brevo.com',
-      port: 465,
-      secure: true,
+      port: 587,
       auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS
+        user: process.env.BREVO_USER || process.env.EMAIL_USER,
+        pass: process.env.BREVO_PASS || process.env.BREVO_API_KEY
       }
-  });
+    });
 
-const message = {
-  from: `"LinguaAble Support" <${process.env.BREVO_USER}>`,
-  to: user.email,
-  subject: 'Password Reset Code',
-  text: `Your password reset otp is: ${otp}\n\nThis code expires in 1 minute.`
-};
+    const message = {
+      from: `"LinguaAble Support" <${process.env.BREVO_USER || process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: 'Password Reset Code',
+      text: `Your password reset otp is: ${otp}\n\nThis code expires in 1 minute.`
+    };
 
-await transporter.sendMail(message);
+    await transporter.sendMail(message);
 
     res.status(200).json({ success: true, data: "OTP sent to email" });
 
