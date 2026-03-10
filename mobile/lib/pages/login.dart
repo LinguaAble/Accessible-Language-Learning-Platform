@@ -167,7 +167,6 @@ class _LoginPageState extends State<LoginPage> {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: cs.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -177,10 +176,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.school,
-                  size: 50,
-                  color: Color(0xFFF79C42),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -302,7 +304,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => context.push('/forgot-password'),
                     child: const Text(
                       'Forgot Password?',
                       style: TextStyle(color: Color(0xFFF79C42)),

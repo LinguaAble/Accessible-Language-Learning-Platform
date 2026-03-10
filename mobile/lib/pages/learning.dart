@@ -11,6 +11,7 @@ import '../data/lesson_data.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import '../services/google_stt_service.dart';
+import '../providers/notification_provider.dart';
 
 class LearningScreen extends StatefulWidget {
   final int lessonId;
@@ -59,6 +60,10 @@ class _LearningScreenState extends State<LearningScreen>
         .where((s) => s.type == 'quiz' || s.type == 'pronounce')
         .length;
     _initTts();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<NotificationProvider>().startStudySession();
+    });
   }
 
   @override
@@ -66,6 +71,10 @@ class _LearningScreenState extends State<LearningScreen>
     _flutterTts.stop();
     _sfxPlayer.dispose();
     _googleStt.dispose();
+    try {
+      // ignore: use_build_context_synchronously
+      Provider.of<NotificationProvider>(context, listen: false).endStudySession();
+    } catch (_) {}
     super.dispose();
   }
 
@@ -253,6 +262,14 @@ class _LearningScreenState extends State<LearningScreen>
       } catch (_) {}
     }
 
+    if (mounted) {
+      context.read<NotificationProvider>().endStudySession();
+      context.read<NotificationProvider>().triggerMilestone(
+        'You finished Lesson ${widget.lessonId} with a score of $pct%!',
+        'Keep going',
+        '/lessons',
+      );
+    }
     setState(() => _showSuccess = true);
   }
 

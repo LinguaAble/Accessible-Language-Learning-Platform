@@ -185,7 +185,6 @@ class _SignupPageState extends State<SignupPage> {
                 width: 90,
                 height: 90,
                 decoration: BoxDecoration(
-                  color: cs.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -195,10 +194,13 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.school,
-                  size: 45,
-                  color: Color(0xFFF79C42),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    width: 90,
+                    height: 90,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/user_provider.dart';
+import '../providers/notification_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/accessibility_widget.dart';
 import '../widgets/daily_study_plan.dart';
 import '../widgets/chat_bot_widget.dart';
+import '../widgets/notification_bell.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -26,6 +28,19 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _syncAndLoad();
+    // US3 – Trigger a goal reminder 4 seconds after dashboard loads (matches web)
+    Future.delayed(const Duration(seconds: 4), () {
+      if (!mounted) return;
+      final userProvider = context.read<UserProvider>();
+      final notifProvider = context.read<NotificationProvider>();
+      final prog = userProvider.todayProgress;
+      final goal = userProvider.dailyGoalMinutes;
+      debugPrint('[Dashboard] Goal reminder check: progress=$prog, goal=$goal');
+      if (prog < goal) {
+        debugPrint('[Dashboard] Triggering goal reminder...');
+        notifProvider.triggerGoalReminder(goal, prog);
+      }
+    });
   }
 
   Future<void> _syncAndLoad() async {
@@ -240,14 +255,7 @@ class _DashboardPageState extends State<DashboardPage> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onTap: () => context.push('/settings'),
-                  child: const Icon(
-                    Icons.notifications_none,
-                    size: 22,
-                    color: Colors.blueGrey,
-                  ),
-                ),
+                const NotificationBell(color: Colors.blueGrey),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () => context.push('/settings'),

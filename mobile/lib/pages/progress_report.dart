@@ -14,8 +14,17 @@ class ProgressReportPage extends StatelessWidget {
 
     final name = provider.username;
     final streak = provider.streak;
-    final completedLessonsCount = provider.completedLessons.length;
     
+    // Total Lessons and Max Lesson
+    int totalLessons = provider.completedLessons.length;
+    int maxLessonCompleted = 0;
+    if (provider.completedLessons.isNotEmpty) {
+      final lessons = provider.completedLessons.map((e) => int.tryParse(e.toString()) ?? 0).toList();
+      lessons.sort();
+      maxLessonCompleted = lessons.last;
+    }
+    int currentLesson = maxLessonCompleted + 1;
+
     // Aggregating points
     int totalPoints = 0;
     for (var entry in provider.dailyScores) {
@@ -38,12 +47,25 @@ class ProgressReportPage extends StatelessWidget {
         activeDays.add(s['date']);
       }
     }
+    final dailyCounts = provider.user?['dailyLessonCounts'] as List? ?? [];
+    for (var c in dailyCounts) {
+      if (c is Map && (c['count'] ?? 0) > 0 && c['date'] != null) {
+        activeDays.add(c['date']);
+      }
+    }
     final activeSessions = activeDays.length;
+
+    // Dynamic Skill Strengths Setup
+    int baseProgress = activeSessions * 10;
+    double vocabPct = (baseProgress + (totalLessons * 4)).clamp(10, 100) / 100.0;
+    double grammarPct = (baseProgress + (totalLessons * 3)).clamp(5, 100) / 100.0;
+    double pronPct = (baseProgress + (totalLessons * 2)).clamp(5, 100) / 100.0;
+    double consPct = ((streak * 15) + (activeSessions * 5)).clamp(5, 100) / 100.0;
 
     // Encouragement message
     String message = "Every step you take is a beautiful beginning. You're doing wonderful.";
-    if (completedLessonsCount > 0) message = "You're making steady and amazing progress. Learning is a journey, not a race.";
-    if (streak > 2) message = "Wow, $streak days in a row! You're building a wonderful habit. Take pride in your dedication.";
+    if (totalLessons > 0) message = "You're making steady and amazing progress. Learning is a journey, not a race. Take it at your own gentle pace.";
+    if (streak > 2) message = "Wow, $streak days in a row! You're building a wonderful habit. Take pride in your dedication, and don't forget to rest when needed.";
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -100,7 +122,7 @@ class ProgressReportPage extends StatelessWidget {
                   children: [
                     _buildStatCard(context, '⭐', '$totalPoints', 'Points'),
                     const SizedBox(width: 12),
-                    _buildStatCard(context, '📚', '$completedLessonsCount', 'Lessons'),
+                    _buildStatCard(context, '📚', '$totalLessons', 'Lessons'),
                     const SizedBox(width: 12),
                     _buildStatCard(context, '📅', '$activeSessions', 'Active Days'),
                     const SizedBox(width: 12),
@@ -136,8 +158,8 @@ class ProgressReportPage extends StatelessWidget {
                       'Done',
                       Icons.check_circle,
                       Colors.green,
-                      'Lesson ${completedLessonsCount > 0 ? completedLessonsCount : 0}',
-                      active: completedLessonsCount > 0,
+                      'Lesson ${maxLessonCompleted > 0 ? maxLessonCompleted : 0}',
+                      active: maxLessonCompleted > 0,
                     ),
                     Icon(Icons.chevron_right, color: cs.outline),
                     _buildPathNode(
@@ -145,7 +167,7 @@ class ProgressReportPage extends StatelessWidget {
                       'Current',
                       Icons.play_circle_fill,
                       const Color(0xFFF79C42),
-                      'Lesson ${completedLessonsCount + 1}',
+                      'Lesson $currentLesson',
                       active: true,
                       pulse: true,
                     ),
@@ -155,7 +177,7 @@ class ProgressReportPage extends StatelessWidget {
                       'Next',
                       Icons.lock,
                       cs.onSurface.withOpacity(0.3),
-                      'Lesson ${completedLessonsCount + 2}',
+                      'Lesson ${currentLesson + 1}',
                       active: false,
                     ),
                   ],
@@ -182,13 +204,13 @@ class ProgressReportPage extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    _buildSkillBar(context, 'Vocabulary', 0.65, Colors.orange),
+                    _buildSkillBar(context, 'Vocabulary', vocabPct, Colors.orange),
                     const SizedBox(height: 16),
-                    _buildSkillBar(context, 'Grammar', 0.45, Colors.blue),
+                    _buildSkillBar(context, 'Grammar', grammarPct, Colors.blue),
                     const SizedBox(height: 16),
-                    _buildSkillBar(context, 'Pronunciation', 0.30, Colors.purple),
+                    _buildSkillBar(context, 'Pronunciation', pronPct, Colors.purple),
                     const SizedBox(height: 16),
-                    _buildSkillBar(context, 'Consistency', 0.80, Colors.green),
+                    _buildSkillBar(context, 'Consistency', consPct, Colors.green),
                   ],
                 ),
               ),

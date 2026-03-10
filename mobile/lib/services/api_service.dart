@@ -9,7 +9,7 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:5000';
     }
-    // Use your machine's IP address instead of localhost for mobile devices
+    // Use the PC's Wi-Fi network IP so physical Android devices can connect easily
     return 'http://10.12.227.158:5000';
   }
 
@@ -17,6 +17,30 @@ class ApiService {
   static String get _evalUrl => '$_host/api/eval';
 
   // ── Auth ──────────────────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/forgot-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+    final data = jsonDecode(response.body);
+    return response.statusCode == 200
+        ? {'success': true, 'message': data['message']}
+        : {'success': false, 'message': data['message'] ?? 'Failed to send OTP'};
+  }
+
+  static Future<Map<String, dynamic>> resetPassword(String otp, String newPassword) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/reset-password/$otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'password': newPassword}),
+    );
+    final data = jsonDecode(response.body);
+    return response.statusCode == 200
+        ? {'success': true, 'message': data['message']}
+        : {'success': false, 'message': data['message'] ?? 'Invalid OTP or Expired'};
+  }
+
   static Future<Map<String, dynamic>> login(
     String email,
     String password,

@@ -8,6 +8,7 @@ import 'pages/learning.dart';
 import 'pages/lessons.dart';
 import 'pages/leaderboard.dart';
 import 'pages/login.dart';
+import 'pages/forgot_password.dart';
 import 'pages/settings.dart';
 import 'pages/signup.dart';
 import 'pages/community.dart';
@@ -15,16 +16,22 @@ import 'pages/user_profile.dart';
 import 'pages/learning_report.dart';
 import 'pages/progress_report.dart';
 import 'providers/user_provider.dart';
+import 'providers/notification_provider.dart';
 import 'widgets/accessibility_widget.dart';
+import 'widgets/notification_toast.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final userProvider = UserProvider();
   await userProvider.init();
+  final notificationProvider = NotificationProvider();
 
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider.value(value: userProvider)],
+      providers: [
+        ChangeNotifierProvider.value(value: userProvider),
+        ChangeNotifierProvider.value(value: notificationProvider),
+      ],
       child: const LinguaAbleApp(),
     ),
   );
@@ -37,6 +44,7 @@ final GoRouter _router = GoRouter(
     final isGoingToAuth =
         state.matchedLocation == '/login' ||
         state.matchedLocation == '/signup' ||
+        state.matchedLocation == '/forgot-password' ||
         state.matchedLocation == '/';
 
     if (userProvider.isAuthenticated && isGoingToAuth) return '/dashboard';
@@ -47,6 +55,7 @@ final GoRouter _router = GoRouter(
     GoRoute(path: '/', builder: (context, state) => const LandingPage()),
     GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
     GoRoute(path: '/signup', builder: (context, state) => const SignupPage()),
+    GoRoute(path: '/forgot-password', builder: (context, state) => const ForgotPasswordPage()),
     GoRoute(
       path: '/dashboard',
       builder: (context, state) => const DashboardPage(),
@@ -371,14 +380,28 @@ class LinguaAbleApp extends StatelessWidget {
             );
 
             if (overlayColor != Colors.transparent) {
-              return Stack(
-                children: [
-                  wrapped,
-                  IgnorePointer(child: Container(color: overlayColor)),
-                ],
+              return Listener(
+                onPointerDown: (_) {
+                  try {
+                    context.read<NotificationProvider>().reportUserActivity();
+                  } catch (_) {}
+                },
+                child: Stack(
+                  children: [
+                    NotificationToastLayer(child: wrapped),
+                    IgnorePointer(child: Container(color: overlayColor)),
+                  ],
+                ),
               );
             }
-            return wrapped;
+            return Listener(
+              onPointerDown: (_) {
+                try {
+                  context.read<NotificationProvider>().reportUserActivity();
+                } catch (_) {}
+              },
+              child: NotificationToastLayer(child: wrapped),
+            );
           },
         );
       },
@@ -447,7 +470,6 @@ class _LandingPageState extends State<LandingPage> {
                 width: 140,
                 height: 140,
                 decoration: BoxDecoration(
-                  color: cs.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -457,7 +479,14 @@ class _LandingPageState extends State<LandingPage> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.school, size: 60, color: _kOrange),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    width: 140,
+                    height: 140,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
               const SizedBox(height: 30),
               RichText(
