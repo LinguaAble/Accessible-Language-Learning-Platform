@@ -1,3 +1,4 @@
+import 'dart:async'; // Add this for Timer
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,42 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  // MFA fields
+  bool _showMfaInput = false;
+  final _otpController = TextEditingController();
+  int _timer = 60;
+  bool _canResend = false;
+  Timer? _countdownTimer;
+  String? _successMessage;
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _otpController.dispose();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    setState(() {
+      _timer = 60;
+      _canResend = false;
+    });
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        if (_timer > 0) {
+          _timer--;
+        } else {
+          _canResend = true;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
   void _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -36,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
+      _successMessage = null;
     });
 
     try {
@@ -43,17 +81,27 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
 
-      if (result['success'] == true && result['token'] != null) {
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (result['success'] == true) {
+        if (result['pendingMFA'] == true) {
+          // Setup MFA screen
+          setState(() {
+            _showMfaInput = true;
+            _successMessage = 'Verification code sent to $email';
+          });
+          _startTimer();
+        } else if (result['token'] != null) {
+          // Direct login fallback
+          final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-        await userProvider.login(
-          result['token'],
-          result['user'] as Map<String, dynamic>,
-          _rememberMe,
-        );
+          await userProvider.login(
+            result['token'],
+            result['user'] as Map<String, dynamic>,
+            _rememberMe,
+          );
 
-        if (mounted) {
-          context.go('/dashboard');
+          if (mounted) {
+            context.go('/dashboard');
+          }
         }
       } else {
         setState(() {
@@ -70,6 +118,71 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  void _verifyOtp() async {
+    final otp = _otpController.text.trim();
+    if (otp.length < 6) {
+      setState(() => _errorMessage = 'Please enter the 6-digit code');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    try {
+      final result = await ApiService.verifyMfa(_emailController.text.trim(), otp);
+
+      if (!mounted) return;
+
+      if (result['success'] == true && result['token'] != null) {
+         final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+         await userProvider.login(
+           result['token'],
+           result['user'] as Map<String, dynamic>,
+           _rememberMe,
+         );
+
+         if (mounted) {
+           context.go('/dashboard');
+         }
+      } else {
+        setState(() {
+          _errorMessage = result['message'] ?? 'Invalid or expired code';
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _errorMessage = 'Cannot connect to server.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _resendOtp() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final result = await ApiService.resendMfa(_emailController.text.trim());
+      if (!mounted) return;
+      if (result['success'] == true) {
+        setState(() {
+          _successMessage = 'Code re-sent successfully';
+        });
+        _startTimer();
+      } else {
+        setState(() => _errorMessage = result['message']);
+      }
+    } catch (e) {
+      if (mounted) setState(() => _errorMessage = 'Cannot connect to server.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -227,6 +340,35 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 30),
 
+              // Success message
+              if (_successMessage != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2ECC71).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF2ECC71).withOpacity(0.4)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.check_circle_outline, color: Color(0xFF2ECC71), size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _successMessage!,
+                          style: const TextStyle(
+                            color: Color(0xFF2ECC71),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               // Error message
               if (_errorMessage != null)
                 Container(
@@ -256,146 +398,220 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email Address',
-                  hintText: 'name@example.com',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                obscureText: !_showPassword,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Enter your password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _showPassword ? Icons.visibility_off : Icons.visibility,
+              if (!_showMfaInput) ...[
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email Address',
+                    hintText: 'name@example.com',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    onPressed: () =>
-                        setState(() => _showPassword = !_showPassword),
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                 ),
-                onSubmitted: (_) => _handleLogin(),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _rememberMe,
-                        onChanged: (val) => setState(() => _rememberMe = val!),
-                        activeColor: const Color(0xFFF79C42),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: !_showPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    hintText: 'Enter your password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _showPassword ? Icons.visibility_off : Icons.visibility,
                       ),
-                      const Text('Stay signed in'),
-                    ],
-                  ),
-                  TextButton(
-                    onPressed: () => context.push('/forgot-password'),
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Color(0xFFF79C42)),
+                      onPressed: () =>
+                          setState(() => _showPassword = !_showPassword),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF79C42),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(color: Colors.white),
-                        )
-                      : const Text(
-                          'Sign In',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  onSubmitted: (_) => _handleLogin(),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberMe,
+                          onChanged: (val) => setState(() => _rememberMe = val!),
+                          activeColor: const Color(0xFFF79C42),
                         ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              Row(
-                children: [
-                  Expanded(child: Divider(color: cs.outline)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: TextStyle(color: cs.onSurface.withOpacity(0.5)),
+                        const Text('Stay signed in'),
+                      ],
                     ),
-                  ),
-                  Expanded(child: Divider(color: cs.outline)),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _isLoading ? null : _handleGoogleLogin,
-                  icon: Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
-                    height: 20,
-                  ),
-                  label: const Text(
-                    'Sign in with Google',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: cs.outline),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('New here? '),
-                  GestureDetector(
-                    child: const Text(
-                      'Create an Account',
-                      style: TextStyle(
-                        color: Color(0xFFF79C42),
-                        fontWeight: FontWeight.bold,
+                    TextButton(
+                      onPressed: () => context.push('/forgot-password'),
+                      child: const Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: Color(0xFFF79C42)),
                       ),
                     ),
-                    onTap: () => context.push('/signup'),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF79C42),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Colors.white),
+                          )
+                        : const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+  
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: cs.outline)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'OR',
+                        style: TextStyle(color: cs.onSurface.withOpacity(0.5)),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: cs.outline)),
+                  ],
+                ),
+                const SizedBox(height: 20),
+  
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _handleGoogleLogin,
+                    icon: Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
+                      height: 20,
+                    ),
+                    label: const Text(
+                      'Sign in with Google',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: cs.outline),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+  
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('New here? '),
+                    GestureDetector(
+                      child: const Text(
+                        'Create an Account',
+                        style: TextStyle(
+                          color: Color(0xFFF79C42),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () => context.push('/signup'),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // MFA Form
+                TextField(
+                  controller: _otpController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(letterSpacing: 10, fontWeight: FontWeight.bold, fontSize: 18),
+                  decoration: InputDecoration(
+                    labelText: 'Enter 6-Digit Code',
+                    hintText: '123456',
+                    alignLabelWithHint: true,
+                    floatingLabelAlignment: FloatingLabelAlignment.center,
+                    counterText: "",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _verifyOtp,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF79C42),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Colors.white),
+                          )
+                        : const Text(
+                            'Verify Code',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 25),
+                TextButton(
+                  onPressed: _canResend && !_isLoading ? _resendOtp : null,
+                  child: Text(
+                    _canResend ? 'Resend Code' : 'Resend Code in ${_timer}s',
+                    style: TextStyle(
+                      color: _canResend ? const Color(0xFFE67E22) : cs.onSurface.withOpacity(0.4),
+                      fontWeight: FontWeight.bold,
+                      decoration: _canResend ? TextDecoration.underline : TextDecoration.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                TextButton(
+                  onPressed: () => setState(() {
+                    _showMfaInput = false;
+                    _errorMessage = null;
+                    _successMessage = null;
+                    _countdownTimer?.cancel();
+                  }),
+                  child: Text(
+                    'Wrong email? Go back',
+                    style: TextStyle(color: cs.onSurface.withOpacity(0.6), decoration: TextDecoration.underline),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
             ],
           ),

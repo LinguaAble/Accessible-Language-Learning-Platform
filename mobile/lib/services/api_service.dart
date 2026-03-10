@@ -55,9 +55,41 @@ class ApiService {
       }),
     );
     final data = jsonDecode(response.body);
+    // Support MFA flow: login now returns pendingMFA instead of a token
+    if (response.statusCode == 200) {
+      return {'success': true, ...data};
+    } else {
+      return {'success': false, 'message': data['message'] ?? 'Login failed'};
+    }
+  }
+
+  // ── MFA Verification ──────────────────────────────────────────────────────
+  static Future<Map<String, dynamic>> verifyMfa(String email, String otp) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/verify-mfa'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'otp': otp,
+        'device': 'Mobile App',
+      }),
+    );
+    final data = jsonDecode(response.body);
     return response.statusCode == 200
         ? {'success': true, ...data}
-        : {'success': false, 'message': data['message'] ?? 'Login failed'};
+        : {'success': false, 'message': data['message'] ?? 'Invalid or expired OTP'};
+  }
+
+  static Future<Map<String, dynamic>> resendMfa(String email) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/resend-mfa'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+    final data = jsonDecode(response.body);
+    return response.statusCode == 200
+        ? {'success': true, 'message': data['message'] ?? 'Verification code re-sent'}
+        : {'success': false, 'message': data['message'] ?? 'Failed to resend code'};
   }
 
   static Future<Map<String, dynamic>> register(
@@ -76,12 +108,14 @@ class ApiService {
       }),
     );
     final data = jsonDecode(response.body);
-    return response.statusCode == 200
-        ? {'success': true, ...data}
-        : {
-            'success': false,
-            'message': data['message'] ?? 'Registration failed',
-          };
+    if (response.statusCode == 200) {
+      return {'success': true, ...data};
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Registration failed',
+      };
+    }
   }
 
   static Future<Map<String, dynamic>> googleLogin({

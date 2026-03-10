@@ -1,47 +1,126 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware'); // Import protect middleware
+const axios = require('axios');
+const crypto = require('crypto');
 const User = require('../models/User');
+const OTP = require('../models/OTP');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const OTP = require('../models/OTP'); // Import OTP model for temporary MFA storage
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { protect } = require('../middleware/authMiddleware');
+
+// --- PREMIUM ACCESSIBILITY-FOCUSED HTML TEMPLATE FOR LINGUAABLE ---
+const getEmailTemplate = (title, subtitle, code, description) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { margin: 0; padding: 0; background-color: #0c0e14; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #0c0e14; padding-bottom: 40px; }
+        .main-container { max-width: 600px; margin: 40px auto; background-color: #171c26; border-radius: 20px; border: 1px solid #2d364a; overflow: hidden; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
+        .header { background: linear-gradient(135deg, #1e3a8a 0%, #171c26 100%); padding: 40px 30px; text-align: center; border-bottom: 1px solid #2d364a; }
+        .logo-text { color: #fff; font-size: 28px; font-weight: 800; letter-spacing: -1px; margin: 0; }
+        .logo-text span { color: #f79c42; }
+        .content { padding: 45px 40px; text-align: center; }
+        .title { color: #ffffff; font-size: 24px; font-weight: 700; margin: 0 0 12px 0; }
+        .subtitle { color: #94a3b8; font-size: 16px; font-weight: 400; line-height: 1.6; margin: 0 0 35px 0; }
+        .code-container { background: #0c0e14; border: 2px dashed #f79c42; border-radius: 16px; padding: 25px; margin: 0 auto 35px auto; display: inline-block; min-width: 240px; }
+        .otp-code { color: #f79c42; font-size: 42px; font-weight: 800; letter-spacing: 12px; margin: 0; padding-left: 12px; font-family: 'Courier New', Courier, monospace; }
+        .info-text { color: #64748b; font-size: 14px; line-height: 1.5; margin: 0 0 10px 0; }
+        .footer { background-color: #0c0e14; padding: 25px; text-align: center; border-top: 1px solid #2d364a; }
+        .footer-text { color: #475569; font-size: 12px; margin: 0; }
+        .accent-bar { height: 4px; background: #f79c42; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="main-container">
+            <div class="accent-bar"></div>
+            <div class="header">
+                <h1 class="logo-text">Lingua<span>Able</span></h1>
+            </div>
+            <div class="content">
+                <h2 class="title">${title}</h2>
+                <p class="subtitle">${subtitle}</p>
+                
+                <div class="code-container">
+                    <p class="otp-code">${code}</p>
+                </div>
+                
+                <p class="info-text">${description}</p>
+                <p class="info-text">If you didn't request this, you can safely ignore this email.</p>
+            </div>
+            <div class="footer">
+                <p class="footer-text">&copy; 2026 LinguaAble. All rights reserved.</p>
+                <p class="footer-text">Making Language Learning Accessible to Everyone.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+// --- RESEND HTTP API HELPER ---
+async function sendEmailViaResend(toEmail, subject, htmlContent) {
+  try {
+    const response = await axios.post(
+      'https://api.resend.com/emails',
+      {
+        from: 'LinguaAble <onboarding@resend.dev>',
+        to: [toEmail],
+        subject: subject,
+        html: htmlContent
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('Email sent successfully via Resend:', response.data.id);
+    return response.data;
+  } catch (err) {
+    if (err.response) {
+      console.error('Resend API Error:', JSON.stringify(err.response.data, null, 2));
+    } else {
+      console.error('Resend Request Error:', err.message);
+    }
+    throw new Error(err.response?.data?.message || 'Failed to send email via Resend');
+  }
+}
+
+
+
 
 // Helper: Generate OTP, hash it, save to OTP collection, and send email
 async function sendMfaOtp(email, signupData = null) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   const hashedOtp = crypto.createHash('sha256').update(otp).digest('hex');
 
-  // UPSERT the OTP record for the user's email
   await OTP.findOneAndUpdate(
     { email },
     { 
       otp: hashedOtp, 
       createdAt: Date.now(),
-      // Only set signupData if it's passed (during registration)
       ...(signupData ? { signupData } : { $unset: { signupData: 1 } })
     },
     { upsert: true, returnDocument: 'after' }
   );
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+  const html = getEmailTemplate(
+    'Verification Code',
+    'Use the code below to verify your email and secure your account.',
+    otp,
+    'This code will expire in 5 minutes for your security.'
+  );
 
-  await transporter.sendMail({
-    from: `"LinguaAble Security" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: 'Your LinguaAble Verification Code',
-    text: `Your verification code is: ${otp}\n\nThis code expires in 5 minutes.`
-  });
+  await sendEmailViaResend(email, 'Your LinguaAble Verification Code', html);
 
-  return otp; // returned only for testing; not sent to client
+  return otp;
 }
+
 
 // 1. REGISTER USER
 router.post('/register', async (req, res) => {
@@ -233,23 +312,15 @@ router.post('/forgot-password', async (req, res) => {
 
     await user.save();
 
-    // C. Send Email using Nodemailer (Gmail)
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
+    const html = getEmailTemplate(
+      'Password Reset',
+      'You requested to reset your password. Use the code below to proceed.',
+      otp,
+      'This code is valid for 1 minute. Please use it immediately.'
+    );
 
-    const message = {
-      from: `"LinguaAble Support" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: 'Password Reset Code',
-      text: `Your password reset otp is: ${otp}\n\nThis code expires in 1 minute.`
-    };
+    await sendEmailViaResend(user.email, 'Password Reset Code', html);
 
-    await transporter.sendMail(message);
 
     res.status(200).json({ success: true, data: "OTP sent to email" });
 
