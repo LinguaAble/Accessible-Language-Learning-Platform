@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const User = require('../models/User');
 const OTP = require('../models/OTP');
@@ -61,33 +61,28 @@ const getEmailTemplate = (title, subtitle, code, description) => `
 </html>
 `;
 
-// --- RESEND HTTP API HELPER ---
-async function sendEmailViaResend(toEmail, subject, htmlContent) {
+// --- SMTP EMAIL HELPER (nodemailer) ---
+const smtpTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+async function sendEmailViaSMTP(toEmail, subject, htmlContent) {
   try {
-    const response = await axios.post(
-      'https://api.resend.com/emails',
-      {
-        from: 'LinguaAble <onboarding@resend.dev>',
-        to: [toEmail],
-        subject: subject,
-        html: htmlContent
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-    console.log('Email sent successfully via Resend:', response.data.id);
-    return response.data;
+    const info = await smtpTransporter.sendMail({
+      from: `"LinguaAble" <${process.env.EMAIL_USER}>`,
+      to: toEmail,
+      subject: subject,
+      html: htmlContent
+    });
+    console.log('Email sent successfully via SMTP:', info.messageId);
+    return info;
   } catch (err) {
-    if (err.response) {
-      console.error('Resend API Error:', JSON.stringify(err.response.data, null, 2));
-    } else {
-      console.error('Resend Request Error:', err.message);
-    }
-    throw new Error(err.response?.data?.message || 'Failed to send email via Resend');
+    console.error('SMTP Email Error:', err.message);
+    throw new Error('Failed to send email via SMTP: ' + err.message);
   }
 }
 
@@ -116,7 +111,7 @@ async function sendMfaOtp(email, signupData = null) {
     'This code will expire in 5 minutes for your security.'
   );
 
-  await sendEmailViaResend(email, 'Your LinguaAble Verification Code', html);
+  await sendEmailViaSMTP(email, 'Your LinguaAble Verification Code', html);
 
   return otp;
 }
@@ -137,14 +132,38 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Instead of creating the user NOW, we store pending data in the OTP collection.
-    // The user is actually created ONLY upon OTP verification.
-    await sendMfaOtp(email, {
+    // Create the user immediately (no MFA)
+    user = new User({
+      email,
+      username: username || email.split('@')[0],
       password: hashedPassword,
-      username: username || email.split('@')[0]
+      loginHistory: [{ timestamp: new Date(), device: 'Web Browser' }]
     });
+    await user.save();
 
-    res.json({ pendingMFA: true, email });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate,
+        streak: user.streak,
+        lastStreakDate: user.lastStreakDate,
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
+      }
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server Error' });
@@ -154,7 +173,7 @@ router.post('/register', async (req, res) => {
 // 2. LOGIN USER
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid email or password.' });
@@ -162,10 +181,49 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid email or password.' });
 
-    // Send MFA OTP. We don't send signupData because they already exist.
-    await sendMfaOtp(email);
+    // Update login history
+    const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: 'Web Browser' }];
+    if (newHistory.length > 10) newHistory.shift();
+    user.loginHistory = newHistory;
 
-    res.json({ pendingMFA: true, email: user.email });
+    // Streak reset check
+    const todayStr = new Date().toISOString().split('T')[0];
+    let newStreak = user.streak || 0;
+    const lastStreakDate = user.lastStreakDate || '';
+    if (lastStreakDate) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      if (lastStreakDate < yesterdayStr && lastStreakDate !== todayStr) {
+        newStreak = 0;
+      }
+    }
+    user.streak = newStreak;
+    await user.save();
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: rememberMe ? '30d' : '7d' });
+
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate,
+        streak: user.streak,
+        lastStreakDate: user.lastStreakDate,
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
+      }
+    });
   } catch (err) {
     console.error('Login error:', err.message, err.stack);
     res.status(500).json({ message: 'Server Error' });
@@ -319,7 +377,7 @@ router.post('/forgot-password', async (req, res) => {
       'This code is valid for 1 minute. Please use it immediately.'
     );
 
-    await sendEmailViaResend(user.email, 'Password Reset Code', html);
+    await sendEmailViaSMTP(user.email, 'Password Reset Code', html);
 
 
     res.status(200).json({ success: true, data: "OTP sent to email" });
