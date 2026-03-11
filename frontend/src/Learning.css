@@ -1,4 +1,4 @@
-﻿/* src/Learning.css */
+/* src/Learning.css */
 
 .learning-container {
     height: 100vh;
@@ -242,8 +242,7 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
+    z-index: 3500;
 }
 
 .sc-dot {

@@ -1,48 +1,63 @@
-/* ================================================================
-   LINGUAABLE — TORN PAPER ZINE COLLAGE
-   Fonts: Playfair Display (editorial serif) + Caveat (handwritten)
-          + DM Sans (clean body)
-   Palette: warm off-white paper, red/orange/black ink, yellow tape
-   Signature: torn SVG paper edges, tape strips, rotated photo scraps,
-              marker underlines, sticky notes, handwritten accents
-   ================================================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,700&family=Caveat:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
-
-:root {
-    --paper:   #F5F0E8;
-    --paper2:  #EDE8DE;
-    --paper3:  #E5DFD2;
-    --ink:     #1C1917;
-    --red:     #E8462A;
-    --orange:  #F5A623;
-    --green:   #27AE60;
-    --yellow:  #F5C842;
-    --blue:    #4ABFFF;
-    --muted:   #6B6460;
-    --border:  rgba(28,25,23,0.12);
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 .zn-root {
+    --paper:   #f0f2f5;
+    --paper2:  #ffffff;
+    --paper3:  #f0f2f5;
+    --ink:     #1a1a1a;
+    --red:     #f79c42;
+    --orange:  #e67e22;
+    --green:   #27AE60;
+    --yellow:  #4a90e2;
+    --blue:    #4a90e2;
+    --muted:   #65676b;
+    --border:  #e4e6eb;
+    --zn-shadow: rgba(0, 0, 0, 0.1);
+
     min-height: 100vh;
     background: var(--paper);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: var(--ink);
     overflow-x: hidden;
     position: relative;
+    transition: background 0.3s, color 0.3s;
 }
 
-/* ── grain texture overlay ── */
-.zn-grain {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    background-size: 200px 200px;
+/* ── Hide scrap elements ── */
+.zn-grain, .zn-tape, .zn-tear { display: none !important; }
+
+/* ── Modernize typography ── */
+.zn-logo-text, .zn-h1-learn, .zn-h1-deva, .zn-h1-swap, .zn-stat-n, .zn-features-h2, .zn-how-h2, .zn-step-n, .zn-final-h2, .zn-poster-deva, .zn-footer-brand {
+    font-family: 'Inter', sans-serif !important;
+}
+
+.zn-link-btn, .zn-eyebrow, .zn-h1-if, .zn-btn-ghost, .zn-caption, .zn-sticky-note p, .zn-section-tag, .zn-how-label, .zn-final-kicker, .zn-poster-en, .zn-footer-copy {
+    font-family: 'Inter', sans-serif !important;
+    font-style: normal !important;
+    text-decoration: none !important;
+}
+
+/* ── Modernize containers ── */
+.zn-photo-scrap, .zn-sticky-note, .zn-scrap-tl, .zn-feat-card, .zn-hindi-poster {
+    transform: none !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--border) !important;
+    background: var(--paper2) !important;
+    box-shadow: 0 8px 30px var(--zn-shadow) !important;
+    animation: none !important;
+}
+
+.zn-sticky-note p, .zn-scrap-tl span { color: var(--ink) !important; }
+.zn-photo-scrap img.zn-mascot { border-radius: 12px; border: none; }
+.zn-feat-tape { display: none !important; }
+
+.zn-stamp-btn, .zn-btn-main {
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4) !important;
+}
+.zn-stamp-btn:hover, .zn-btn-main:hover {
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6) !important;
 }
 
 /* ════════════════════════════
@@ -297,21 +312,21 @@
 
 .zn-btn-main {
     padding: 15px 36px;
-    background: var(--ink);
-    border: 2px solid var(--ink);
+    background: var(--accent-color);
+    border: none;
     border-radius: 2px;
     font-family: 'DM Sans', sans-serif;
     font-size: 1rem;
     font-weight: 700;
     color: white;
     cursor: pointer;
-    box-shadow: 4px 4px 0 var(--red);
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
     transition: transform 0.15s, box-shadow 0.15s;
     letter-spacing: 0.2px;
 }
 .zn-btn-main:hover {
-    transform: translate(-2px,-2px);
-    box-shadow: 6px 6px 0 var(--red);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249, 115, 22, 0.6);
 }
 .zn-btn-lg { padding: 18px 48px; font-size: 1.05rem; }
 
@@ -329,8 +344,8 @@
     transition: color 0.2s;
 }
 .zn-btn-ghost:hover { color: var(--ink); }
-.zn-btn-ghost-inv { color: rgba(255,255,255,0.7); }
-.zn-btn-ghost-inv:hover { color: white; }
+.zn-btn-ghost-inv { color: var(--muted); }
+.zn-btn-ghost-inv:hover { color: var(--ink); }
 
 /* Hero right — photo scrap */
 .zn-hero-right {
@@ -416,7 +431,7 @@
     transition: background 0.2s;
 }
 .zn-stat-block:last-child { border-right: 1.5px solid var(--border); }
-.zn-stat-block:hover { background: white; }
+.zn-stat-block:hover { background: transparent; }
 
 .zn-stat-n {
     font-family: 'Playfair Display', serif;
@@ -540,7 +555,7 @@
 }
 
 .zn-feat-card {
-    background: white;
+    background: var(--paper2);
     border: 1.5px solid var(--border);
     padding: 28px 24px 24px;
     position: relative;
@@ -598,17 +613,19 @@
 
 /* ════════════════════════════
    HOW IT WORKS
-════════════════════════════ */
+   ════════════════════════════ */
 .zn-how {
-    background: var(--ink);
+    background: var(--paper2);
     padding: 90px 60px 110px;
     position: relative;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 .zn-how-label {
     font-family: 'Caveat', cursive;
     font-size: 1rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.3);
+    color: var(--muted);
     letter-spacing: 1px;
     margin-bottom: 10px;
 }
@@ -618,10 +635,10 @@
     font-weight: 900;
     line-height: 1;
     letter-spacing: -2px;
-    color: white;
+    color: var(--ink);
     margin-bottom: 64px;
 }
-.zn-how-h2 span { color: var(--yellow); font-style: italic; }
+.zn-how-h2 span { color: var(--orange); font-style: italic; }
 
 .zn-steps {
     display: grid;
@@ -629,7 +646,6 @@
     gap: 48px;
     max-width: 960px;
 }
-.zn-step {}
 .zn-step-n {
     font-family: 'Playfair Display', serif;
     font-size: 4rem;
@@ -647,14 +663,14 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 1rem;
     font-weight: 700;
-    color: white;
+    color: var(--ink);
     margin-bottom: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 .zn-step-body {
     font-size: 0.92rem;
-    color: rgba(255,255,255,0.5);
+    color: var(--muted);
     line-height: 1.7;
     font-weight: 500;
 }
@@ -719,7 +735,7 @@
     font-family: 'Playfair Display', serif;
     font-size: clamp(4rem, 8vw, 7rem);
     font-weight: 900;
-    color: white;
+    color: var(--red);
     letter-spacing: -2px;
     line-height: 1;
 }
@@ -727,42 +743,43 @@
     font-family: 'Caveat', cursive;
     font-size: 1rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.7);
+    color: var(--muted);
     letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 /* ════════════════════════════
    FOOTER
-════════════════════════════ */
+   ════════════════════════════ */
 .zn-footer {
-    background: var(--ink);
+    background: var(--paper2);
     padding: 28px 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 12px;
+    border-top: 1px solid var(--border);
 }
 .zn-footer-brand {
     display: flex; align-items: center; gap: 10px;
     font-family: 'Playfair Display', serif;
     font-size: 1.1rem;
     font-weight: 900;
-    color: white;
+    color: var(--ink);
     letter-spacing: -0.3px;
 }
 .zn-footer-img {
     width: 30px; height: 30px;
     border-radius: 50%;
-    border: 1.5px solid rgba(255,255,255,0.2);
+    border: 1.5px solid var(--border);
     object-fit: cover;
 }
 .zn-footer-copy {
     font-family: 'Caveat', cursive;
     font-size: 0.95rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.3);
+    color: var(--muted);
 }
 
 /* ── ANIMATION ── */

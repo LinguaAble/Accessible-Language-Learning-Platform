@@ -969,6 +969,61 @@ const lessonDatabase = {
   },
 };
 
+// ── Canvas-based confetti: 130 colourful rectangular pieces falling & rotating ──
+const Confetti = () => {
+  const canvasRef = React.useRef(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const COLORS = ['#f97316','#38bdf8','#a855f7','#34d399','#fbbf24','#f43f5e','#818cf8','#4ade80','#fb923c','#22d3ee','#e879f9','#86efac'];
+    const pieces = Array.from({ length: 130 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * -window.innerHeight,
+      w: Math.random() * 11 + 6,
+      h: Math.random() * 7 + 4,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      speed: Math.random() * 3.5 + 1.8,
+      drift: (Math.random() - 0.5) * 1.8,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.14,
+    }));
+
+    let raf;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.globalAlpha = 0.88;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+        p.y += p.speed;
+        p.x += p.drift;
+        p.rot += p.rotSpeed;
+        if (p.y > canvas.height + 20) { p.y = -20; p.x = Math.random() * canvas.width; }
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: 3100, pointerEvents: 'none' }}
+    />
+  );
+};
+
 const LearningScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1459,6 +1514,24 @@ const LearningScreen = () => {
     return { percentage, grade, message };
   };
 
+  // These must be computed BEFORE any early returns to satisfy React's Rules of Hooks
+  // (useMemo must be called unconditionally on every render)
+  const slide = activeSlides[currentSlideIndex];
+
+  // Shuffle options each time a new slide appears (keyed by index + slide identity)
+  // Using Fisher-Yates for an unbiased shuffle — correct answer stays in the array,
+  // just in a random position so it's never predictably first.
+  const shuffledOptions = React.useMemo(() => {
+    if (!slide || !slide.options) return [];
+    const arr = [...slide.options];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSlideIndex, activeSlides]);
+
   // Break Notification Overlay
   if (showBreakNotification) {
     return (
@@ -1514,94 +1587,74 @@ const LearningScreen = () => {
     const xpEarned = Math.max(10, firstAttemptCorrect * 2);
 
     return (
-      <div className="sc-root">
-        {/* Scattered confetti dots */}
-        <div className="sc-confetti" aria-hidden="true">
-          {[...Array(22)].map((_, i) => (
-            <span key={i} className={`sc-dot sc-dot-${i % 6}`} style={{ '--i': i }} />
-          ))}
-        </div>
-
-        <div className="sc-card">
-          {/* Brand row */}
-          <div className="sc-brand">
-            <img src={logo} alt="LinguaAble" className="sc-brand-img" />
-            <span className="sc-brand-text">Lingua<span className="sc-brand-accent">Able</span></span>
-          </div>
-
-          {/* Title */}
-          <h1 className="sc-title">
-            Lesson Completed <span className="sc-check">✓</span>
-          </h1>
-
-          {/* Grade bar */}
-          <div className="sc-grade-bar-wrap">
-            <span className="sc-grade-label">Grade: <strong>{grade}</strong></span>
-            <div className="sc-grade-track">
-              <div className="sc-grade-fill" style={{ width: `${percentage}%` }} />
+      <>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'var(--bg-color)', zIndex: 3000 }} />
+        <Confetti />
+        <div className="sc-root" style={{ background: 'transparent', zIndex: 3200 }}>
+          <div className="sc-card">
+            {/* Brand row */}
+            <div className="sc-brand">
+              <img src={logo} alt="LinguaAble" className="sc-brand-img" />
+              <span className="sc-brand-text">Lingua<span className="sc-brand-accent">Able</span></span>
             </div>
-            <span className="sc-grade-pct">{percentage}%</span>
-          </div>
 
-          {/* Stat cards */}
-          <div className="sc-stat-cards">
-            <div className="sc-stat-card">
-              <div className="sc-stat-card-top">
-                <span className="sc-stat-card-icon sc-icon-orange"><CheckCircle size={20} /></span>
-                <span className="sc-stat-card-val">{firstAttemptCorrect}/{totalQuestions}</span>
+            {/* Title */}
+            <h1 className="sc-title">
+              Lesson Completed <span className="sc-check">✓</span>
+            </h1>
+
+            {/* Grade bar */}
+            <div className="sc-grade-bar-wrap">
+              <span className="sc-grade-label">Grade: <strong>{grade}</strong></span>
+              <div className="sc-grade-track">
+                <div className="sc-grade-fill" style={{ width: `${percentage}%` }} />
               </div>
-              <div className="sc-stat-card-lbl">First Try</div>
+              <span className="sc-grade-pct">{percentage}%</span>
             </div>
-            <div className="sc-stat-card">
-              <div className="sc-stat-card-top">
-                <span className="sc-stat-card-icon sc-icon-orange"><Zap size={20} /></span>
-                <span className="sc-stat-card-val">+{xpEarned} <span className="sc-stat-card-unit">XP</span></span>
-              </div>
-              <div className="sc-stat-card-lbl">XP Earned</div>
-            </div>
-            <div className="sc-stat-card">
-              <div className="sc-stat-card-top">
-                <span className="sc-stat-card-icon sc-icon-green"><Target size={20} /></span>
-                <span className="sc-stat-card-val">{percentage}%</span>
-              </div>
-              <div className="sc-stat-card-lbl">Accuracy</div>
-            </div>
-          </div>
 
-          {/* CTA section */}
-          <div className="sc-cta-section">
-            <h2 className="sc-cta-heading">Continue Learning</h2>
-            <p className="sc-cta-sub">{message}</p>
-            <button className="sc-cta-btn" onClick={() => navigate('/lessons')}>
-              Continue Learning
-            </button>
-            <button className="sc-cta-dash" onClick={() => navigate('/dashboard')}>
-              Go to Dashboard
-            </button>
+            {/* Stat cards */}
+            <div className="sc-stat-cards">
+              <div className="sc-stat-card">
+                <div className="sc-stat-card-top">
+                  <span className="sc-stat-card-icon sc-icon-orange"><CheckCircle size={20} /></span>
+                  <span className="sc-stat-card-val">{firstAttemptCorrect}/{totalQuestions}</span>
+                </div>
+                <div className="sc-stat-card-lbl">First Try</div>
+              </div>
+              <div className="sc-stat-card">
+                <div className="sc-stat-card-top">
+                  <span className="sc-stat-card-icon sc-icon-orange"><Zap size={20} /></span>
+                  <span className="sc-stat-card-val">+{xpEarned} <span className="sc-stat-card-unit">XP</span></span>
+                </div>
+                <div className="sc-stat-card-lbl">XP Earned</div>
+              </div>
+              <div className="sc-stat-card">
+                <div className="sc-stat-card-top">
+                  <span className="sc-stat-card-icon sc-icon-green"><Target size={20} /></span>
+                  <span className="sc-stat-card-val">{percentage}%</span>
+                </div>
+                <div className="sc-stat-card-lbl">Accuracy</div>
+              </div>
+            </div>
+
+            {/* CTA section */}
+            <div className="sc-cta-section">
+              <h2 className="sc-cta-heading">Continue Learning</h2>
+              <p className="sc-cta-sub">{message}</p>
+              <button className="sc-cta-btn" onClick={() => navigate('/lessons')}>
+                Continue Learning
+              </button>
+              <button className="sc-cta-dash" onClick={() => navigate('/dashboard')}>
+                Go to Dashboard
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
-
-
-  const slide = activeSlides[currentSlideIndex];
-
-  // Shuffle options each time a new slide appears (keyed by index + slide identity)
-  // Using Fisher-Yates for an unbiased shuffle — correct answer stays in the array,
-  // just in a random position so it's never predictably first.
-  const shuffledOptions = React.useMemo(() => {
-    if (!slide || !slide.options) return [];
-    const arr = [...slide.options];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlideIndex, activeSlides]);
-  if (!slide || !isReady) return (
+  if (!isReady || (!slide && !showSuccess)) return (
     <div className="learning-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', gap: '16px' }}>
       <div className="loading-spinner" style={{ width: '40px', height: '40px', border: '4px solid rgba(255,255,255,0.15)', borderTopColor: '#58cc02', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       <span style={{ fontSize: '1.1rem', opacity: 0.8 }}>Loading Lesson...</span>
@@ -1778,7 +1831,7 @@ const LearningScreen = () => {
           <ChevronRight size={20} />
         </button>
       </div>
-    </div >
+    </div>
   );
 };
 

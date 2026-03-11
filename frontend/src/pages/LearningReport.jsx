@@ -155,10 +155,6 @@ const LearningReport = () => {
                                         <span className="lr-summary-val">{weeklyPoints}</span>
                                         <span className="lr-summary-lbl">Points this week</span>
                                     </div>
-                                    <div className="lr-summary-item">
-                                        <span className="lr-summary-val" style={{ color: '#34d399' }}>{weeklyLessonCount}</span>
-                                        <span className="lr-summary-lbl">Lessons done</span>
-                                    </div>
                                 </div>
                             </div>
 
@@ -246,7 +242,11 @@ const LearningReport = () => {
                                 <div className="lr-mini-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
                                     <Target size={22} />
                                 </div>
-                                <span className="lr-mini-val">{Math.min(100, Math.round((Math.max(user?.todayProgress || 0, parseInt(localStorage.getItem('todayProgress'), 10) || 0) / (user?.preferences?.dailyGoalMinutes || 5)) * 100))}%</span>
+                                <span className="lr-mini-val">{(() => {
+                                    const todayMins = Math.max(user?.todayProgress || 0, parseInt(localStorage.getItem('todayProgress'), 10) || 0);
+                                    const goalMins = user?.preferences?.dailyGoalMinutes || 30;
+                                    return Math.min(100, Math.round((todayMins / goalMins) * 100));
+                                })()}%</span>
                                 <span className="lr-mini-lbl">Goal Completed</span>
                             </div>
                             <div className="lr-mini-card">

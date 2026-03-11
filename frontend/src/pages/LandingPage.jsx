@@ -34,7 +34,7 @@ const LandingPage = () => {
                         sign in
                     </button>
                     <button className="zn-stamp-btn" onClick={() => navigate('/signup')}>
-                        START FREE
+                        SIGN UP
                     </button>
                 </div>
             </nav>
