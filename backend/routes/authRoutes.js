@@ -170,6 +170,87 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// 1b. GOOGLE LOGIN / REGISTER
+router.post('/google-login', async (req, res) => {
+  try {
+    const { email, username, fullName, avatarUrl, device } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // Existing user — update Google-specific fields if missing
+      if (!user.googleId) user.googleId = email;
+      if (!user.authProvider || user.authProvider === 'local') user.authProvider = 'google';
+      if (fullName && !user.fullName) user.fullName = fullName;
+      if (avatarUrl && !user.avatarUrl) user.avatarUrl = avatarUrl;
+
+      // Update login history
+      const newHistory = [...(user.loginHistory || []), { timestamp: new Date(), device: device || 'Web Browser' }];
+      if (newHistory.length > 10) newHistory.shift();
+      user.loginHistory = newHistory;
+
+      // Streak reset check
+      const todayStr = new Date().toISOString().split('T')[0];
+      let newStreak = user.streak || 0;
+      const lastStreakDate = user.lastStreakDate || '';
+      if (lastStreakDate) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        if (lastStreakDate < yesterdayStr && lastStreakDate !== todayStr) {
+          newStreak = 0;
+        }
+      }
+      user.streak = newStreak;
+
+      await user.save();
+    } else {
+      // New Google user — create account (no password needed)
+      user = new User({
+        email,
+        username: username || email.split('@')[0],
+        fullName: fullName || '',
+        avatarUrl: avatarUrl || '',
+        googleId: email,
+        authProvider: 'google',
+        loginHistory: [{ timestamp: new Date(), device: device || 'Web Browser' }]
+      });
+      await user.save();
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate,
+        streak: user.streak,
+        lastStreakDate: user.lastStreakDate,
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
+      }
+    });
+  } catch (err) {
+    console.error('Google login error:', err.message, err.stack);
+    res.status(500).json({ message: 'Failed to authenticate with Google.' });
+  }
+});
+
 // 2. LOGIN USER
 router.post('/login', async (req, res) => {
   try {
@@ -177,6 +258,11 @@ router.post('/login', async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid email or password.' });
+
+    // Google-only users don't have a password
+    if (user.authProvider === 'google' && !user.password) {
+      return res.status(400).json({ message: 'This account uses Google Sign-In. Please use the Google button to log in.' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid email or password.' });

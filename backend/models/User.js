@@ -40,8 +40,18 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: false,
     minlength: 6
+  },
+  googleId: {
+    type: String,
+    required: false,
+    default: ''
+  },
+  authProvider: {
+    type: String,
+    enum: ['local', 'google'],
+    default: 'local'
   },
 
   // --- NEW: Password Reset Fields ---
