@@ -95,11 +95,9 @@ class _SettingsPageState extends State<SettingsPage>
   String _avatarUrlForSeed(String seed, String bg) =>
       'https://api.dicebear.com/9.x/avataaars/png?seed=$seed&backgroundColor=$bg';
 
-  String get _effectiveAvatar {
-    if (_avatarUrl.isNotEmpty && !_avatarUrl.contains('ui-avatars'))
-      return _avatarUrl;
+  ImageProvider get _effectiveAvatarProvider {
     final provider = Provider.of<UserProvider>(context, listen: false);
-    return 'https://api.dicebear.com/9.x/initials/png?seed=${Uri.encodeComponent(provider.username)}&backgroundColor=F79C42&textColor=ffffff';
+    return ApiService.getImageProvider(_avatarUrl, fallbackSeed: provider.username);
   }
 
   // ── Save profile (offline-first) ─────────────────────────────────────────
@@ -302,7 +300,7 @@ class _SettingsPageState extends State<SettingsPage>
           CircleAvatar(
             radius: 40,
             backgroundColor: const Color(0xFFF79C42).withAlpha(30),
-            backgroundImage: NetworkImage(_effectiveAvatar),
+            backgroundImage: _effectiveAvatarProvider,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -377,7 +375,7 @@ class _SettingsPageState extends State<SettingsPage>
             child: CircleAvatar(
               radius: 44,
               backgroundColor: const Color(0xFFF79C42).withAlpha(30),
-              backgroundImage: NetworkImage(_effectiveAvatar),
+              backgroundImage: _effectiveAvatarProvider,
             ),
           ),
           const SizedBox(height: 12),
@@ -406,7 +404,7 @@ class _SettingsPageState extends State<SettingsPage>
                       width: selected ? 3 : 1.5,
                     ),
                   ),
-                  child: CircleAvatar(backgroundImage: NetworkImage(url)),
+                  child: CircleAvatar(backgroundImage: ApiService.getImageProvider(url)),
                 ),
               );
             },

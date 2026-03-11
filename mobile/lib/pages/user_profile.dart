@@ -230,16 +230,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                         ),
                       ),
                       child: ClipOval(
-                        child: Image.network(
-                          profile['avatarUrl']?.isNotEmpty == true
-                              ? profile['avatarUrl']
-                              : 'https://api.dicebear.com/7.x/avataaars/svg?seed=${profile['username'] ?? 'default'}',
+                        child: Image(
+                          image: ApiService.getImageProvider(profile['avatarUrl'] ?? '', fallbackSeed: profile['username']),
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Color(0xFFF79C42),
-                          ),
                         ),
                       ),
                     ),
@@ -571,11 +564,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       CircleAvatar(
                         radius: 18,
                         backgroundColor: cs.outline,
-                        backgroundImage: NetworkImage(
-                          friendAvatar.isNotEmpty
-                              ? friendAvatar
-                              : 'https://api.dicebear.com/7.x/avataaars/svg?seed=$friendUsername',
-                        ),
+                        backgroundImage: ApiService.getImageProvider(friendAvatar, fallbackSeed: friendUsername),
                       ),
                       const SizedBox(width: 12),
                       Expanded(

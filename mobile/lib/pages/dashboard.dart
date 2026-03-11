@@ -275,7 +275,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  /// Robust avatar widget with text-initials fallback.
+  /// Robust avatar widget with text-initials fallback and base64 support.
   Widget _buildAvatarWidget({
     required String url,
     required String name,
@@ -283,21 +283,6 @@ class _DashboardPageState extends State<DashboardPage> {
     Color borderColor = const Color(0xFFF79C42),
     double borderWidth = 2,
   }) {
-    // Determine the effective URL
-    final effectiveUrl = (url.isNotEmpty && !url.contains('ui-avatars'))
-        ? url
-        : 'https://api.dicebear.com/9.x/initials/png?seed=${Uri.encodeComponent(name)}&backgroundColor=F79C42&textColor=ffffff';
-
-    // Build initials for fallback
-    final initials = name.isNotEmpty
-        ? name
-              .trim()
-              .split(RegExp(r'\s+'))
-              .map((w) => w[0].toUpperCase())
-              .take(2)
-              .join()
-        : '?';
-
     return Container(
       width: size,
       height: size,
@@ -307,21 +292,11 @@ class _DashboardPageState extends State<DashboardPage> {
         color: borderColor.withOpacity(0.15),
       ),
       child: ClipOval(
-        child: Image.network(
-          effectiveUrl,
+        child: Image(
+          image: ApiService.getImageProvider(url, fallbackSeed: name),
           fit: BoxFit.cover,
           width: size,
           height: size,
-          errorBuilder: (_, __, ___) => Center(
-            child: Text(
-              initials,
-              style: TextStyle(
-                color: borderColor,
-                fontWeight: FontWeight.w800,
-                fontSize: size * 0.35,
-              ),
-            ),
-          ),
         ),
       ),
     );

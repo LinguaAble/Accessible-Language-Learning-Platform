@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../data/lesson_data.dart';
 import '../providers/user_provider.dart';
+import '../services/api_service.dart';
 import '../widgets/accessibility_widget.dart';
 
 class LessonsPage extends StatelessWidget {
@@ -73,7 +74,7 @@ class LessonsPage extends StatelessWidget {
               child: CircleAvatar(
                 radius: 15,
                 backgroundColor: const Color(0xFFF79C42).withOpacity(0.3),
-                backgroundImage: NetworkImage(effectiveAvatar),
+                backgroundImage: ApiService.getImageProvider(effectiveAvatar, fallbackSeed: provider.username),
                 onBackgroundImageError: (_, __) {},
               ),
             ),

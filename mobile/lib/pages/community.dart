@@ -459,20 +459,15 @@ class _CommunityPageState extends State<CommunityPage> {
   }
 
   Widget _buildAvatar(String? avatarUrl, String username) {
-    final url = (avatarUrl != null && avatarUrl.isNotEmpty)
-        ? avatarUrl
-        : 'https://api.dicebear.com/7.x/avataaars/svg?seed=${username.isNotEmpty ? username : 'default'}';
     return CircleAvatar(
       radius: 22,
       backgroundColor: const Color(0xFFF79C42).withOpacity(0.2),
       child: ClipOval(
-        child: Image.network(
-          url,
+        child: Image(
+          image: ApiService.getImageProvider(avatarUrl ?? '', fallbackSeed: username),
           width: 44,
           height: 44,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) =>
-              const Icon(Icons.person, color: Color(0xFFF79C42)),
         ),
       ),
     );

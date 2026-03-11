@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart'; // import foundation for kIsWeb
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
@@ -9,11 +10,29 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:5000';
     }
-    // Use the PC's Wi-Fi network IP so physical Android devices can connect easily
-    return 'http://10.12.227.158:5000';
+    // Railway deployed backend
+    return 'https://accessible-language-learning-platform-production.up.railway.app';
   }
 
+  static String get host => _host;
   static String get _baseUrl => '$_host/api/auth';
+  
+  static String getImageUrl(String url) {
+    if (url.isEmpty || url.startsWith('http') || url.startsWith('data:')) return url;
+    if (!url.startsWith('/')) url = '/$url';
+    return '$_host$url';
+  }
+
+  static ImageProvider getImageProvider(String url, {String? fallbackSeed}) {
+    if (url.isEmpty || url == 'null') {
+      return NetworkImage('https://api.dicebear.com/9.x/initials/png?seed=${Uri.encodeComponent(fallbackSeed ?? 'user')}&backgroundColor=F79C42&textColor=ffffff');
+    }
+    if (url.startsWith('data:image')) {
+      final base64String = url.split(',').last;
+      return MemoryImage(base64Decode(base64String));
+    }
+    return NetworkImage(getImageUrl(url));
+  }
   static String get _evalUrl => '$_host/api/eval';
 
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -63,34 +82,7 @@ class ApiService {
     }
   }
 
-  // ── MFA Verification ──────────────────────────────────────────────────────
-  static Future<Map<String, dynamic>> verifyMfa(String email, String otp) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/verify-mfa'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'otp': otp,
-        'device': 'Mobile App',
-      }),
-    );
-    final data = jsonDecode(response.body);
-    return response.statusCode == 200
-        ? {'success': true, ...data}
-        : {'success': false, 'message': data['message'] ?? 'Invalid or expired OTP'};
-  }
 
-  static Future<Map<String, dynamic>> resendMfa(String email) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/resend-mfa'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email}),
-    );
-    final data = jsonDecode(response.body);
-    return response.statusCode == 200
-        ? {'success': true, 'message': data['message'] ?? 'Verification code re-sent'}
-        : {'success': false, 'message': data['message'] ?? 'Failed to resend code'};
-  }
 
   static Future<Map<String, dynamic>> register(
     String email,
