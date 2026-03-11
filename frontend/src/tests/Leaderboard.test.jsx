@@ -347,9 +347,9 @@ describe('Leaderboard – Ranked List (4th+)', () => {
         makeEntry({ rank: 2, username: 'p2', email: 'p2@x.com', weeklyScore: 800 }),
         makeEntry({ rank: 3, username: 'p3', email: 'p3@x.com', weeklyScore: 700 }),
         makeEntry({ rank: 4, username: 'p4', email: 'p4@x.com', weeklyScore: 600, completedLessons: 8 }),
-        makeEntry({ rank: 5, username: 'p5', email: 'p5@x.com', weeklyScore: 500, completedLessons: 6 }),
+        makeEntry({ rank: 5, username: 'myuser', email: 'me@example.com', weeklyScore: 500, completedLessons: 6 }),
         makeEntry({ rank: 6, username: 'p6', email: 'p6@x.com', weeklyScore: 400, completedLessons: 4 }),
-        makeEntry({ rank: 7, username: 'myuser', email: 'me@example.com', weeklyScore: 300, completedLessons: 2 }),
+        makeEntry({ rank: 7, username: 'p7', email: 'p7@x.com', weeklyScore: 300, completedLessons: 2 }),
     ];
 
     test('Should render lb-row elements for 4th place and beyond', async () => {

@@ -1,0 +1,383 @@
+Dashboard.test.jsx > Should render dashboard with main sections
+  TestingLibraryElementError: Unable to find an element with the text: TestUser. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should render quick actions section
+  TestingLibraryElementError: Unable to find an element with the text: /^Learn$/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should display username when available
+  TestingLibraryElementError: Unable to find an element with the text: JohnDoe. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should extract name from email when username not available
+  TestingLibraryElementError: Unable to find an element with the text: Arjun. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should display "Learner" when no email or username
+  TestingLibraryElementError: Unable to find an element with the text: Learner. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should show 0 day streak when no lessons completed
+  TestingLibraryElementError: Unable to find an element with the text: /0.*Day Streak/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should display daily goal progress correctly
+  TestingLibraryElementError: Unable to find an element with the text: /3\/5 min today/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should show 0% when no progress
+  TestingLibraryElementError: Unable to find an element with the text: /0\/5 min today/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should display correct number of lessons completed from user data
+  TestingLibraryElementError: Unable to find an element with the text: 5. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should fall back to localStorage when user has no completed lessons
+  TestingLibraryElementError: Unable to find an element with the text: 3. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should navigate to lessons when Learn quick action clicked
+  TestingLibraryElementError: Unable to find an element with the text: /^Learn$/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Dashboard.test.jsx > Should highlight today in weekly chart
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should render landing page with hero section
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should render logo image
+  Error: [2mexpect([22m[31melement[39m[2m).toHaveClass([22m[32m[32m"landing-logo"[32m[39m[2m)[22m
+
+LandingPage.test.jsx > Should render hero description text
+  TestingLibraryElementError: Unable to find an element with the text: /Master Hindi with confidence!/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LandingPage.test.jsx > Should render Sign In button
+  TestingLibraryElementError: Found multiple elements with the role "button" and name `/Sign In/i`
+
+LandingPage.test.jsx > Should render Create Account button
+  Error: [2mexpect([22m[31melement[39m[2m).toHaveClass([22m[32m[32m"secondary-btn"[32m[39m[2m)[22m
+
+LandingPage.test.jsx > Should render features section title
+  TestingLibraryElementError: Unable to find an element with the text: /Why Choose LinguaAble?/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LandingPage.test.jsx > Should render all 6 feature cards
+  TestingLibraryElementError: Unable to find an element with the text: /Dyslexia-Friendly Design/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LandingPage.test.jsx > Should render feature descriptions
+  TestingLibraryElementError: Unable to find an element with the text: /Clear fonts, high contrast, and customizable text spacing/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LandingPage.test.jsx > Should render all feature icons
+  AssertionError: expected  to have a length of 6 but got +0
+
+LandingPage.test.jsx > Should navigate to login page when Sign In clicked
+  TestingLibraryElementError: Found multiple elements with the role "button" and name `/Sign In/i`
+
+LandingPage.test.jsx > Should not redirect if no token exists
+  TestingLibraryElementError: Found multiple elements with the text: /Sign In/i
+
+LandingPage.test.jsx > Should have floating shapes for background animation
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should set isVisible state on mount for animations
+  AssertionError: expected +0 to be 6 // Object.is equality
+
+LandingPage.test.jsx > Should have correct CSS classes for styling
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should have hero tagline with correct text
+  TestingLibraryElementError: Unable to find an element with the text: /Built Around Learners, Not Limitations!/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LandingPage.test.jsx > Should have CTA buttons container
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should have alt text for logo image
+  Error: [2mexpect([22m[31melement[39m[2m).toHaveAttribute([22m[32m[32m"alt"[32m[39m[2m, [22m[32m[32m"LinguaAble Mascot"[32m[39m[2m) // element.getAttribute("alt") === "LinguaAble Mascot"[22m
+
+LandingPage.test.jsx > Should have semantic HTML structure
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should render brand colors correctly
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should have logo wrapper with correct class
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should render complete hero description
+  TestingLibraryElementError: Unable to find an element with the text: /Our accessible, multi-sensory approach makes learning Hindi engaging, effective, and stress-free./i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LandingPage.test.jsx > Should render features grid with correct structure
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+LandingPage.test.jsx > Should have correct feature card structure
+  TestingLibraryElementError: Unable to find an element with the text: /Dyslexia-Friendly Design/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LandingPage.test.jsx > Should trigger animation setup on mount
+  AssertionError: expected +0 to be 6 // Object.is equality
+
+LandingPage.test.jsx > Should have clickable buttons
+  TestingLibraryElementError: Found multiple elements with the role "button" and name `/Sign In/i`
+
+LandingPage.test.jsx > Should have proper page structure
+  TypeError: Cannot read properties of null (reading 'querySelector')
+
+Layout.test.jsx > Should have main content as second child
+  AssertionError: expected <div class="content-wrapper" …(1)>…(2)</div> to be <main class="main-content">…(1)</main> // Object.is equality
+
+Leaderboard.test.jsx > Should render lb-row elements for 4th place and beyond
+  AssertionError: expected 3 to be 4 // Object.is equality
+
+Leaderboard.test.jsx > Should display the username of a 4th-place entry in the list
+  Error: Unable to find an element with the text: p4. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Leaderboard.test.jsx > Should show lessons count for a ranked-list entry
+  Error: Unable to find an element with the text: 8 lessons. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LearningReport.test.jsx > Should render Lessons done label
+  TestingLibraryElementError: Unable to find an element with the text: /Lessons done/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LearningReport.test.jsx > Should render Lifetime Days Active mini card
+  TestingLibraryElementError: Unable to find an element with the text: /Lifetime Days Active/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LearningReport.test.jsx > Should render GLOBAL RANK badge
+  TestingLibraryElementError: Unable to find an element with the text: /GLOBAL RANK: B1/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LearningReport.test.jsx > Should render Lifetime Points stat card
+  TestingLibraryElementError: Unable to find an element with the text: /Lifetime Points/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LearningReport.test.jsx > Should render Best Streak stat card
+  TestingLibraryElementError: Unable to find an element with the text: /Best Streak/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+LearningReport.test.jsx > Should show correct total score in overall view
+  Error: [2mexpect([22m[31melement[39m[2m).toHaveTextContent()[22m
+
+LearningReport.test.jsx > Should render lr-mini-card elements in weekly view
+  AssertionError: expected 2 to be greater than or equal to 3
+
+LearningScreen.test.jsx > Should handle pronunciation slide interaction
+  AssertionError: expected "vi.fn()" to be called at least once
+
+LearningScreen.test.jsx > Should complete lesson and sync progress
+  Error: Unable to find an element with the text: Finish. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Lessons.test.jsx > Should display day streak correctly
+  Error: Unable to find an element with the text: (content, element) => { return element.classList.contains("streak") && element.textContent.includes("1") && element.textContent.includes("Day Streak"); } (normalized from '(content, element) => {
+
+Lessons.test.jsx > Should fetch progress from API on mount when token exists
+  AssertionError: expected "vi.fn()" to be called with arguments: [ …(2) ][90m
+
+Lessons.test.jsx > Should navigate to lesson when unlocked lesson is clicked
+  AssertionError: expected "vi.fn()" to be called with arguments: [ Array(2) ][90m
+
+Lessons.test.jsx > Should navigate to lesson when completed lesson is clicked
+  AssertionError: expected "vi.fn()" to be called with arguments: [ Array(2) ][90m
+
+NotificationContext.test.jsx > useNotifications should throw when used outside NotificationProvider
+  AssertionError: expected [Function] to throw an error
+
+NotificationContext.test.jsx > Should add a goal notification when progress < 100%
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Goal notification should be of type "goal"
+  AssertionError: expected 'none' to be 'goal' // Object.is equality
+
+NotificationContext.test.jsx > Should set a toast for the goal notification
+  AssertionError: expected 'none' not to be 'none' // Object.is equality
+
+NotificationContext.test.jsx > Should increment unreadCount after goal notification
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should add a milestone notification
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Milestone notification should be of type "milestone"
+  AssertionError: expected 'none' to be 'milestone' // Object.is equality
+
+NotificationContext.test.jsx > Should add an encouragement notification
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Encouragement notification should be of type "encouragement"
+  AssertionError: expected 'none' to be 'encouragement' // Object.is equality
+
+NotificationContext.test.jsx > Should clear the toast when dismissToast is called
+  AssertionError: expected 'none' not to be 'none' // Object.is equality
+
+NotificationContext.test.jsx > Should keep notifications list intact after dismissing toast
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should set unreadCount to 0 after markAllRead
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should keep notifications in the list after markAllRead
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should remove all notifications after clearAll
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should reset unreadCount to 0 after clearAll
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should NOT add a second notification fired within the 5-min throttle window
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should allow a notification after the 5-min throttle window passes
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should push a notification outside quiet hours (e.g. noon)
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+NotificationContext.test.jsx > Should update a preference value
+  AssertionError: expected 'true' to be 'false' // Object.is equality
+
+NotificationContext.test.jsx > Should persist updated prefs to localStorage
+  TypeError: Cannot read properties of null (reading 'goalReminders')
+
+NotificationContext.test.jsx > Should merge partial pref updates without losing other prefs
+  AssertionError: expected 'true' to be 'false' // Object.is equality
+
+NotificationContext.test.jsx > Should restore prefs from localStorage on mount
+  AssertionError: expected 'true' to be 'false' // Object.is equality
+
+Settings.test.jsx > Should save profile changes
+  Error: [2mexpect([22m[31melement[39m[2m).not.toBeInTheDocument()[22m
+
+Settings.test.jsx > Should update age and gender fields
+  TestingLibraryElementError: Found multiple elements with the role "combobox"
+
+Signup.test.jsx > Should have link to login page
+  TestingLibraryElementError: Found multiple elements with the text: /Sign In/i
+
+UserContext.test.jsx > useNotifications should throw when used outside NotificationProvider
+  AssertionError: expected [Function] to throw an error
+
+UserContext.test.jsx > Should add a goal notification when progress < 100%
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Goal notification should be of type "goal"
+  AssertionError: expected 'none' to be 'goal' // Object.is equality
+
+UserContext.test.jsx > Should set a toast for the goal notification
+  AssertionError: expected 'none' not to be 'none' // Object.is equality
+
+UserContext.test.jsx > Should increment unreadCount after goal notification
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should add a milestone notification
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Milestone notification should be of type "milestone"
+  AssertionError: expected 'none' to be 'milestone' // Object.is equality
+
+UserContext.test.jsx > Should add an encouragement notification
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Encouragement notification should be of type "encouragement"
+  AssertionError: expected 'none' to be 'encouragement' // Object.is equality
+
+UserContext.test.jsx > Should clear the toast when dismissToast is called
+  AssertionError: expected 'none' not to be 'none' // Object.is equality
+
+UserContext.test.jsx > Should keep notifications list intact after dismissing toast
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should set unreadCount to 0 after markAllRead
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should keep notifications in the list after markAllRead
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should remove all notifications after clearAll
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should reset unreadCount to 0 after clearAll
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should NOT add a second notification fired within the 5-min throttle window
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should allow a notification after the 5-min throttle window passes
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should push a notification outside quiet hours (e.g. noon)
+  AssertionError: expected '0' to be '1' // Object.is equality
+
+UserContext.test.jsx > Should update a preference value
+  AssertionError: expected 'true' to be 'false' // Object.is equality
+
+UserContext.test.jsx > Should persist updated prefs to localStorage
+  TypeError: Cannot read properties of null (reading 'goalReminders')
+
+UserContext.test.jsx > Should merge partial pref updates without losing other prefs
+  AssertionError: expected 'true' to be 'false' // Object.is equality
+
+UserContext.test.jsx > Should restore prefs from localStorage on mount
+  AssertionError: expected 'true' to be 'false' // Object.is equality
+
+UserProfile.test.jsx > Should render the page title "Learner Profile"
+  Error: Unable to find role="heading" and name `/Learner Profile/i`
+
+UserProfile.test.jsx > Should render the subtitle "Viewing alice's information"
+  Error: Unable to find an element with the text: /Viewing alice's information/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should render the back chevron button
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+UserProfile.test.jsx > Should navigate to /community when back button is clicked
+  Error: Unable to find an element with the text: /Learner Profile/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should render avatar img element
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+UserProfile.test.jsx > Should use dicebear URL when avatarUrl is empty
+  TypeError: Cannot read properties of null (reading 'src')
+
+UserProfile.test.jsx > Should use provided avatarUrl when it is set
+  TypeError: Cannot read properties of null (reading 'src')
+
+UserProfile.test.jsx > Should render the dashboard-grid container
+  Error: [2mexpect([22m[31mreceived[39m[2m).toBeInTheDocument()[22m
+
+UserProfile.test.jsx > Should show streak stat card
+  Error: Unable to find an element with the text: Streak. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show "Days in a row" description
+  Error: Unable to find an element with the text: /Days in a row/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show lessons stat card
+  Error: Unable to find an element with the text: Lessons. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should display correct completed lessons count
+  Error: Unable to find an element with the text: 5. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show "Lessons finished" description
+  Error: Unable to find an element with the text: /Lessons finished/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show Total Experience stat card
+  Error: Unable to find an element with the text: /Total Experience/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should calculate and display total XP from dailyScores
+  Error: Unable to find an element with the text: 130 XP. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show "Knowledge gained over time" description
+  Error: Unable to find an element with the text: /Knowledge gained over time/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show "Friends" button (disabled state)
+  Error: Found multiple elements with the text: /Friends/i
+
+UserProfile.test.jsx > "Friends" button should be disabled
+  Error: Found multiple elements with the text: /Friends/i
+
+UserProfile.test.jsx > Should NOT show Private Progress card
+  Error: Unable to find an element with the text: Streak. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show stats (streak, lessons, XP) for own profile
+  Error: Unable to find an element with the text: Streak. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should NOT render any friend action button for own profile
+  Error: Unable to find an element with the text: Streak. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should NOT show Private Progress card for own profile
+  Error: Unable to find an element with the text: Streak. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show message to add friend to see stats
+  Error: Unable to find an element with the text: /@alice as a friend to see their learning statistics/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show 0 XP when dailyScores is an empty array
+  Error: Unable to find an element with the text: 0 XP. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should show 0 XP when dailyScores is undefined
+  Error: Unable to find an element with the text: 0 XP. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+UserProfile.test.jsx > Should correctly sum multiple daily scores
+  Error: Unable to find an element with the text: 350 XP. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.

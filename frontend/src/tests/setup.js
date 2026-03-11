@@ -8,6 +8,9 @@ afterEach(() => {
     cleanup();
 });
 
+// Mock scrollIntoView – not supported by jsdom
+window.HTMLElement.prototype.scrollIntoView = vi.fn();
+
 // Mock axios
 vi.mock('axios');
 
@@ -27,6 +30,7 @@ vi.mock('../context/UserContext', () => ({
         user: {},
         login: vi.fn(),
         logout: vi.fn(),
+        streak: 0,
         preferences: {
             theme: 'dark',
             soundEffects: false,
@@ -40,6 +44,35 @@ vi.mock('../context/UserContext', () => ({
         updateProgress: vi.fn(),
     }),
     UserProvider: ({ children }) => children,
+}));
+
+// Mock NotificationContext
+vi.mock('../context/NotificationContext', () => ({
+    useNotifications: () => ({
+        notifications: [],
+        toast: null,
+        unreadCount: 0,
+        notifPrefs: {
+            inactivityReminders: true,
+            breakReminders: true,
+            goalReminders: true,
+            milestoneAlerts: true,
+            inactivityMinutes: 30,
+            breakIntervalMinutes: 20,
+            quietHoursStart: 22,
+            quietHoursEnd: 8,
+        },
+        dismissToast: vi.fn(),
+        markAllRead: vi.fn(),
+        clearAll: vi.fn(),
+        updateNotifPrefs: vi.fn(),
+        startStudySession: vi.fn(),
+        endStudySession: vi.fn(),
+        triggerGoalReminder: vi.fn(),
+        triggerMilestone: vi.fn(),
+        triggerEncouragement: vi.fn(),
+    }),
+    NotificationProvider: ({ children }) => children,
 }));
 
 // Mock Google OAuth

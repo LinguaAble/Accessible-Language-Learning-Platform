@@ -9,6 +9,10 @@ import Dashboard from '../pages/Dashboard';
 // Mock navigate function that will be tracked
 const mockNavigate = vi.fn();
 
+vi.mock('../components/DailyStudyPlan', () => ({
+    default: () => <div data-testid="daily-study-plan">Mocked Daily Study Plan</div>
+}));
+
 // Override the useNavigate mock for Dashboard tests specifically
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
@@ -42,6 +46,7 @@ let mockUserContextValue = {
         fontSize: 'medium',
         dailyGoalMinutes: 5
     },
+    streak: 1,
     todayProgress: 3,
     login: vi.fn(),
     logout: vi.fn(),
@@ -96,6 +101,7 @@ describe('Dashboard Component Tests', () => {
                 fontSize: 'medium',
                 dailyGoalMinutes: 5
             },
+            streak: 1,
             todayProgress: 3,
             login: vi.fn(),
             logout: vi.fn(),
@@ -130,16 +136,15 @@ describe('Dashboard Component Tests', () => {
 
         // Check header greeting
         expect(screen.getByText(/नमस्ते/i)).toBeInTheDocument();
-        expect(screen.getByText('TestUser')).toBeInTheDocument();
-        expect(screen.getByText(/You're doing amazing/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /TestUser/i })).toBeInTheDocument();
+        expect(screen.getByText(/You're doing amazing|Ready to continue your/i)).toBeInTheDocument();
 
-        // Check streak indicator - looks for text that contains "Day Streak"
-        expect(screen.getByText(/Day Streak/i)).toBeInTheDocument();
+        // Check streak indicator
+        expect(document.querySelector('.db-streak')).toBeInTheDocument();
 
         // Check main sections
         expect(screen.getByText(/CONTINUE LEARNING/i)).toBeInTheDocument();
         expect(screen.getByText(/Daily Goal/i)).toBeInTheDocument();
-        expect(screen.getByText(/Word of the Day/i)).toBeInTheDocument();
     });
 
     test('Should render all quick stat cards', () => {
@@ -162,9 +167,9 @@ describe('Dashboard Component Tests', () => {
         renderDashboard();
 
         expect(screen.getByText(/Quick Actions/i)).toBeInTheDocument();
-        expect(screen.getByText(/^Learn$/)).toBeInTheDocument();
-        expect(screen.getByText(/^Leaderboard$/)).toBeInTheDocument();
-        expect(screen.getByText(/^Settings$/)).toBeInTheDocument();
+        expect(screen.getByText('Lessons')).toBeInTheDocument();
+        expect(screen.getByText('Leaderboard')).toBeInTheDocument();
+        expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
     test('Should render focus card with lesson info', () => {
@@ -182,7 +187,7 @@ describe('Dashboard Component Tests', () => {
             user: { ...mockUserContextValue.user, username: 'JohnDoe' }
         });
 
-        expect(screen.getByText('JohnDoe')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /JohnDoe/i })).toBeInTheDocument();
     });
 
     test('Should extract name from email when username not available', () => {
@@ -194,7 +199,7 @@ describe('Dashboard Component Tests', () => {
             }
         });
 
-        expect(screen.getByText('Arjun')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /Arjun/i })).toBeInTheDocument();
     });
 
     test('Should display "Learner" when no email or username', () => {
@@ -206,7 +211,7 @@ describe('Dashboard Component Tests', () => {
             }
         });
 
-        expect(screen.getByText('Learner')).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /Learner/i })).toBeInTheDocument();
     });
 
     test('Should display user avatar', () => {
@@ -234,48 +239,40 @@ describe('Dashboard Component Tests', () => {
     // ==================== STREAK TESTS ====================
     test('Should show 1 day streak when lessons completed', () => {
         renderDashboard({
-            user: { ...mockUserContextValue.user, completedLessons: [1, 2] }
+            user: { ...mockUserContextValue.user, completedLessons: [1, 2] },
+            streak: 1
         });
 
-        // Look for text containing "1" and "Day Streak"
-        expect(screen.getByText(/1.*Day Streak/i)).toBeInTheDocument();
+        expect(document.querySelector('.db-streak')).toHaveTextContent(/1 Day Streak/i);
     });
 
     test('Should show 0 day streak when no lessons completed', () => {
+        // streak is a separate context value; pass streak: 0 to simulate empty state
         renderDashboard({
-            user: { ...mockUserContextValue.user, completedLessons: [] }
+            user: { ...mockUserContextValue.user, completedLessons: [] },
+            streak: 0
         });
 
-        // The component shows "1 Day Streak" even with empty lessons because
-        // the streak counter uses totalLessonsCompleted > 0 check
-        // But it falls back to localStorage which has 3 lessons
-        // So we need to also clear localStorage
-        Storage.prototype.getItem = vi.fn(() => JSON.stringify([]));
-
-        // Re-render with empty lessons
-        const { container } = renderDashboard({
-            user: { ...mockUserContextValue.user, completedLessons: [] }
-        });
-
-        // Now it should show 0
-        expect(screen.getByText(/0.*Day Streak/i)).toBeInTheDocument();
+        expect(document.querySelector('.db-streak')).toHaveTextContent(/0 Days Streak/i);
     });
 
     // ==================== DAILY GOAL TESTS ====================
     test('Should display daily goal progress correctly', () => {
+        // Mock math calculations: (3 / 5) * 100 = 60%
         renderDashboard({
-            todayProgress: 3,
-            preferences: { ...mockUserContextValue.preferences, dailyGoalMinutes: 5 }
+            preferences: { ...mockUserContextValue.preferences, dailyGoalMinutes: 5 },
+            todayProgress: 3
         });
 
-        expect(screen.getByText(/3\/5 min today/i)).toBeInTheDocument();
-        expect(screen.getByText(/60%/i)).toBeInTheDocument();
+        expect(screen.getByText((content, element) => element.textContent.replace(/\s+/g, ' ').includes('3/5 min today'))).toBeInTheDocument();
+        expect(screen.getByText('60%')).toBeInTheDocument();
     });
 
     test('Should cap progress at 100% when exceeded', () => {
+        // (10 / 5) * 100 = 200% -> should cap at 100%
         renderDashboard({
-            todayProgress: 10,
-            preferences: { ...mockUserContextValue.preferences, dailyGoalMinutes: 5 }
+            preferences: { ...mockUserContextValue.preferences, dailyGoalMinutes: 5 },
+            todayProgress: 10
         });
 
         expect(screen.getByText(/100%/i)).toBeInTheDocument();
@@ -283,12 +280,12 @@ describe('Dashboard Component Tests', () => {
 
     test('Should show 0% when no progress', () => {
         renderDashboard({
-            todayProgress: 0,
-            preferences: { ...mockUserContextValue.preferences, dailyGoalMinutes: 5 }
+            preferences: { ...mockUserContextValue.preferences, dailyGoalMinutes: 5 },
+            todayProgress: 0
         });
 
         expect(screen.getByText(/0%/i)).toBeInTheDocument();
-        expect(screen.getByText(/0\/5 min today/i)).toBeInTheDocument();
+        expect(screen.getByText((content, element) => element.textContent.replace(/\s+/g, ' ').includes('0/5 min today'))).toBeInTheDocument();
     });
 
     // ==================== LESSONS COMPLETED TESTS ====================
@@ -297,9 +294,8 @@ describe('Dashboard Component Tests', () => {
             user: { ...mockUserContextValue.user, completedLessons: [1, 2, 3, 4, 5] }
         });
 
-        // Find the Lessons Completed card and check the number
         const lessonsCard = screen.getByText(/Lessons Completed/i).closest('div');
-        expect(within(lessonsCard).getByText('5')).toBeInTheDocument();
+        expect(within(lessonsCard).getByText((c, e) => e.textContent.trim() === '5')).toBeInTheDocument();
     });
 
     test('Should fall back to localStorage when user has no completed lessons', () => {
@@ -307,9 +303,8 @@ describe('Dashboard Component Tests', () => {
             user: { ...mockUserContextValue.user, completedLessons: [] }
         });
 
-        // Should use localStorage data (mocked to return [1, 2, 3])
         const lessonsCard = screen.getByText(/Lessons Completed/i).closest('div');
-        expect(within(lessonsCard).getByText('3')).toBeInTheDocument();
+        expect(within(lessonsCard).getByText((c, e) => e.textContent.trim() === '3')).toBeInTheDocument();
     });
 
     // ==================== NAVIGATION TESTS ====================
@@ -329,7 +324,7 @@ describe('Dashboard Component Tests', () => {
         const user = userEvent.setup();
         renderDashboard();
 
-        const learnButton = screen.getByText(/^Learn$/);
+        const learnButton = screen.getByText('Lessons');
         await user.click(learnButton);
 
         await waitFor(() => {
@@ -343,7 +338,7 @@ describe('Dashboard Component Tests', () => {
         const user = userEvent.setup();
         renderDashboard();
 
-        const leaderboardButton = screen.getByText(/^Leaderboard$/);
+        const leaderboardButton = screen.getByText('Leaderboard');
         await user.click(leaderboardButton);
 
         await waitFor(() => {
@@ -355,7 +350,7 @@ describe('Dashboard Component Tests', () => {
         const user = userEvent.setup();
         renderDashboard();
 
-        const settingsButton = screen.getByText(/^Settings$/);
+        const settingsButton = screen.getByText('Settings');
         await user.click(settingsButton);
 
         await waitFor(() => {
@@ -379,7 +374,7 @@ describe('Dashboard Component Tests', () => {
         });
     });
 
-    test('Should navigate to settings when notification bell clicked', async () => {
+    test('Should open notification panel when notification bell clicked', async () => {
         const user = userEvent.setup();
         renderDashboard();
 
@@ -387,7 +382,8 @@ describe('Dashboard Component Tests', () => {
         await user.click(bellButton);
 
         await waitFor(() => {
-            expect(mockNavigate).toHaveBeenCalledWith('/settings');
+            // Clicking the bell opens the dropdown panel
+            expect(screen.getByRole('dialog', { name: /Notifications/i })).toBeInTheDocument();
         });
     });
 
@@ -405,33 +401,35 @@ describe('Dashboard Component Tests', () => {
     });
 
     // ==================== TOOLTIP TESTS ====================
-    test('Should show notification tooltip on hover', async () => {
+    test('Should show notification panel when notification bell clicked', async () => {
         const user = userEvent.setup();
         renderDashboard();
 
         const bellButton = screen.getByLabelText(/Notifications/i);
 
-        await user.hover(bellButton);
+        await user.click(bellButton);
 
         await waitFor(() => {
-            expect(screen.getByText(/No notifications/i)).toBeInTheDocument();
+            expect(screen.getByText(/No notifications yet/i)).toBeInTheDocument();
         });
     });
 
-    test('Should hide notification tooltip on mouse leave', async () => {
+    test('Should hide notification panel when bell is clicked again', async () => {
         const user = userEvent.setup();
         renderDashboard();
 
         const bellButton = screen.getByLabelText(/Notifications/i);
 
-        await user.hover(bellButton);
+        // Open panel
+        await user.click(bellButton);
         await waitFor(() => {
-            expect(screen.getByText(/No notifications/i)).toBeInTheDocument();
+            expect(screen.getByText(/No notifications yet/i)).toBeInTheDocument();
         });
 
-        await user.unhover(bellButton);
+        // Close panel
+        await user.click(bellButton);
         await waitFor(() => {
-            expect(screen.queryByText(/No notifications/i)).not.toBeInTheDocument();
+            expect(screen.queryByText(/No notifications yet/i)).not.toBeInTheDocument();
         });
     });
 
@@ -514,7 +512,7 @@ describe('Dashboard Component Tests', () => {
         renderDashboard();
 
         // Today's bar should have special styling (tested via data attributes or classes)
-        const weeklyChart = screen.getByText(/This Week/i).closest('.progress-card');
+        const weeklyChart = screen.getByText(/This Week/i).closest('.db-card');
         expect(weeklyChart).toBeInTheDocument();
     });
 

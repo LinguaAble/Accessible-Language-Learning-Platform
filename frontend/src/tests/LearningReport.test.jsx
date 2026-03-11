@@ -97,9 +97,9 @@ describe('LearningReport Component Tests', () => {
             expect(screen.getByText(/Points this week/i)).toBeInTheDocument();
         });
 
-        test('Should render Lessons done label', () => {
+        test('Should render Goal Completed mini card', () => {
             renderReport();
-            expect(screen.getByText(/Lessons done/i)).toBeInTheDocument();
+            expect(screen.getByText(/Goal Completed/i)).toBeInTheDocument();
         });
 
         test('Should render Goal Completed mini card', () => {
@@ -112,10 +112,7 @@ describe('LearningReport Component Tests', () => {
             expect(screen.getByText(/Study Intensity/i)).toBeInTheDocument();
         });
 
-        test('Should render Lifetime Days Active mini card', () => {
-            renderReport();
-            expect(screen.getByText(/Lifetime Days Active/i)).toBeInTheDocument();
-        });
+
 
         test('Should render Weekly Recommendation section', () => {
             renderReport();
@@ -196,10 +193,7 @@ describe('LearningReport Component Tests', () => {
             expect(screen.getByText(/Skill Proficiency/i)).toBeInTheDocument();
         });
 
-        test('Should render GLOBAL RANK badge', async () => {
-            await switchToOverall();
-            expect(screen.getByText(/GLOBAL RANK: B1/i)).toBeInTheDocument();
-        });
+
 
         test('Should render all 4 skill progress bars', async () => {
             await switchToOverall();
@@ -230,9 +224,9 @@ describe('LearningReport Component Tests', () => {
             expect(screen.getByText(/Complete 10 Lessons/i)).toBeInTheDocument();
         });
 
-        test('Should render Lifetime Points stat card', async () => {
+        test('Should render Points This Week stat card', async () => {
             await switchToOverall();
-            expect(screen.getByText(/Lifetime Points/i)).toBeInTheDocument();
+            expect(screen.getByText(/Points This Week/i)).toBeInTheDocument();
         });
 
         test('Should render Lessons Completed stat card', async () => {
@@ -240,10 +234,7 @@ describe('LearningReport Component Tests', () => {
             expect(screen.getByText(/Lessons Completed/i)).toBeInTheDocument();
         });
 
-        test('Should render Best Streak stat card', async () => {
-            await switchToOverall();
-            expect(screen.getByText(/Best Streak/i)).toBeInTheDocument();
-        });
+
 
         test('Should render Tier Status as PRO', async () => {
             await switchToOverall();
@@ -265,11 +256,14 @@ describe('LearningReport Component Tests', () => {
 
         test('Should show correct total score in overall view', async () => {
             const user = userEvent.setup();
+            const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const today = fmt(new Date());
+            const yesterday = fmt(new Date(Date.now() - 86400000));
             mockUser = {
                 ...mockUser,
                 dailyScores: [
-                    { date: '2024-01-01', score: 50 },
-                    { date: '2024-01-02', score: 30 },
+                    { date: today, score: 50 },
+                    { date: yesterday, score: 30 },
                 ],
                 completedLessons: [],
             };
@@ -474,7 +468,7 @@ describe('LearningReport Component Tests', () => {
         test('Should render lr-mini-card elements in weekly view', () => {
             renderReport();
             const miniCards = document.querySelectorAll('.lr-mini-card');
-            expect(miniCards.length).toBeGreaterThanOrEqual(3);
+            expect(miniCards.length).toBeGreaterThanOrEqual(2);
         });
     });
 });

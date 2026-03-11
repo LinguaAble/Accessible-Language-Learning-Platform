@@ -122,13 +122,13 @@ describe('Layout Component Tests', () => {
             expect(container.firstChild).toBe(sidebar);
         });
 
-        test('Should have main content as second child', () => {
+        test('Should have main content wrapper as second child', () => {
             renderLayout();
 
             const container = document.querySelector('.dashboard-container');
-            const mainContent = document.querySelector('.main-content');
+            const contentWrapper = document.querySelector('.content-wrapper');
 
-            expect(container.children[1]).toBe(mainContent);
+            expect(container.children[1]).toBe(contentWrapper);
         });
 
         test('Should maintain layout structure across different routes', () => {

@@ -3,6 +3,8 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { NotificationProvider, useNotifications } from '../context/NotificationContext';
 
+vi.unmock('../context/NotificationContext');
+
 // ── Consumer component ────────────────────────────────────────────────────────
 const Consumer = ({ onMount } = {}) => {
     const ctx = useNotifications();

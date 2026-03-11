@@ -1,0 +1,47 @@
+
+ RUN  v4.0.18 C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend
+
+ ❯ src/tests/Dashboard.test.jsx (37 tests | 5 failed) 1691ms
+     ✓ Should render dashboard with main sections 158ms
+     ✓ Should render all quick stat cards 19ms
+     ✓ Should render weekly progress chart 20ms
+     ✓ Should render quick actions section 20ms
+     ✓ Should render focus card with lesson info 21ms
+     ✓ Should display username when available 36ms
+     ✓ Should extract name from email when username not available 33ms
+     ✓ Should display "Learner" when no email or username 28ms
+     ✓ Should display user avatar 27ms
+     ✓ Should use custom avatar URL when provided 24ms
+     ✓ Should show 1 day streak when lessons completed 14ms
+     × Should show 0 day streak when no lessons completed 27ms
+     × Should display daily goal progress correctly 19ms
+     ✓ Should cap progress at 100% when exceeded 14ms
+     × Should show 0% when no progress 19ms
+     × Should display correct number of lessons completed from user data 14ms
+     × Should fall back to localStorage when user has no completed lessons 13ms
+     ✓ Should navigate to lessons when START NOW clicked 93ms
+     ✓ Should navigate to lessons when Learn quick action clicked 89ms
+     ✓ Should navigate to leaderboard when Leaderboard quick action clicked 75ms
+     ✓ Should navigate to settings when Settings quick action clicked 82ms
+     ✓ Should navigate to lessons when Lessons Completed card clicked 89ms
+     ✓ Should open notification panel when notification bell clicked 110ms
+     ✓ Should navigate to settings when profile avatar clicked 99ms
+     ✓ Should show notification panel when notification bell clicked 74ms
+     ✓ Should hide notification panel when bell is clicked again 143ms
+     ✓ Should sync progress with backend on mount 28ms
+     ✓ Should update localStorage after successful sync 83ms
+     ✓ Should not sync when user has no email 20ms
+     ✓ Should handle sync failure gracefully 88ms
+     ✓ Should render weekly chart with correct data 22ms
+     ✓ Should highlight today in weekly chart 16ms
+     ✓ Should have accessible notification button 12ms
+     ✓ Should have clickable elements with proper cursor 13ms
+     ✓ Should handle empty daily scores 16ms
+     ✓ Should handle undefined daily scores 17ms
+     ✓ Should handle very high progress values 15ms
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 32 passed (37)
+   Start at  07:35:57
+   Duration  2.99s (transform 153ms, setup 169ms, import 451ms, tests 1.69s, environment 554ms)
+

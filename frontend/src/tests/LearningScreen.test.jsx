@@ -8,6 +8,7 @@ import LearningScreen from '../pages/LearningScreen';
 import { useUser } from '../context/UserContext';
 import * as soundUtils from '../utils/soundUtils';
 import * as speechService from '../utils/googleSpeechService';
+import * as nlpService from '../utils/nlpEvalService';
 
 // Mock CSS to avoid JSDOM parsing errors with var() in borders
 vi.mock('../Learning.css', () => ({}));
@@ -17,6 +18,7 @@ vi.mock('axios');
 vi.mock('../context/UserContext');
 vi.mock('../utils/soundUtils');
 vi.mock('../utils/googleSpeechService');
+vi.mock('../utils/nlpEvalService');
 
 // Mock Navigation and Location
 const mockNavigate = vi.fn();
@@ -98,6 +100,7 @@ describe('LearningScreen Component Tests', () => {
 
         // Reset speech mocks
         speechService.transcribeAudio.mockResolvedValue("test transcript");
+        nlpService.evaluatePronunciation.mockResolvedValue({ isCorrect: true, confidence: 0.9, feedback: 'Perfect' });
 
         // Reset MediaRecorder mocks
         mockStart.mockClear();
@@ -191,17 +194,20 @@ describe('LearningScreen Component Tests', () => {
 
         // Navigate through teaching slides to the first pronunciation slide
         // Slide 1: Teach (Continue)
-        const continueBtn = screen.getByText(/Continue/i);
-        await user.click(continueBtn);
+        const getNextBtn = () => document.querySelector('.next-btn');
+        await waitFor(() => expect(getNextBtn()).toBeInTheDocument());
+        await user.click(getNextBtn());
 
         // Slide 2: Teach (Continue)
-        await user.click(continueBtn);
+        await waitFor(() => expect(document.querySelector('.hindi-large').textContent).toContain('अ इ उ'));
+        await user.click(getNextBtn());
 
         // Slide 3: Teach (Continue)
-        await user.click(continueBtn);
+        await waitFor(() => expect(document.querySelector('.hindi-large').textContent).toContain('आ ई ऊ'));
+        await user.click(getNextBtn());
 
         // Slide 4: Pronounce "Speak this sound" - "अ"
-        expect(screen.getByText(/Speak this sound/i)).toBeInTheDocument();
+        expect(await screen.findByText(/Speak this sound/i)).toBeInTheDocument();
         expect(screen.getByText('अ')).toBeInTheDocument();
 
         // Find Mic Button using class name as it likely doesn't have text
@@ -234,7 +240,7 @@ describe('LearningScreen Component Tests', () => {
     });
 
     test('Should complete lesson and sync progress', async () => {
-        // Use Lesson 19 (Numbers Recap) - Short: 3 slides
+        // Use Lesson 19 (Numbers Recap) - 7 slides
         mockLocationState = { lessonId: 19 };
         const user = userEvent.setup();
 
@@ -244,24 +250,47 @@ describe('LearningScreen Component Tests', () => {
             </MemoryRouter>
         );
 
+        const getNextBtn = () => document.querySelector('.next-btn');
+
+        // Helper to click option and next
+        const answerParam = async (text) => {
+            await user.click(await screen.findByText(text, { selector: 'button.option-btn' }));
+            await waitFor(() => expect(getNextBtn()).not.toBeDisabled());
+            await user.click(getNextBtn());
+        };
+
         // Slide 1: Select 'One' -> 'एक'
-        await user.click(screen.getByText('एक'));
-        await user.click(screen.getByText('Next'));
+        await answerParam('एक');
 
         // Slide 2: Select 'Five' -> 'पाँच'
-        await user.click(screen.getByText('पाँच'));
-        await user.click(screen.getByText('Next'));
+        await answerParam('पाँच');
 
         // Slide 3: Select 'Ten' -> 'दस'
-        await user.click(screen.getByText('दस'));
+        await answerParam('दस');
 
-        // Wait for 'Finish' button to appear
-        const finishBtn = await screen.findByText('Finish');
-        await user.click(finishBtn);
+        // Slide 4: Select 'Seven' -> 'सात'
+        await answerParam('सात');
+
+        // Slide 5: Select 'Eight' -> 'आठ'
+        await answerParam('आठ');
+
+        // Slides 6 & 7: Pronounce
+        for (let i = 0; i < 2; i++) {
+            const micBtn = document.querySelector('.mic-btn');
+            await user.click(micBtn); // Start
+            await user.click(micBtn); // Stop
+            await act(async () => {
+                if (mediaRecorderInstance && mediaRecorderInstance.onstop) {
+                    await mediaRecorderInstance.onstop();
+                }
+            });
+            await waitFor(() => expect(getNextBtn()).not.toBeDisabled());
+            await user.click(getNextBtn());
+        }
 
         // Wait for success screen
         await waitFor(() => {
-            expect(screen.getByText(/Lesson Complete!/i)).toBeInTheDocument();
+            expect(screen.getByText(/Lesson Completed/i)).toBeInTheDocument();
         });
 
         // Verify API call

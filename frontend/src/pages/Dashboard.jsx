@@ -99,11 +99,11 @@ const Dashboard = () => {
           </div>
           <div className="profile-avatar-container" onMouseEnter={() => setShowProfileTooltip(true)} onMouseLeave={() => setShowProfileTooltip(false)}>
             <div className="profile-avatar" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }}>
-              <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="User avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
             </div>
             {showProfileTooltip && <div className="profile-tooltip">
               <div className="tooltip-header">
-                <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" className="tooltip-avatar" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '50%' }} />
+                <img src={user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="User avatar" className="tooltip-avatar" style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '50%' }} />
                 <div className="tooltip-user-info"><h4>{name}</h4><p>{user.email || 'No email'}</p></div>
               </div>
               <div className="tooltip-divider" />
@@ -122,7 +122,7 @@ const Dashboard = () => {
           <p className="db-hero-hindi">आम वाक्यांश</p>
           <p className="db-hero-desc">Master 10 essential greetings for daily conversation</p>
           <button className="db-start-btn" onClick={() => navigate('/lessons')}>
-            <PlayCircle size={18} /> Start Now
+            <PlayCircle size={18} /> START NOW
           </button>
         </div>
 

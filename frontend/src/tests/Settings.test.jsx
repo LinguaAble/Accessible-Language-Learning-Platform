@@ -379,7 +379,7 @@ describe('Settings Component Tests', () => {
         // Should exit edit mode after save
         await waitFor(() => {
             expect(screen.queryByText('Save Profile')).not.toBeInTheDocument();
-        });
+        }, { timeout: 3000 });
     });
 
     test('Should update age and gender fields', async () => {
@@ -399,7 +399,7 @@ describe('Settings Component Tests', () => {
         expect(ageInput).toHaveValue(30);
 
         // Update gender - find select element by role
-        const genderSelect = screen.getByRole('combobox');
+        const genderSelect = screen.getAllByRole('combobox')[0];
         await user.selectOptions(genderSelect, 'female');
         expect(genderSelect).toHaveValue('female');
     });

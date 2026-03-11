@@ -1,0 +1,32 @@
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/Dashboard.test.jsx
+  Should render dashboard with main sections
+  Should display username when available
+  Should extract name from email when username not available
+  Should display "Learner" when no email or username
+  Should show 1 day streak when lessons completed
+  Should show 0 day streak when no lessons completed
+  Should display daily goal progress correctly
+  Should show 0% when no progress
+  Should display correct number of lessons completed from user data
+  Should fall back to localStorage when user has no completed lessons
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/LandingPage.test.jsx
+  Should render hero text correctly
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/LearningReport.test.jsx
+  Should show correct total score in overall view
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/LearningScreen.test.jsx
+  Should handle pronunciation slide interaction
+  Should complete lesson and sync progress
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/Lessons.test.jsx
+  Should display day streak correctly
+  Should fetch progress from API on mount when token exists
+  Should navigate to lesson when unlocked lesson is clicked
+  Should navigate to lesson when completed lesson is clicked
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/Settings.test.jsx
+  Should save profile changes
+  Should update age and gender fields
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/Signup.test.jsx
+  Should have link to login page
+C:/Users/Girish Kumar/LinguaAble/Accessible-Language-Learning-Platform/frontend/src/tests/UserProfile.test.jsx
+  Should show the error message when user not found
+  Should show "Friends" button (disabled state)
+  Should NOT render any friend action button for own profile
