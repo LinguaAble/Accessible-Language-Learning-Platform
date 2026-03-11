@@ -197,7 +197,6 @@ class _LearningReportPageState extends State<LearningReportPage> {
                       Row(
                         children: [
                           Expanded(child: _buildSummaryItem(cs, '$weeklyPoints', 'Points this week', const Color(0xFF38BDF8))),
-                          Expanded(child: _buildSummaryItem(cs, '$weeklyLessonCount', 'Lessons done', const Color(0xFF34D399))),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -239,7 +238,11 @@ class _LearningReportPageState extends State<LearningReportPage> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: _buildMiniCard(cs, '${min(100, (weeklyPoints / 100 * 10)).toStringAsFixed(0)}%', 'Goal Completed', Icons.track_changes, const Color(0xFF38BDF8))),
+                    Expanded(child: _buildMiniCard(cs, '${(() {
+                      final todayMins = provider.todayProgress;
+                      final goalMins = provider.preferences['dailyGoalMinutes'] as int? ?? 30;
+                      return min(100, ((todayMins / goalMins) * 100).round());
+                    })()}%', 'Goal Completed', Icons.track_changes, const Color(0xFF38BDF8))),
                     const SizedBox(width: 12),
                     Expanded(child: _buildMiniCard(cs, weeklyLessonCount > 0 ? 'High' : 'Low', 'Study Intensity', Icons.bolt, const Color(0xFFFBBF24))),
                   ],

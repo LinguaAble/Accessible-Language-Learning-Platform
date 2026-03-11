@@ -12,6 +12,7 @@ import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import '../services/google_stt_service.dart';
 import '../providers/notification_provider.dart';
+import '../widgets/confetti.dart';
 
 class LearningScreen extends StatefulWidget {
   final int lessonId;
@@ -871,8 +872,11 @@ class _LearningScreenState extends State<LearningScreen>
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Center(
+      body: Stack(
+        children: [
+          const ConfettiOverlay(),
+          SafeArea(
+            child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -1052,10 +1056,12 @@ class _LearningScreenState extends State<LearningScreen>
               ],
             ),
           ),
+          ),
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
   Widget _buildStatCard(
     IconData icon,
