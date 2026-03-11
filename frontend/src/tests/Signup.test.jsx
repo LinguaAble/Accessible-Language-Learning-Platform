@@ -34,9 +34,9 @@ describe('Signup Component Tests', () => {
     test('Should have link to login page', () => {
         renderSignup();
 
-        const loginLink = screen.getByText(/Sign In/i);
+        const loginLink = screen.getAllByText(/Sign In/i).find(el => el.closest('a'));
         expect(loginLink).toBeInTheDocument();
-        expect(loginLink.closest('a')).toHaveAttribute('href', '/');
+        expect(loginLink.closest('a')).toHaveAttribute('href', '/login');
     });
 
     // ==================== USER INTERACTION TESTS ====================

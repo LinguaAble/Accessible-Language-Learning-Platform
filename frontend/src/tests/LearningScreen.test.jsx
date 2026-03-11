@@ -48,6 +48,18 @@ Object.defineProperty(window, 'speechSynthesis', {
 });
 global.SpeechSynthesisUtterance = vi.fn();
 
+// Mock HTMLCanvasElement.getContext for the Confetti component
+HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
+    clearRect: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
+    translate: vi.fn(),
+    rotate: vi.fn(),
+    fillRect: vi.fn(),
+    fillStyle: '',
+    globalAlpha: 1,
+});
+
 // Mock MediaRecorder
 let mediaRecorderInstance;
 const mockStart = vi.fn();
@@ -63,6 +75,7 @@ global.MediaRecorder = vi.fn(function () {
     };
     return mediaRecorderInstance;
 });
+global.MediaRecorder.isTypeSupported = vi.fn().mockReturnValue(true);
 
 if (!global.navigator.mediaDevices) {
     global.navigator.mediaDevices = {};
@@ -101,6 +114,7 @@ describe('LearningScreen Component Tests', () => {
         // Reset speech mocks
         speechService.transcribeAudio.mockResolvedValue("test transcript");
         nlpService.evaluatePronunciation.mockResolvedValue({ isCorrect: true, confidence: 0.9, feedback: 'Perfect' });
+        nlpService.getConfidenceBadge.mockReturnValue({ emoji: '🎯', label: 'Excellent', color: '#2ecc71' });
 
         // Reset MediaRecorder mocks
         mockStart.mockClear();
@@ -225,12 +239,16 @@ describe('LearningScreen Component Tests', () => {
         await user.click(micBtn);
         expect(mockStop).toHaveBeenCalled();
 
+        // Simulate ondataavailable with a blob so the handler doesn't bail with 'No speech detected'
+        await act(async () => {
+            if (mediaRecorderInstance && mediaRecorderInstance.ondataavailable) {
+                mediaRecorderInstance.ondataavailable({ data: new Blob(['audio'], { type: 'audio/webm' }) });
+            }
+        });
+
         // Trigger onstop manual simulation
-        // The component logic inside onstop is async, so we wrap in act
         await act(async () => {
             if (mediaRecorderInstance && mediaRecorderInstance.onstop) {
-                // Determine if onstop is a function or event handler
-                // Usually it's assigned: mediaRecorder.onstop = ...
                 await mediaRecorderInstance.onstop();
             }
         });
@@ -279,6 +297,12 @@ describe('LearningScreen Component Tests', () => {
             const micBtn = document.querySelector('.mic-btn');
             await user.click(micBtn); // Start
             await user.click(micBtn); // Stop
+            // Simulate ondataavailable so onstop handler processes audio
+            await act(async () => {
+                if (mediaRecorderInstance && mediaRecorderInstance.ondataavailable) {
+                    mediaRecorderInstance.ondataavailable({ data: new Blob(['audio'], { type: 'audio/webm' }) });
+                }
+            });
             await act(async () => {
                 if (mediaRecorderInstance && mediaRecorderInstance.onstop) {
                     await mediaRecorderInstance.onstop();

@@ -74,7 +74,7 @@ describe('UserProfile – Loading & Error States', () => {
         });
         renderProfile();
         await waitFor(() => {
-            expect(screen.getByText(/User Not Found/i)).toBeInTheDocument();
+            expect(screen.getByRole('heading', { name: /User Not Found/i })).toBeInTheDocument();
             expect(screen.getByText(/User not found\./i)).toBeInTheDocument();
         });
     });
@@ -211,9 +211,12 @@ describe('UserProfile – Relationship: "friends"', () => {
     test('Should show "Friends" button (disabled state)', async () => {
         renderProfile();
         await waitFor(() => {
-            const btn = screen.getByRole('button', { name: /Friends/i });
-            expect(btn).toBeInTheDocument();
-            expect(btn).toBeDisabled();
+            const allBtns = screen.getAllByRole('button').filter(btn => {
+                const txt = btn.textContent.trim();
+                return txt.includes('Friends') && !txt.includes('View');
+            });
+            expect(allBtns.length).toBeGreaterThan(0);
+            expect(allBtns[0]).toBeDisabled();
         });
     });
 
@@ -245,7 +248,16 @@ describe('UserProfile – Relationship: "self"', () => {
     test('Should NOT render any friend action button for own profile', async () => {
         renderProfile();
         await waitFor(() => expect(screen.getByText('Day Streak')).toBeInTheDocument());
-        expect(screen.queryByRole('button', { name: /Add Friend|Request Sent|Accept Request|Friends/i })).not.toBeInTheDocument();
+        // "View Friends" button always renders for all profiles, so exclude it
+        expect(screen.queryByRole('button', { name: /Add Friend/i })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /Request Sent/i })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /Accept Request/i })).not.toBeInTheDocument();
+        // The disabled "Friends" status button should not appear for self
+        const friendsBtns = screen.getAllByRole('button').filter(btn => {
+            const txt = btn.textContent.trim();
+            return txt === 'Friends' || (txt.includes('Friends') && !txt.includes('View'));
+        });
+        expect(friendsBtns.length).toBe(0);
     });
 });
 

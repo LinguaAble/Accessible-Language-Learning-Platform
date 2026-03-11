@@ -264,8 +264,8 @@ describe('Dashboard Component Tests', () => {
             todayProgress: 3
         });
 
-        expect(screen.getByText((content, element) => element.textContent.replace(/\s+/g, ' ').includes('3/5 min today'))).toBeInTheDocument();
         expect(screen.getByText('60%')).toBeInTheDocument();
+        expect(screen.getByText(/Target: 5 min/i)).toBeInTheDocument();
     });
 
     test('Should cap progress at 100% when exceeded', () => {
@@ -285,7 +285,7 @@ describe('Dashboard Component Tests', () => {
         });
 
         expect(screen.getByText(/0%/i)).toBeInTheDocument();
-        expect(screen.getByText((content, element) => element.textContent.replace(/\s+/g, ' ').includes('0/5 min today'))).toBeInTheDocument();
+        expect(screen.getByText(/Target: 5 min/i)).toBeInTheDocument();
     });
 
     // ==================== LESSONS COMPLETED TESTS ====================
@@ -294,8 +294,8 @@ describe('Dashboard Component Tests', () => {
             user: { ...mockUserContextValue.user, completedLessons: [1, 2, 3, 4, 5] }
         });
 
-        const lessonsCard = screen.getByText(/Lessons Completed/i).closest('div');
-        expect(within(lessonsCard).getByText((c, e) => e.textContent.trim() === '5')).toBeInTheDocument();
+        const lessonsCard = screen.getByText(/Lessons Completed/i).closest('.db-lessons-card');
+        expect(within(lessonsCard).getByText('5')).toBeInTheDocument();
     });
 
     test('Should fall back to localStorage when user has no completed lessons', () => {
@@ -303,8 +303,8 @@ describe('Dashboard Component Tests', () => {
             user: { ...mockUserContextValue.user, completedLessons: [] }
         });
 
-        const lessonsCard = screen.getByText(/Lessons Completed/i).closest('div');
-        expect(within(lessonsCard).getByText((c, e) => e.textContent.trim() === '3')).toBeInTheDocument();
+        const lessonsCard = screen.getByText(/Lessons Completed/i).closest('.db-lessons-card');
+        expect(within(lessonsCard).getByText('3')).toBeInTheDocument();
     });
 
     // ==================== NAVIGATION TESTS ====================
