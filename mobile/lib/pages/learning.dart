@@ -1,4 +1,4 @@
-import 'dart:math' show sin, pi;
+import 'dart:math' show sin, pi, Random;
 import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +38,9 @@ class _LearningScreenState extends State<LearningScreen>
   int _totalQuestions = 0;
   int _firstAttemptCorrect = 0;
 
+  // Shuffled options for current slide
+  List<String> _shuffledOptions = [];
+
   final FlutterTts _flutterTts = FlutterTts();
   // AudioPlayer for correct/wrong tones — independent of TTS engine.
   // (TTS-based sound effects fail silently on Android when another TTS is speaking.)
@@ -60,6 +63,7 @@ class _LearningScreenState extends State<LearningScreen>
         .where((s) => s.type == 'quiz' || s.type == 'pronounce')
         .length;
     _initTts();
+    _shuffleCurrentOptions();
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<NotificationProvider>().startStudySession();
@@ -145,6 +149,26 @@ class _LearningScreenState extends State<LearningScreen>
     }
   }
 
+  /// Shuffle options for the current slide using Fisher-Yates
+  void _shuffleCurrentOptions() {
+    if (_currentIndex < _activeSlides.length) {
+      final slide = _activeSlides[_currentIndex];
+      if (slide.options != null) {
+        final arr = List<String>.from(slide.options!);
+        final rng = Random();
+        for (int i = arr.length - 1; i > 0; i--) {
+          final j = rng.nextInt(i + 1);
+          final tmp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = tmp;
+        }
+        _shuffledOptions = arr;
+      } else {
+        _shuffledOptions = [];
+      }
+    }
+  }
+
   double get _progress {
     if (_currentIndex >= _originalCount) return 0.95;
     return _currentIndex / _originalCount;
@@ -201,6 +225,7 @@ class _LearningScreenState extends State<LearningScreen>
         _isCorrect = null;
         _selectedOption = null;
       });
+      _shuffleCurrentOptions();
       _playAudio();
     } else if (_mistakeQueue.isNotEmpty) {
       setState(() {
@@ -211,6 +236,7 @@ class _LearningScreenState extends State<LearningScreen>
         _isCorrect = null;
         _selectedOption = null;
       });
+      _shuffleCurrentOptions();
       _playAudio();
     } else {
       _finishLesson();
@@ -524,7 +550,7 @@ class _LearningScreenState extends State<LearningScreen>
       spacing: 12,
       runSpacing: 12,
       alignment: WrapAlignment.center,
-      children: slide.options!.map((opt) {
+      children: _shuffledOptions.map((opt) {
         final isSelected = _selectedOption == opt;
         final isAnswer = opt == slide.answer;
 

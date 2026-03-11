@@ -73,6 +73,28 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     for (var e in _entries) {
       if (_isCurrentUser(e)) myEntry = e;
     }
+    final myRank = myEntry != null ? (myEntry['rank'] as int?) ?? 0 : 0;
+
+    // Build visible rows for ranked list (4th+)
+    // If user is in top-3 or not ranked: show next 7 after podium
+    // If user is rank 4+: show 2 above, user, 2 below with gap dividers
+    List<Map<String, dynamic>> visibleRows = [];
+    if (myEntry == null || myRank <= 3) {
+      final shown = rest.take(7).toList();
+      visibleRows = shown.map((e) => {...Map<String, dynamic>.from(e), 'type': 'entry'}).toList();
+      if (rest.length > 7) visibleRows.add({'type': 'gap'});
+    } else {
+      final myRestIndex = rest.indexWhere((e) => _isCurrentUser(e));
+      if (myRestIndex >= 0) {
+        final start = (myRestIndex - 2).clamp(0, rest.length - 1);
+        final end = (myRestIndex + 2).clamp(0, rest.length - 1);
+        if (start > 0) visibleRows.add({'type': 'gap'});
+        for (int i = start; i <= end; i++) {
+          visibleRows.add({...Map<String, dynamic>.from(rest[i]), 'type': 'entry'});
+        }
+        if (end < rest.length - 1) visibleRows.add({'type': 'gap'});
+      }
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -189,10 +211,10 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  if (myEntry != null && (myEntry['rank'] as int) > 3)
+                  if (myEntry != null && myRank > 3)
                     _buildMyRankBanner(myEntry),
                   if (top3.isNotEmpty) _buildTop3Podium(top3),
-                  if (rest.isNotEmpty) _buildRankedList(rest),
+                  if (visibleRows.isNotEmpty) _buildRankedList(visibleRows),
                 ],
               ),
             ),
@@ -256,16 +278,42 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               color: Colors.grey,
             ),
           ),
+          const SizedBox(height: 4),
+          Text(
+            'Tap a player to view their profile',
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey.withOpacity(0.7),
+            ),
+          ),
           const SizedBox(height: 20),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (top3.length > 1)
-                _buildPodiumColumn(top3[1], 120, const Color(0xFFC0C0C0)),
-              _buildPodiumColumn(top3[0], 160, const Color(0xFFFFD700)),
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    onTap: () => context.push('/profile/${top3[1]['username']}'),
+                    child: _buildPodiumColumnContent(top3[1], 120, const Color(0xFFC0C0C0)),
+                  ),
+                ),
+              Expanded(
+                flex: 4,
+                child: GestureDetector(
+                  onTap: () => context.push('/profile/${top3[0]['username']}'),
+                  child: _buildPodiumColumnContent(top3[0], 160, const Color(0xFFFFD700)),
+                ),
+              ),
               if (top3.length > 2)
-                _buildPodiumColumn(top3[2], 90, const Color(0xFFCD7F32)),
+                Expanded(
+                  flex: 3,
+                  child: GestureDetector(
+                    onTap: () => context.push('/profile/${top3[2]['username']}'),
+                    child: _buildPodiumColumnContent(top3[2], 90, const Color(0xFFCD7F32)),
+                  ),
+                ),
             ],
           ),
         ],
@@ -273,7 +321,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     );
   }
 
-  Widget _buildPodiumColumn(
+  Widget _buildPodiumColumnContent(
     Map<String, dynamic> entry,
     double height,
     Color color,
@@ -281,80 +329,77 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     final isMe = _isCurrentUser(entry);
     final size = entry['rank'] == 1 ? 80.0 : 60.0;
 
-    return Expanded(
-      flex: entry['rank'] == 1 ? 4 : 3,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Icon(
-            entry['rank'] == 1 ? Icons.workspace_premium : Icons.star,
-            color: color,
-            size: 24,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Icon(
+          entry['rank'] == 1 ? Icons.workspace_premium : Icons.star,
+          color: color,
+          size: 24,
+        ),
+        const SizedBox(height: 8),
+        _buildAvatarWidget(
+          url: entry['avatarUrl'] as String? ?? '',
+          name: entry['username'] ?? 'U',
+          size: size,
+          borderColor: color,
+          borderWidth: 3,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${entry['username']}${isMe ? ' (You)' : ''}',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: isMe
+                ? const Color(0xFFE67E22)
+                : Theme.of(context).colorScheme.onSurface,
+            fontSize: 13,
           ),
-          const SizedBox(height: 8),
-          _buildAvatarWidget(
-            url: entry['avatarUrl'] as String? ?? '',
-            name: entry['username'] ?? 'U',
-            size: size,
-            borderColor: color,
-            borderWidth: 3,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          (entry['weeklyScore'] ?? 0) > 0
+              ? '${entry['weeklyScore']} pts'
+              : '—',
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
           ),
-          const SizedBox(height: 8),
-          Text(
-            '${entry['username']}${isMe ? ' (You)' : ''}',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: isMe
-                  ? const Color(0xFFE67E22)
-                  : Theme.of(context).colorScheme.onSurface,
-              fontSize: 13,
+        ),
+        const SizedBox(height: 10),
+        Container(
+          width: double.infinity,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [color.withOpacity(0.3), color.withOpacity(0.05)],
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            (entry['weeklyScore'] ?? 0) > 0
-                ? '${entry['weeklyScore']} pts'
-                : '—',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(12),
             ),
+            border: Border.all(color: color.withOpacity(0.4)),
           ),
-          const SizedBox(height: 10),
-          Container(
-            width: double.infinity,
-            height: height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [color.withOpacity(0.3), color.withOpacity(0.05)],
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-              border: Border.all(color: color.withOpacity(0.4)),
-            ),
-            child: Center(
-              child: Text(
-                '#${entry['rank']}',
-                style: TextStyle(
-                  fontSize: entry['rank'] == 1 ? 32 : 24,
-                  fontWeight: FontWeight.w900,
-                  color: color,
-                ),
+          child: Center(
+            child: Text(
+              '#${entry['rank']}',
+              style: TextStyle(
+                fontSize: entry['rank'] == 1 ? 32 : 24,
+                fontWeight: FontWeight.w900,
+                color: color,
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildRankedList(List<dynamic> rest) {
+  Widget _buildRankedList(List<Map<String, dynamic>> rows) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -411,7 +456,23 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
             ),
           ),
           const Divider(),
-          ...rest.map((entry) => _buildListRow(entry)),
+          ...rows.map((row) =>
+            row['type'] == 'gap'
+              ? _buildGapDivider()
+              : _buildListRow(row),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGapDivider() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('•  •  •', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w700, fontSize: 12)),
         ],
       ),
     );
@@ -420,65 +481,68 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   Widget _buildListRow(Map<String, dynamic> entry) {
     final isMe = _isCurrentUser(entry);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: isMe
-          ? const Color(0xFFE67E22).withOpacity(0.05)
-          : Colors.transparent,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 28,
-            child: Text(
-              '${entry['rank']}',
-              style: const TextStyle(
-                fontWeight: FontWeight.w800,
-                color: Colors.grey,
+    return GestureDetector(
+      onTap: () => context.push('/profile/${entry['username']}'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        color: isMe
+            ? const Color(0xFFE67E22).withOpacity(0.05)
+            : Colors.transparent,
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              child: Text(
+                '${entry['rank']}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(width: 10),
-          _buildAvatarWidget(
-            url: entry['avatarUrl'] as String? ?? '',
-            name: entry['username'] ?? 'U',
-            size: 36,
-            borderColor: const Color(0xFF94A3B8),
-            borderWidth: 1.5,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '${entry['username']}${isMe ? ' (You)' : ''}',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: isMe
-                    ? const Color(0xFFE67E22)
-                    : Theme.of(context).colorScheme.onSurface,
+            const SizedBox(width: 10),
+            _buildAvatarWidget(
+              url: entry['avatarUrl'] as String? ?? '',
+              name: entry['username'] ?? 'U',
+              size: 36,
+              borderColor: const Color(0xFF94A3B8),
+              borderWidth: 1.5,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                '${entry['username']}${isMe ? ' (You)' : ''}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: isMe
+                      ? const Color(0xFFE67E22)
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          Text(
-            '${entry['completedLessons'] ?? 0}',
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-          const SizedBox(width: 24),
-          SizedBox(
-            width: 50,
-            child: Text(
-              (entry['weeklyScore'] ?? 0) > 0 ? '${entry['weeklyScore']}' : '—',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: (entry['weeklyScore'] ?? 0) > 0
-                    ? Theme.of(context).colorScheme.onSurface
-                    : Colors.grey,
+            Text(
+              '${entry['completedLessons'] ?? 0}',
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            const SizedBox(width: 24),
+            SizedBox(
+              width: 50,
+              child: Text(
+                (entry['weeklyScore'] ?? 0) > 0 ? '${entry['weeklyScore']}' : '—',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: (entry['weeklyScore'] ?? 0) > 0
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Colors.grey,
+                ),
+                textAlign: TextAlign.right,
               ),
-              textAlign: TextAlign.right,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

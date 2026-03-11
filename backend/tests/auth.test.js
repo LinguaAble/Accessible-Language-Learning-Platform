@@ -27,10 +27,11 @@ process.env.EMAIL_PASS = 'test-password';
 
 describe('Authentication API Tests', () => {
 
+
     // ==================== USER REGISTRATION TESTS ====================
     describe('POST /api/auth/register - User Registration', () => {
 
-        test('Should register a new user successfully and return pendingMFA', async () => {
+        test('Should register a new user successfully and return token', async () => {
             const response = await request(app)
                 .post('/api/auth/register')
                 .send({
@@ -40,19 +41,15 @@ describe('Authentication API Tests', () => {
                 });
 
             expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('pendingMFA', true);
-            expect(response.body).toHaveProperty('email', 'newuser@example.com');
-            expect(response.body).not.toHaveProperty('token');
+            expect(response.body).toHaveProperty('token');
+            expect(response.body).toHaveProperty('user');
+            expect(response.body.user.email).toBe('newuser@example.com');
+            expect(response.body.user.username).toBe('newuser');
 
-            // Verify User was NOT created yet
+            // Verify User was created in DB
             const user = await User.findOne({ email: 'newuser@example.com' });
-            expect(user).toBeNull();
-
-            // Verify OTP token was saved in DB
-            const otpRecord = await OTP.findOne({ email: 'newuser@example.com' });
-            expect(otpRecord).toBeDefined();
-            expect(otpRecord.signupData).toBeDefined();
-            expect(otpRecord.signupData.username).toBe('newuser');
+            expect(user).toBeDefined();
+            expect(user.username).toBe('newuser');
         });
 
         test('Should hash password in database', async () => {
@@ -64,18 +61,19 @@ describe('Authentication API Tests', () => {
                     username: 'hashtest'
                 });
 
-            // User is not created yet, so check OTP collection
-            const otpRecord = await OTP.findOne({ email: 'hashtest@example.com' });
-            expect(otpRecord.signupData.password).not.toBe('MyPassword123'); // Password should be hashed
-            expect(otpRecord.signupData.password.length).toBeGreaterThan(20); // Bcrypt hash is long
+            // User is created directly now
+            const user = await User.findOne({ email: 'hashtest@example.com' });
+            expect(user).toBeDefined();
+            expect(user.password).not.toBe('MyPassword123'); // Password should be hashed
+            expect(user.password.length).toBeGreaterThan(20); // Bcrypt hash is long
 
             // Verify password can be compared
-            const isMatch = await bcrypt.compare('MyPassword123', otpRecord.signupData.password);
+            const isMatch = await bcrypt.compare('MyPassword123', user.password);
             expect(isMatch).toBe(true);
         });
 
-        test('Should initialize login history on registration in DB', async () => {
-             await request(app)
+        test('Should initialize login history on registration', async () => {
+            const response = await request(app)
                 .post('/api/auth/register')
                 .send({
                     email: 'loginhistory@example.com',
@@ -83,12 +81,11 @@ describe('Authentication API Tests', () => {
                     username: 'loginhistory'
                 });
 
-            const otpRecord = await OTP.findOne({ email: 'loginhistory@example.com' });
-            expect(otpRecord).toBeDefined();
-            
-            // Note: loginHistory is no longer initialized in OTP, it's initialized on creation inside verify-mfa.
-            // But we can check if it exists in DB as an OTP record.
-            expect(otpRecord.signupData).toBeDefined();
+            expect(response.status).toBe(200);
+            const user = await User.findOne({ email: 'loginhistory@example.com' });
+            expect(user).toBeDefined();
+            expect(user.loginHistory).toBeDefined();
+            expect(user.loginHistory.length).toBeGreaterThan(0);
         });
 
         test('Should return 400 if email already exists', async () => {
@@ -113,6 +110,37 @@ describe('Authentication API Tests', () => {
             expect(response.status).toBe(400);
             expect(response.body.message).toBe('This email is already registered.');
         });
+
+        test('Should return default preferences on registration', async () => {
+            const response = await request(app)
+                .post('/api/auth/register')
+                .send({
+                    email: 'prefs@example.com',
+                    password: 'Password123',
+                    username: 'prefsuser'
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body.user.preferences).toBeDefined();
+            expect(response.body.user.preferences.theme).toBe('dark');
+            expect(response.body.user.preferences.dailyGoalMinutes).toBe(5);
+        });
+
+        test('Should return empty arrays for progress fields on registration', async () => {
+            const response = await request(app)
+                .post('/api/auth/register')
+                .send({
+                    email: 'progress@example.com',
+                    password: 'Password123',
+                    username: 'progressuser'
+                });
+
+            expect(response.status).toBe(200);
+            expect(response.body.user.completedLessons).toEqual([]);
+            expect(response.body.user.dailyScores).toEqual([]);
+            expect(response.body.user.dailyLessonCounts).toEqual([]);
+            expect(response.body.user.streak).toBe(0);
+        });
     });
 
     // ==================== USER LOGIN TESTS ====================
@@ -129,7 +157,7 @@ describe('Authentication API Tests', () => {
                 });
         });
 
-        test('Should login with valid credentials and return pendingMFA', async () => {
+        test('Should login with valid credentials and return token', async () => {
             const response = await request(app)
                 .post('/api/auth/login')
                 .send({
@@ -138,9 +166,9 @@ describe('Authentication API Tests', () => {
                 });
 
             expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('pendingMFA', true);
-            expect(response.body).toHaveProperty('email', 'logintest@example.com');
-            expect(response.body).not.toHaveProperty('token');
+            expect(response.body).toHaveProperty('token');
+            expect(response.body).toHaveProperty('user');
+            expect(response.body.user.email).toBe('logintest@example.com');
         });
 
         test('Should return 400 with invalid email', async () => {
@@ -166,10 +194,38 @@ describe('Authentication API Tests', () => {
             expect(response.status).toBe(400);
             expect(response.body.message).toBe('Invalid email or password.');
         });
+
+        test('Should update login history on login', async () => {
+            await request(app)
+                .post('/api/auth/login')
+                .send({
+                    email: 'logintest@example.com',
+                    password: 'LoginPass123'
+                });
+
+            const user = await User.findOne({ email: 'logintest@example.com' });
+            // Registration adds 1, login adds 1 = at least 2
+            expect(user.loginHistory.length).toBeGreaterThanOrEqual(2);
+        });
+
+        test('Should cap login history at 10 entries', async () => {
+            // Login 12 times (1 from register + 12 logins = 13 total, capped at 10)
+            for (let i = 0; i < 12; i++) {
+                await request(app)
+                    .post('/api/auth/login')
+                    .send({
+                        email: 'logintest@example.com',
+                        password: 'LoginPass123'
+                    });
+            }
+
+            const user = await User.findOne({ email: 'logintest@example.com' });
+            expect(user.loginHistory.length).toBeLessThanOrEqual(10);
+        });
     });
 
-    // ==================== MFA VERIFICATION TESTS ====================
-    describe('POST /api/auth/verify-mfa & resend-mfa', () => {
+    // ==================== MFA VERIFICATION TESTS (Legacy endpoints) ====================
+    describe('POST /api/auth/verify-mfa & resend-mfa - Legacy MFA endpoints', () => {
 
         beforeEach(async () => {
             // Mock an existing user for login MFA tests
@@ -288,7 +344,7 @@ describe('Authentication API Tests', () => {
     describe('Password Reset Flow', () => {
 
         beforeEach(async () => {
-            // Create a test user
+            // Create a test user directly
             await request(app)
                 .post('/api/auth/register')
                 .send({
@@ -300,7 +356,7 @@ describe('Authentication API Tests', () => {
 
         describe('POST /api/auth/forgot-password - Request OTP', () => {
 
-            test.skip('Should generate OTP and save hashed token', async () => {
+            test('Should generate OTP and save hashed token', async () => {
                 const response = await request(app)
                     .post('/api/auth/forgot-password')
                     .send({

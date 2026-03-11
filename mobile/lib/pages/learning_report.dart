@@ -44,13 +44,17 @@ class _LearningReportPageState extends State<LearningReportPage> {
 
     final thisWeekScores = dailyScores.where((s) {
       final d = s['date'] as String?;
-      return d != null && d.compareTo(sowStr) >= 0;
+      final eow = sow.add(const Duration(days: 6));
+      final eowStr = _fmtDate(eow);
+      return d != null && d.compareTo(sowStr) >= 0 && d.compareTo(eowStr) <= 0;
     }).toList();
     final weeklyPoints = thisWeekScores.fold<int>(0, (sum, s) => sum + ((s['score'] ?? 0) as num).toInt());
 
     final thisWeekLessons = dailyLessonCounts.where((l) {
       final d = l['date'] as String?;
-      return d != null && d.compareTo(sowStr) >= 0;
+      final eow = sow.add(const Duration(days: 6));
+      final eowStr = _fmtDate(eow);
+      return d != null && d.compareTo(sowStr) >= 0 && d.compareTo(eowStr) <= 0;
     }).toList();
     final weeklyLessonCount = thisWeekLessons.fold<int>(0, (sum, l) => sum + ((l['count'] ?? 0) as num).toInt());
 
@@ -238,8 +242,6 @@ class _LearningReportPageState extends State<LearningReportPage> {
                     Expanded(child: _buildMiniCard(cs, '${min(100, (weeklyPoints / 100 * 10)).toStringAsFixed(0)}%', 'Goal Completed', Icons.track_changes, const Color(0xFF38BDF8))),
                     const SizedBox(width: 12),
                     Expanded(child: _buildMiniCard(cs, weeklyLessonCount > 0 ? 'High' : 'Low', 'Study Intensity', Icons.bolt, const Color(0xFFFBBF24))),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildMiniCard(cs, '$activeSessions', 'Days Active', Icons.watch_later, const Color(0xFF818CF8))),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -285,23 +287,10 @@ class _LearningReportPageState extends State<LearningReportPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.emoji_events, color: Color(0xFFFBBF24)),
-                              const SizedBox(width: 8),
-                              Text('Skill Proficiency', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: cs.onSurface)),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFBBF24).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Text('GLOBAL RANK: B1', style: TextStyle(color: Color(0xFFFBBF24), fontSize: 10, fontWeight: FontWeight.bold)),
-                          )
+                          const Icon(Icons.emoji_events, color: Color(0xFFFBBF24)),
+                          const SizedBox(width: 8),
+                          Text('Skill Proficiency', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: cs.onSurface)),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -401,16 +390,15 @@ class _LearningReportPageState extends State<LearningReportPage> {
                 const SizedBox(height: 24),
                 // Summary Grid stats
                 GridView.count(
-                  crossAxisCount: 2,
+                  crossAxisCount: 3,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.5,
+                  childAspectRatio: 1.0,
                   children: [
-                    _buildGridStatCard(cs, '$totalScore', 'Lifetime Points', const Color(0xFFFBBF24)),
+                    _buildGridStatCard(cs, '$weeklyPoints', 'Points This Week', const Color(0xFFFBBF24)),
                     _buildGridStatCard(cs, '$totalLessons', 'Lessons Done', const Color(0xFF38BDF8)),
-                    _buildGridStatCard(cs, '$streak', 'Best Streak', const Color(0xFFA855F7)),
                     _buildGridStatCard(cs, 'PRO', 'Tier Status', const Color(0xFF34D399)),
                   ],
                 ),

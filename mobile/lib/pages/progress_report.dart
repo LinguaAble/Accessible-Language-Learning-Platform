@@ -33,6 +33,24 @@ class ProgressReportPage extends StatelessWidget {
       }
     }
 
+    // Weekly points — strict Mon→Sun window
+    String fmtDate(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    DateTime startOfWeek(DateTime d) => d.subtract(Duration(days: d.weekday - 1));
+    final now = DateTime.now();
+    final sow = startOfWeek(now);
+    final sowStr = fmtDate(sow);
+    final eow = sow.add(const Duration(days: 6));
+    final eowStr = fmtDate(eow);
+    int weeklyPoints = 0;
+    for (var entry in provider.dailyScores) {
+      if (entry is Map && entry['date'] != null && entry['score'] != null) {
+        final d = entry['date'] as String;
+        if (d.compareTo(sowStr) >= 0 && d.compareTo(eowStr) <= 0) {
+          weeklyPoints += (entry['score'] as num).toInt();
+        }
+      }
+    }
+
     // Active Sessions (unique days with scores or login)
     final activeDays = <String>{};
     for (var log in provider.loginHistory) {
@@ -120,11 +138,9 @@ class ProgressReportPage extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildStatCard(context, '⭐', '$totalPoints', 'Points'),
+                    _buildStatCard(context, '⭐', '$weeklyPoints', 'Weekly Pts'),
                     const SizedBox(width: 12),
                     _buildStatCard(context, '📚', '$totalLessons', 'Lessons'),
-                    const SizedBox(width: 12),
-                    _buildStatCard(context, '📅', '$activeSessions', 'Active Days'),
                     const SizedBox(width: 12),
                     _buildStatCard(context, '🔥', '$streak', 'Streak'),
                   ],

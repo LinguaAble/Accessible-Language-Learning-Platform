@@ -1,4 +1,3 @@
-import 'dart:async'; // Add this for Timer
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,41 +22,13 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  // MFA fields
-  bool _showMfaInput = false;
-  final _otpController = TextEditingController();
-  int _timer = 60;
-  bool _canResend = false;
-  Timer? _countdownTimer;
-  String? _successMessage;
-
   @override
   void dispose() {
-    _countdownTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
-    _otpController.dispose();
     super.dispose();
   }
 
-  void _startTimer() {
-    setState(() {
-      _timer = 60;
-      _canResend = false;
-    });
-    _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) return;
-      setState(() {
-        if (_timer > 0) {
-          _timer--;
-        } else {
-          _canResend = true;
-          timer.cancel();
-        }
-      });
-    });
-  }
 
   void _handleLogin() async {
     final email = _emailController.text.trim();
@@ -73,7 +44,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
-      _successMessage = null;
     });
 
     try {
@@ -81,27 +51,17 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
 
-      if (result['success'] == true) {
-        if (result['pendingMFA'] == true) {
-          // Setup MFA screen
-          setState(() {
-            _showMfaInput = true;
-            _successMessage = 'Verification code sent to $email';
-          });
-          _startTimer();
-        } else if (result['token'] != null) {
-          // Direct login fallback
-          final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (result['success'] == true && result['token'] != null) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-          await userProvider.login(
-            result['token'],
-            result['user'] as Map<String, dynamic>,
-            _rememberMe,
-          );
+        await userProvider.login(
+          result['token'],
+          result['user'] as Map<String, dynamic>,
+          _rememberMe,
+        );
 
-          if (mounted) {
-            context.go('/dashboard');
-          }
+        if (mounted) {
+          context.go('/dashboard');
         }
       } else {
         setState(() {
@@ -121,70 +81,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _verifyOtp() async {
-    final otp = _otpController.text.trim();
-    if (otp.length < 6) {
-      setState(() => _errorMessage = 'Please enter the 6-digit code');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _successMessage = null;
-    });
-
-    try {
-      final result = await ApiService.verifyMfa(_emailController.text.trim(), otp);
-
-      if (!mounted) return;
-
-      if (result['success'] == true && result['token'] != null) {
-         final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-         await userProvider.login(
-           result['token'],
-           result['user'] as Map<String, dynamic>,
-           _rememberMe,
-         );
-
-         if (mounted) {
-           context.go('/dashboard');
-         }
-      } else {
-        setState(() {
-          _errorMessage = result['message'] ?? 'Invalid or expired code';
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _errorMessage = 'Cannot connect to server.');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  void _resendOtp() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    try {
-      final result = await ApiService.resendMfa(_emailController.text.trim());
-      if (!mounted) return;
-      if (result['success'] == true) {
-        setState(() {
-          _successMessage = 'Code re-sent successfully';
-        });
-        _startTimer();
-      } else {
-        setState(() => _errorMessage = result['message']);
-      }
-    } catch (e) {
-      if (mounted) setState(() => _errorMessage = 'Cannot connect to server.');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
 
   Future<void> _handleGoogleLogin() async {
     setState(() {
@@ -340,34 +236,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 30),
 
-              // Success message
-              if (_successMessage != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2ECC71).withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFF2ECC71).withOpacity(0.4)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check_circle_outline, color: Color(0xFF2ECC71), size: 20),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _successMessage!,
-                          style: const TextStyle(
-                            color: Color(0xFF2ECC71),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
               // Error message
               if (_errorMessage != null)
@@ -398,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
 
-              if (!_showMfaInput) ...[
+
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -539,79 +407,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ],
                 ),
-              ] else ...[
-                // MFA Form
-                TextField(
-                  controller: _otpController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(letterSpacing: 10, fontWeight: FontWeight.bold, fontSize: 18),
-                  decoration: InputDecoration(
-                    labelText: 'Enter 6-Digit Code',
-                    hintText: '123456',
-                    alignLabelWithHint: true,
-                    floatingLabelAlignment: FloatingLabelAlignment.center,
-                    counterText: "",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _verifyOtp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF79C42),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(color: Colors.white),
-                          )
-                        : const Text(
-                            'Verify Code',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 25),
-                TextButton(
-                  onPressed: _canResend && !_isLoading ? _resendOtp : null,
-                  child: Text(
-                    _canResend ? 'Resend Code' : 'Resend Code in ${_timer}s',
-                    style: TextStyle(
-                      color: _canResend ? const Color(0xFFE67E22) : cs.onSurface.withOpacity(0.4),
-                      fontWeight: FontWeight.bold,
-                      decoration: _canResend ? TextDecoration.underline : TextDecoration.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                TextButton(
-                  onPressed: () => setState(() {
-                    _showMfaInput = false;
-                    _errorMessage = null;
-                    _successMessage = null;
-                    _countdownTimer?.cancel();
-                  }),
-                  child: Text(
-                    'Wrong email? Go back',
-                    style: TextStyle(color: cs.onSurface.withOpacity(0.6), decoration: TextDecoration.underline),
-                  ),
-                ),
-              ],
               const SizedBox(height: 20),
             ],
           ),
