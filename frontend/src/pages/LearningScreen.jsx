@@ -1587,6 +1587,20 @@ const LearningScreen = () => {
 
 
   const slide = activeSlides[currentSlideIndex];
+
+  // Shuffle options each time a new slide appears (keyed by index + slide identity)
+  // Using Fisher-Yates for an unbiased shuffle — correct answer stays in the array,
+  // just in a random position so it's never predictably first.
+  const shuffledOptions = React.useMemo(() => {
+    if (!slide || !slide.options) return [];
+    const arr = [...slide.options];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSlideIndex, activeSlides]);
   if (!slide || !isReady) return (
     <div className="learning-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexDirection: 'column', gap: '16px' }}>
       <div className="loading-spinner" style={{ width: '40px', height: '40px', border: '4px solid rgba(255,255,255,0.15)', borderTopColor: '#58cc02', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
@@ -1719,7 +1733,7 @@ const LearningScreen = () => {
         {/* --- QUIZ SLIDES --- */}
         {(slide.type === 'quiz') && (
           <div className={`options-grid fade-in ${slide.subtype === 'char_select' ? 'grid-cols-3' : 'grid-cols-2'}`} style={{ marginTop: '30px' }}>
-            {slide.options.map((opt, idx) => (
+            {shuffledOptions.map((opt, idx) => (
               <button
                 key={idx}
                 className={`option-btn 

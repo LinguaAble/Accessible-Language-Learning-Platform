@@ -335,16 +335,34 @@ input:focus {
   color: var(--accent-hover);
 }
 
-/* --- FIX: Stop Browser Autofill from turning inputs white --- */
+/* --- FIX: Autofill — Dark Theme: keep dark background --- */
+[data-theme='dark'] input:-webkit-autofill,
+[data-theme='dark'] input:-webkit-autofill:hover,
+[data-theme='dark'] input:-webkit-autofill:focus,
+[data-theme='dark'] input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #2c3e50 inset !important;
+  -webkit-text-fill-color: #ecf0f1 !important;
+  caret-color: #ecf0f1;
+}
+
+/* --- FIX: Autofill — Light Theme: keep white/light background --- */
+[data-theme='light'] input:-webkit-autofill,
+[data-theme='light'] input:-webkit-autofill:hover,
+[data-theme='light'] input:-webkit-autofill:focus,
+[data-theme='light'] input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #2c3e50 !important;
+  caret-color: #2c3e50;
+}
+
+/* --- FIX: Autofill fallback (no theme set) — default to light --- */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  /* Forces the background to stay Dark Gray/Blue */
-  -webkit-box-shadow: 0 0 0 30px #1f2937 inset !important;
-  /* Forces the text to be White */
-  -webkit-text-fill-color: white !important;
-  caret-color: white;
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #2c3e50 !important;
+  caret-color: #2c3e50;
 }
 
 /* --- FIX: Remove Default Browser Password Eye --- */

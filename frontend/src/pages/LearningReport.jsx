@@ -63,13 +63,16 @@ const LearningReport = () => {
         const totalScore = dailyScores.reduce((acc, curr) => acc + (curr.score || 0), 0);
         const totalLessons = completedLessons.length;
 
-        // This Week
+        // This Week — use strict Mon→Sun window to avoid data bleed
         const sow = startOfWeek(new Date());
         const sowStr = fmt(sow);
-        const thisWeekScores = dailyScores.filter(s => s.date >= sowStr);
+        const eow = new Date(sow); eow.setDate(sow.getDate() + 6);
+        const eowStr = fmt(eow);
+
+        const thisWeekScores = dailyScores.filter(s => s.date >= sowStr && s.date <= eowStr);
         const weeklyPoints = thisWeekScores.reduce((acc, curr) => acc + curr.score, 0);
 
-        const thisWeekLessons = dailyLessonCounts.filter(l => l.date >= sowStr);
+        const thisWeekLessons = dailyLessonCounts.filter(l => l.date >= sowStr && l.date <= eowStr);
         const weeklyLessonCount = thisWeekLessons.reduce((acc, curr) => acc + curr.count, 0);
 
         // Active Days
@@ -243,7 +246,7 @@ const LearningReport = () => {
                                 <div className="lr-mini-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
                                     <Target size={22} />
                                 </div>
-                                <span className="lr-mini-val">{Math.min(100, Math.round(((user?.todayProgress || 0) / (user?.preferences?.dailyGoalMinutes || 5)) * 100))}%</span>
+                                <span className="lr-mini-val">{Math.min(100, Math.round((Math.max(user?.todayProgress || 0, parseInt(localStorage.getItem('todayProgress'), 10) || 0) / (user?.preferences?.dailyGoalMinutes || 5)) * 100))}%</span>
                                 <span className="lr-mini-lbl">Goal Completed</span>
                             </div>
                             <div className="lr-mini-card">
@@ -252,13 +255,6 @@ const LearningReport = () => {
                                 </div>
                                 <span className="lr-mini-val">{weeklyLessonCount > 0 ? 'High' : 'Low'}</span>
                                 <span className="lr-mini-lbl">Study Intensity</span>
-                            </div>
-                            <div className="lr-mini-card">
-                                <div className="lr-mini-icon" style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}>
-                                    <Clock size={22} />
-                                </div>
-                                <span className="lr-mini-val">{activeSessions}</span>
-                                <span className="lr-mini-lbl">Lifetime Days Active</span>
                             </div>
                         </div>
                     </div>
@@ -285,7 +281,6 @@ const LearningReport = () => {
                         <div className="lr-glass-card">
                             <div className="lr-skill-header">
                                 <h3 className="lr-chart-title"><Trophy size={24} color="#fbbf24" /> Skill Proficiency</h3>
-                                <span style={{ padding: '4px 12px', background: 'rgba(251, 191, 36, 0.1)', borderRadius: '20px', color: '#fbbf24', fontSize: '0.75rem', fontWeight: 800, border: '1px solid rgba(251, 191, 36, 0.2)' }}>GLOBAL RANK: B1</span>
                             </div>
                             <div className="lr-skill-list">
                                 {skillProgress.map((s, i) => (
@@ -322,18 +317,14 @@ const LearningReport = () => {
                     </div>
 
                     {/* Overall Summary Stats */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginTop: '2.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginTop: '2.5rem' }}>
                         <div className="lr-mini-card" style={{ textAlign: 'center' }}>
-                            <span className="lr-mini-val" style={{ color: '#fbbf24' }}>{totalScore}</span>
-                            <span className="lr-mini-lbl">Lifetime Points</span>
+                            <span className="lr-mini-val" style={{ color: '#fbbf24' }}>{weeklyPoints}</span>
+                            <span className="lr-mini-lbl">Points This Week</span>
                         </div>
                         <div className="lr-mini-card" style={{ textAlign: 'center' }}>
                             <span className="lr-mini-val" style={{ color: '#38bdf8' }}>{totalLessons}</span>
                             <span className="lr-mini-lbl">Lessons Completed</span>
-                        </div>
-                        <div className="lr-mini-card" style={{ textAlign: 'center' }}>
-                            <span className="lr-mini-val" style={{ color: '#a855f7' }}>{streak}</span>
-                            <span className="lr-mini-lbl">Best Streak</span>
                         </div>
                         <div className="lr-mini-card" style={{ textAlign: 'center' }}>
                             <span className="lr-mini-val" style={{ color: '#34d399' }}>PRO</span>

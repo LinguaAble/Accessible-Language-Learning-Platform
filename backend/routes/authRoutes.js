@@ -768,6 +768,12 @@ router.get('/profile/:username', async (req, res) => {
       publicProfile.dailyLessonCounts = profileUser.dailyLessonCounts || [];
     }
 
+    // Always expose friend count and friend list (username + avatar) — public info
+    const friendIds = profileUser.friends || [];
+    const friendDocs = await User.find({ _id: { $in: friendIds } }).select('username avatarUrl').lean();
+    publicProfile.friends = friendDocs.map(f => ({ username: f.username, avatarUrl: f.avatarUrl || '' }));
+    publicProfile.friendCount = friendDocs.length;
+
     res.json({
       success: true,
       ...publicProfile,

@@ -7,11 +7,11 @@ import '../Dashboard.css';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-// ─── helpers ────────────────────────────────────────────────────────────────
+// ─── helpers ─────────────────────────────────────────────────────────────────
 
 function getWeekResetInfo() {
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0=Sun
+    const dayOfWeek = now.getDay();
     const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
     const nextMonday = new Date(now);
     nextMonday.setDate(now.getDate() + daysUntilMonday);
@@ -28,32 +28,33 @@ function getAvatarUrl(entry) {
 }
 
 function getRankColor(rank) {
-    if (rank === 1) return '#FFD700';  // gold
-    if (rank === 2) return '#C0C0C0';  // silver
-    if (rank === 3) return '#CD7F32';  // bronze
+    if (rank === 1) return '#FFD700';
+    if (rank === 2) return '#C0C0C0';
+    if (rank === 3) return '#CD7F32';
     return 'var(--accent-color)';
 }
 
-// ─── sub-components ─────────────────────────────────────────────────────────
+// ─── PodiumCard ───────────────────────────────────────────────────────────────
 
-const PodiumCard = ({ entry, isCurrentUser }) => {
+const PodiumCard = ({ entry, isCurrentUser, onNavigate }) => {
     const height = entry.rank === 1 ? 180 : entry.rank === 2 ? 140 : 110;
     const color = getRankColor(entry.rank);
     const icon = entry.rank === 1 ? <Crown size={22} /> : entry.rank === 2 ? <Medal size={20} /> : <Star size={18} />;
 
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            flex: entry.rank === 1 ? 1.2 : 1,
-            gap: 10,
-            order: entry.rank === 2 ? 0 : entry.rank === 1 ? 1 : 2,
-        }}>
-            {/* Crown / medal */}
+        <div
+            style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                flex: entry.rank === 1 ? 1.2 : 1,
+                gap: 10,
+                order: entry.rank === 2 ? 0 : entry.rank === 1 ? 1 : 2,
+                cursor: 'pointer',
+            }}
+            onClick={() => onNavigate(entry.username)}
+            title={`View ${entry.username}'s profile`}
+        >
             <div className="lb-crown-icon" style={{ color, fontSize: 22 }}>{icon}</div>
 
-            {/* Avatar */}
             <div style={{
                 position: 'relative',
                 width: entry.rank === 1 ? 80 : 64,
@@ -63,21 +64,20 @@ const PodiumCard = ({ entry, isCurrentUser }) => {
                 boxShadow: `0 0 ${entry.rank === 1 ? 24 : 12}px ${color}66`,
                 overflow: 'hidden',
                 flexShrink: 0,
-            }}>
+                transition: 'transform 0.2s, box-shadow 0.2s',
+            }}
+                onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.boxShadow = `0 0 28px ${color}99`; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = `0 0 ${entry.rank === 1 ? 24 : 12}px ${color}66`; }}
+            >
                 <img src={getAvatarUrl(entry)} alt={entry.username} style={{ width: '100%', height: '100%' }} />
             </div>
 
-            {/* Name + score */}
             <div style={{ textAlign: 'center' }}>
                 <p style={{
-                    margin: 0,
-                    fontWeight: 700,
+                    margin: 0, fontWeight: 700,
                     fontSize: entry.rank === 1 ? '1rem' : '0.875rem',
                     color: isCurrentUser ? color : 'var(--text-main)',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    maxWidth: 100,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 110,
                 }}>
                     {entry.username}{isCurrentUser ? ' (You)' : ''}
                 </p>
@@ -86,16 +86,12 @@ const PodiumCard = ({ entry, isCurrentUser }) => {
                 </p>
             </div>
 
-            {/* Pedestal */}
             <div className="lb-pedestal" style={{
-                width: '100%',
-                height,
+                width: '100%', height,
                 background: `linear-gradient(180deg, ${color}33, ${color}11)`,
                 border: `1px solid ${color}44`,
                 borderRadius: '12px 12px 0 0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontWeight: 900,
                 fontSize: entry.rank === 1 ? '2.5rem' : '1.75rem',
                 color,
@@ -106,29 +102,33 @@ const PodiumCard = ({ entry, isCurrentUser }) => {
     );
 };
 
-const LeaderRow = ({ entry, isCurrentUser }) => (
-    <div className="lb-row" style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-        padding: '14px 20px',
-        background: isCurrentUser ? 'rgba(230, 126, 34, 0.12)' : 'transparent',
-        border: isCurrentUser ? '1px solid rgba(230, 126, 34, 0.5)' : '1px solid transparent',
-        borderRadius: 14,
-        transition: 'background 0.2s',
-        cursor: 'default',
-    }}
-        onMouseEnter={e => { if (!isCurrentUser) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-        onMouseLeave={e => { if (!isCurrentUser) e.currentTarget.style.background = 'transparent'; }}
+// ─── LeaderRow ────────────────────────────────────────────────────────────────
+
+const LeaderRow = ({ entry, isCurrentUser, onNavigate }) => (
+    <div
+        className="lb-row"
+        style={{
+            display: 'flex', alignItems: 'center', gap: 16,
+            padding: '14px 20px',
+            background: isCurrentUser ? 'rgba(230, 126, 34, 0.12)' : 'transparent',
+            border: isCurrentUser ? '1px solid rgba(230, 126, 34, 0.5)' : '1px solid transparent',
+            borderRadius: 14,
+            transition: 'background 0.2s, transform 0.15s',
+            cursor: 'pointer',
+        }}
+        onClick={() => onNavigate(entry.username)}
+        onMouseEnter={e => {
+            if (!isCurrentUser) e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+            e.currentTarget.style.transform = 'translateX(3px)';
+        }}
+        onMouseLeave={e => {
+            if (!isCurrentUser) e.currentTarget.style.background = 'transparent';
+            e.currentTarget.style.transform = 'translateX(0)';
+        }}
+        title={`View ${entry.username}'s profile`}
     >
         {/* Rank */}
-        <span style={{
-            minWidth: 32,
-            fontWeight: 800,
-            fontSize: '1rem',
-            color: 'var(--text-muted)',
-            textAlign: 'center',
-        }}>
+        <span style={{ minWidth: 32, fontWeight: 800, fontSize: '1rem', color: 'var(--text-muted)', textAlign: 'center' }}>
             {entry.rank}
         </span>
 
@@ -142,12 +142,7 @@ const LeaderRow = ({ entry, isCurrentUser }) => (
         </div>
 
         {/* Name */}
-        <span style={{
-            flex: 1,
-            fontWeight: 600,
-            color: isCurrentUser ? 'var(--accent-color)' : 'var(--text-main)',
-            fontSize: '0.9375rem',
-        }}>
+        <span style={{ flex: 1, fontWeight: 600, color: isCurrentUser ? 'var(--accent-color)' : 'var(--text-main)', fontSize: '0.9375rem' }}>
             {entry.username}{isCurrentUser ? ' (You)' : ''}
         </span>
 
@@ -158,10 +153,7 @@ const LeaderRow = ({ entry, isCurrentUser }) => (
 
         {/* Score */}
         <span style={{
-            minWidth: 80,
-            textAlign: 'right',
-            fontWeight: 800,
-            fontSize: '1rem',
+            minWidth: 80, textAlign: 'right', fontWeight: 800, fontSize: '1rem',
             color: entry.weeklyScore > 0 ? 'var(--text-main)' : 'var(--text-muted)',
         }}>
             {entry.weeklyScore > 0 ? entry.weeklyScore.toLocaleString() : '—'}
@@ -169,7 +161,18 @@ const LeaderRow = ({ entry, isCurrentUser }) => (
     </div>
 );
 
-// ─── main component ──────────────────────────────────────────────────────────
+// ─── Gap divider ──────────────────────────────────────────────────────────────
+
+const GapDivider = () => (
+    <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '6px 20px', gap: 6, color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 700,
+    }}>
+        <span>•</span><span>•</span><span>•</span>
+    </div>
+);
+
+// ─── main component ───────────────────────────────────────────────────────────
 
 const Leaderboard = () => {
     const { user, streak } = useUser();
@@ -178,7 +181,6 @@ const Leaderboard = () => {
     const [weekInfo, setWeekInfo] = useState({ weekStart: '', weekEnd: '' });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { daysLeft, hoursLeft } = getWeekResetInfo();
     const [showProfileTooltip, setShowProfileTooltip] = useState(false);
     const [showNotificationTooltip, setShowNotificationTooltip] = useState(false);
 
@@ -205,15 +207,37 @@ const Leaderboard = () => {
     const isCurrentUser = (entry) =>
         entry.email === user.email || entry.username === user.username;
 
-    const top3 = entries.slice(0, 3);
-    const rest = entries.slice(3);
-    const myEntry = entries.find(isCurrentUser);
+    const handleNavigate = (username) => navigate(`/profile/${username}`);
 
-    // ─── render ───────────────────────────────────────────────────────────────
+    const top3 = entries.slice(0, 3);
+    const rest = entries.slice(3); // rank 4+
+    const myEntry = entries.find(isCurrentUser);
+    const myRank = myEntry?.rank ?? null;
+
+    // Build the visible rows for the ranked list (4th+ section)
+    // If user is in top-3 or not on the board → show only next 5 after the podium
+    // If user is rank 4+                       → show 2 above, user, 2 below (with gap dividers)
+    let visibleRows; // array of either entry objects or { type: 'gap' }
+    if (!myEntry || myRank <= 3) {
+        // Top-3 or not ranked: show ranks 4–10 (7 entries)
+        const shown = rest.slice(0, 7);
+        visibleRows = shown.map(e => ({ ...e, type: 'entry' }));
+        if (rest.length > 7) visibleRows.push({ type: 'gap' });
+    } else {
+        // Show 2 above and 2 below the user (within the 4+ list)
+        const myRestIndex = rest.findIndex(isCurrentUser); // 0-based in rest[]
+        const start = Math.max(0, myRestIndex - 2);
+        const end = Math.min(rest.length - 1, myRestIndex + 2);
+
+        visibleRows = [];
+        if (start > 0) visibleRows.push({ type: 'gap' });
+        for (let i = start; i <= end; i++) visibleRows.push({ ...rest[i], type: 'entry' });
+        if (end < rest.length - 1) visibleRows.push({ type: 'gap' });
+    }
 
     return (
         <div>
-            {/* ── Header ────────────────────────────────────────────── */}
+            {/* Header */}
             <header className="content-header">
                 <div className="greeting">
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -227,7 +251,6 @@ const Leaderboard = () => {
                         <Flame size={15} fill="currentColor" />
                         {streak} Day{streak !== 1 ? 's' : ''} Streak
                     </div>
-                    {/* Refresh button */}
                     <button
                         className="db-icon-btn"
                         onClick={fetchLeaderboard}
@@ -236,11 +259,17 @@ const Leaderboard = () => {
                     >
                         <RefreshCw size={18} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
                     </button>
-                    <div className="notification-container" onMouseEnter={() => setShowNotificationTooltip(true)} onMouseLeave={() => setShowNotificationTooltip(false)}>
+                    <div className="notification-container"
+                        onMouseEnter={() => setShowNotificationTooltip(true)}
+                        onMouseLeave={() => setShowNotificationTooltip(false)}
+                    >
                         <button className="db-icon-btn" aria-label="Notifications" onClick={() => navigate('/settings')}><Bell size={18} /></button>
                         {showNotificationTooltip && <div className="notification-tooltip"><div className="notification-tooltip-content"><Bell size={20} style={{ color: 'var(--text-muted)', opacity: 0.5 }} /><p>No notifications</p></div></div>}
                     </div>
-                    <div className="profile-avatar-container" onMouseEnter={() => setShowProfileTooltip(true)} onMouseLeave={() => setShowProfileTooltip(false)}>
+                    <div className="profile-avatar-container"
+                        onMouseEnter={() => setShowProfileTooltip(true)}
+                        onMouseLeave={() => setShowProfileTooltip(false)}
+                    >
                         <div className="profile-avatar" onClick={() => navigate('/settings')} style={{ cursor: 'pointer' }}>
                             <img src={user?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                         </div>
@@ -256,50 +285,35 @@ const Leaderboard = () => {
                 </div>
             </header>
 
-            {/* ── Body ──────────────────────────────────────────────── */}
+            {/* Body */}
             <div style={{ maxWidth: 720, margin: '0 auto' }}>
-
-                {/* Week label */}
                 <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8125rem', marginBottom: 32, fontWeight: 600 }}>
                     📅 {weekInfo.weekStart} → {weekInfo.weekEnd}
                 </p>
 
-                {/* ── Loading ── */}
+                {/* Loading */}
                 {loading && (
                     <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
-                        <div style={{
-                            width: 40, height: 40, border: '4px solid var(--border-color)',
-                            borderTopColor: 'var(--accent-color)', borderRadius: '50%',
-                            animation: 'spin 0.8s linear infinite', margin: '0 auto 16px',
-                        }} />
+                        <div style={{ width: 40, height: 40, border: '4px solid var(--border-color)', borderTopColor: 'var(--accent-color)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
                         <p style={{ fontWeight: 600 }}>Loading rankings…</p>
                     </div>
                 )}
 
-                {/* ── Error ── */}
+                {/* Error */}
                 {!loading && error && (
-                    <div style={{
-                        textAlign: 'center', padding: '60px 20px',
-                        background: 'var(--card-bg)', borderRadius: 20, border: '1px solid var(--border-color)',
-                    }}>
+                    <div style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--card-bg)', borderRadius: 20, border: '1px solid var(--border-color)' }}>
                         <p style={{ color: '#e74c3c', fontWeight: 700, marginBottom: 16 }}>{error}</p>
-                        <button
-                            onClick={fetchLeaderboard}
-                            style={{
-                                padding: '10px 24px', background: 'var(--accent-color)', color: '#fff',
-                                border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer',
-                            }}
-                        >
+                        <button onClick={fetchLeaderboard} style={{ padding: '10px 24px', background: 'var(--accent-color)', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, cursor: 'pointer' }}>
                             Try Again
                         </button>
                     </div>
                 )}
 
-                {/* ── Leaderboard content ── */}
+                {/* Leaderboard content */}
                 {!loading && !error && entries.length > 0 && (
                     <>
-                        {/* ── Your Rank banner (if not top 3) ── */}
-                        {myEntry && myEntry.rank > 3 && (
+                        {/* Your Rank banner (if not top 3) */}
+                        {myEntry && myRank > 3 && (
                             <div className="lb-my-rank" style={{
                                 display: 'flex', alignItems: 'center', gap: 12,
                                 background: 'rgba(230, 126, 34, 0.08)',
@@ -308,7 +322,7 @@ const Leaderboard = () => {
                             }}>
                                 <Trophy size={20} color="var(--accent-color)" />
                                 <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
-                                    Your rank: <span style={{ color: 'var(--accent-color)' }}>#{myEntry.rank}</span>
+                                    Your rank: <span style={{ color: 'var(--accent-color)' }}>#{myRank}</span>
                                 </span>
                                 <span style={{ marginLeft: 'auto', fontWeight: 800, color: 'var(--text-main)' }}>
                                     {myEntry.weeklyScore > 0 ? `${myEntry.weeklyScore.toLocaleString()} pts this week` : 'No score yet'}
@@ -316,7 +330,7 @@ const Leaderboard = () => {
                             </div>
                         )}
 
-                        {/* ── Top 3 Podium ── */}
+                        {/* Top 3 Podium — always clickable */}
                         {top3.length > 0 && (
                             <div style={{
                                 background: 'var(--card-bg)', borderRadius: 24,
@@ -325,22 +339,30 @@ const Leaderboard = () => {
                                 boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
                             }}>
                                 <h3 style={{
-                                    textAlign: 'center', margin: '0 0 28px',
+                                    textAlign: 'center', margin: '0 0 6px',
                                     color: 'var(--text-muted)', fontSize: '0.75rem',
                                     fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
                                 }}>
                                     Top Performers
                                 </h3>
+                                <p style={{ textAlign: 'center', fontSize: '0.73rem', color: 'var(--text-muted)', margin: '0 0 24px', opacity: 0.7 }}>
+                                    Click a player to view their profile
+                                </p>
                                 <div className="lb-podium-area" style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
                                     {top3.map(entry => (
-                                        <PodiumCard key={entry.email} entry={entry} isCurrentUser={isCurrentUser(entry)} />
+                                        <PodiumCard
+                                            key={entry.email}
+                                            entry={entry}
+                                            isCurrentUser={isCurrentUser(entry)}
+                                            onNavigate={handleNavigate}
+                                        />
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* ── Ranked List (4th+) ── */}
-                        {rest.length > 0 && (
+                        {/* Ranked list (4th+) */}
+                        {visibleRows.length > 0 && (
                             <div style={{
                                 background: 'var(--card-bg)', borderRadius: 20,
                                 border: '1px solid var(--border-color)',
@@ -348,70 +370,55 @@ const Leaderboard = () => {
                                 boxShadow: '0 4px 24px rgba(0,0,0,0.05)',
                             }}>
                                 {/* Header row */}
-                                <div style={{
-                                    display: 'flex', gap: 16, padding: '10px 20px',
-                                    borderBottom: '1px solid var(--border-color)', marginBottom: 4,
-                                }}>
+                                <div style={{ display: 'flex', gap: 16, padding: '10px 20px', borderBottom: '1px solid var(--border-color)', marginBottom: 4 }}>
                                     <span style={{ minWidth: 32, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'center' }}>#</span>
                                     <span style={{ width: 40 }} />
                                     <span style={{ flex: 1, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>PLAYER</span>
                                     <span style={{ minWidth: 70, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>LESSONS</span>
                                     <span style={{ minWidth: 80, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, textAlign: 'right' }}>SCORE</span>
                                 </div>
-                                {rest.map(entry => (
-                                    <LeaderRow key={entry.email} entry={entry} isCurrentUser={isCurrentUser(entry)} />
-                                ))}
+
+                                {visibleRows.map((row, i) =>
+                                    row.type === 'gap'
+                                        ? <GapDivider key={`gap-${i}`} />
+                                        : <LeaderRow
+                                            key={row.email}
+                                            entry={row}
+                                            isCurrentUser={isCurrentUser(row)}
+                                            onNavigate={handleNavigate}
+                                        />
+                                )}
                             </div>
                         )}
                     </>
                 )}
 
-                {/* ── Empty state ── */}
+                {/* Empty state */}
                 {!loading && !error && entries.length === 0 && (
-                    <div style={{
-                        textAlign: 'center', padding: '80px 20px',
-                        background: 'var(--card-bg)', borderRadius: 20,
-                        border: '1px solid var(--border-color)',
-                    }}>
+                    <div style={{ textAlign: 'center', padding: '80px 20px', background: 'var(--card-bg)', borderRadius: 20, border: '1px solid var(--border-color)' }}>
                         <Trophy size={56} color="var(--border-color)" style={{ marginBottom: 16 }} />
                         <h3 style={{ color: 'var(--text-main)', marginBottom: 8 }}>No players yet!</h3>
-                        <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>
-                            Complete a lesson to appear on the leaderboard.
-                        </p>
+                        <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Complete a lesson to appear on the leaderboard.</p>
                     </div>
                 )}
             </div>
 
-            {/* Animation keyframes */}
+            {/* Styles */}
             <style>{`
                 @keyframes spin { to { transform: rotate(360deg); } }
-
-                /* Podium slide-up with stagger */
                 .lb-podium-area { animation: fadeIn 0.4s ease-out; }
                 .lb-podium-area > div:nth-child(1) { animation: slideUp 0.6s ease-out 0.1s both; }
                 .lb-podium-area > div:nth-child(2) { animation: slideUp 0.6s ease-out 0.25s both; }
                 .lb-podium-area > div:nth-child(3) { animation: slideUp 0.6s ease-out 0.15s both; }
-
-                /* Ranked list rows stagger */
                 .lb-row { animation: fadeInUp 0.4s ease-out both; }
                 .lb-row:nth-child(1) { animation-delay: 0.05s; }
                 .lb-row:nth-child(2) { animation-delay: 0.1s; }
                 .lb-row:nth-child(3) { animation-delay: 0.15s; }
                 .lb-row:nth-child(4) { animation-delay: 0.2s; }
                 .lb-row:nth-child(5) { animation-delay: 0.25s; }
-                .lb-row:nth-child(6) { animation-delay: 0.3s; }
-
-                /* Your-rank banner */
                 .lb-my-rank { animation: fadeIn 0.5s ease-out, pulseGlow 2s ease-in-out 1s infinite; }
-
-                /* Crown/medal icon bounce */
                 .lb-crown-icon { animation: bounceIn 0.6s ease-out 0.3s both; }
-
-                /* Pedestal grow-up */
-                .lb-pedestal {
-                    transform-origin: bottom;
-                    animation: fillBar 0.8s ease-out 0.3s both;
-                }
+                .lb-pedestal { transform-origin: bottom; animation: fillBar 0.8s ease-out 0.3s both; }
             `}</style>
         </div>
     );

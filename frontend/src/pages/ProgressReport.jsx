@@ -37,6 +37,15 @@ const ProgressReport = () => {
         const dailyScores = user.dailyScores || [];
         const totalScore = dailyScores.reduce((acc, curr) => acc + (curr.score || 0), 0);
 
+        // Weekly points — strict Mon→Sun window
+        const sow = startOfWeek(new Date());
+        const sowStr = fmt(sow);
+        const eow = new Date(sow); eow.setDate(sow.getDate() + 6);
+        const eowStr = fmt(eow);
+        const weeklyPoints = dailyScores
+            .filter(s => s.date >= sowStr && s.date <= eowStr)
+            .reduce((acc, curr) => acc + (curr.score || 0), 0);
+
         const completedLessons = user.completedLessons || [];
         let storedLessons = [];
         try {
@@ -71,6 +80,7 @@ const ProgressReport = () => {
 
         return {
             totalScore,
+            weeklyPoints,
             totalLessons,
             activeSessions,
             maxLessonCompleted,
@@ -78,7 +88,7 @@ const ProgressReport = () => {
         };
     }, [user]);
 
-    const { totalScore, totalLessons, activeSessions, maxLessonCompleted, currentLesson } = performanceData;
+    const { totalScore, weeklyPoints, totalLessons, activeSessions, maxLessonCompleted, currentLesson } = performanceData;
     const rawMax = Math.max(...weeklyData.map(d => d.value), 1);
 
     // Compute a nice rounded ceiling for the Y-axis so bars never touch the top
@@ -151,18 +161,13 @@ const ProgressReport = () => {
             <div className="report-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginTop: '20px' }}>
                 <div className="db-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', textAlign: 'center' }}>
                     <div style={{ background: 'rgba(159, 172, 230, 0.1)', color: '#9face6', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}><Star size={28} /></div>
-                    <div style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.2rem', color: 'var(--text-main)' }}>{totalScore}</div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>Total Gained Points</div>
+                    <div style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.2rem', color: 'var(--text-main)' }}>{weeklyPoints}</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>Points Earned This Week</div>
                 </div>
                 <div className="db-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', textAlign: 'center' }}>
                     <div style={{ background: 'rgba(116, 235, 213, 0.1)', color: '#74ebd5', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}><BookOpen size={28} /></div>
                     <div style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.2rem', color: 'var(--text-main)' }}>{totalLessons}</div>
                     <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>Lessons Explored</div>
-                </div>
-                <div className="db-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', textAlign: 'center' }}>
-                    <div style={{ background: 'rgba(255, 183, 178, 0.1)', color: '#ffb7b2', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}><Calendar size={28} /></div>
-                    <div style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '0.2rem', color: 'var(--text-main)' }}>{activeSessions}</div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>Active Learning Days</div>
                 </div>
                 <div className="db-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', textAlign: 'center' }}>
                     <div style={{ background: 'rgba(255, 210, 127, 0.1)', color: '#ffd27f', padding: '1rem', borderRadius: '50%', marginBottom: '1rem' }}><Flame size={28} /></div>
