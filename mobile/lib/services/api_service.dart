@@ -10,8 +10,8 @@ class ApiService {
     if (kIsWeb) {
       return 'http://localhost:5000';
     }
-    // Railway deployed backend
-    return 'https://accessible-language-learning-platform-production.up.railway.app';
+    // Cloud Run deployed backend
+    return 'https://backend-service-704569764751.us-central1.run.app';
   }
 
   static String get host => _host;

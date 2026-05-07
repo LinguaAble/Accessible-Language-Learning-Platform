@@ -15,8 +15,8 @@ app.use(cors({
     if (!origin) return callback(null, true);
     // Allow any localhost port (for Vite :5173, Flutter web :random port, etc.)
     if (origin.match(/^http:\/\/localhost:\d+$/)) return callback(null, true);
-    // Allow your Vercel production URL
-    if (origin === 'https://linguaable.vercel.app') return callback(null, true);
+    // Allow your Vercel production URL and Cloud Run URL
+    if (origin === 'https://linguaable.vercel.app' || origin === 'https://frontend-service-704569764751.us-central1.run.app' || origin === 'https://linguaable-704569764751.us-central1.run.app') return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -31,4 +31,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/eval', nlpEvalRoutes);
 app.use('/api/ai', aiRoutes);
 const PORT = process.env.PORT || 5000;
+
+app.get('/', (req, res) => {
+  res.send('Backend is running');
+});
+
+app.get('/test', (req, res) => {
+  res.json({ status: 'OK' });
+});
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT} (0.0.0.0)`));

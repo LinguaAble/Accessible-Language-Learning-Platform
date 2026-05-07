@@ -421,7 +421,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
-            onPressed: () => context.push('/lessons/1'),
+            onPressed: () => context.push('/lessons'),
             icon: const Icon(Icons.play_circle_fill),
             label: const Text('START NOW'),
             style: ElevatedButton.styleFrom(
