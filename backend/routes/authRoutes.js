@@ -209,18 +209,10 @@ router.post('/google-login', async (req, res) => {
 
       await user.save();
     } else {
-      // New Google user — create account (no password needed)
-      user = new User({
-        email,
-        username: username || email.split('@')[0],
-        fullName: fullName || '',
-        avatarUrl: avatarUrl || '',
-        googleId: email,
-        authProvider: 'google',
-        loginHistory: [{ timestamp: new Date(), device: device || 'Web Browser' }]
-      });
-      await user.save();
+      // New Google user — reject on login, they need to sign up first
+      return res.status(404).json({ message: 'No account found. Please sign up first.' });
     }
+
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
@@ -250,6 +242,62 @@ router.post('/google-login', async (req, res) => {
     res.status(500).json({ message: 'Failed to authenticate with Google.' });
   }
 });
+
+router.post('/google-signup', async (req, res) => {
+  try {
+    const { email, username, fullName, avatarUrl, device } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({ message: 'Account already exists. Please log in.' });
+    }
+
+    // Create new user
+    user = new User({
+      email,
+      username: username || email.split('@')[0],
+      fullName: fullName || '',
+      avatarUrl: avatarUrl || '',
+      googleId: email,
+      authProvider: 'google',
+      loginHistory: [{ timestamp: new Date(), device: device || 'Web Browser' }]
+    });
+    await user.save();
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      token,
+      user: {
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        age: user.age,
+        gender: user.gender,
+        bio: user.bio,
+        avatarUrl: user.avatarUrl,
+        preferences: user.preferences,
+        completedLessons: user.completedLessons,
+        loginHistory: user.loginHistory,
+        todayProgress: user.todayProgress,
+        progressDate: user.progressDate,
+        streak: user.streak,
+        lastStreakDate: user.lastStreakDate,
+        dailyLessonCounts: user.dailyLessonCounts,
+        dailyScores: user.dailyScores
+      }
+    });
+  } catch (err) {
+    console.error('Google signup error:', err.message, err.stack);
+    res.status(500).json({ message: 'Failed to register with Google.' });
+  }
+});
+
 
 // 2. LOGIN USER
 router.post('/login', async (req, res) => {

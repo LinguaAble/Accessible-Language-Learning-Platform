@@ -79,7 +79,7 @@ const Login = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
-      setError("Failed to register Google account with our database.");
+      setError(err.response?.data?.message || "Failed to register Google account with our database.");
     } finally {
       setLoading(false);
     }

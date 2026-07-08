@@ -41,14 +41,14 @@ const Signup = () => {
       };
 
       setLoading(true);
-      const res = await axios.post(`${API}/api/auth/google-login`, googleUser);
+      const res = await axios.post(`${API}/api/auth/google-signup`, googleUser);
 
       localStorage.setItem('token', res.data.token);
       login(res.data.user);
       navigate('/dashboard');
     } catch (err) {
       console.error(err);
-      setError("Failed to register Google account with our database.");
+      setError(err.response?.data?.message || "Failed to register Google account with our database.");
     } finally {
       setLoading(false);
     }
