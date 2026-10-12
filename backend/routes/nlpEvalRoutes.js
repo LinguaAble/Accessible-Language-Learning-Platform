@@ -34,14 +34,46 @@ const HINDI_TO_ROMAN = {
   'नमस्ते': 'namaste', 'मैं': 'main', 'तुम': 'tum',
   'वह': 'vah', 'हम': 'hum', 'क्या': 'kya',
   'कहाँ': 'kahaan', 'कब': 'kab',
+  'बिल्कुल': 'bilkul', 'शायद': 'shayad',
+  'सुप्रभात': 'suprabhat', 'शुभ संध्या': 'shubh sandhya',
 };
+
+// ─── Character-level Devanagari to Roman transliteration map ──────────────────
+const DEVA_CHAR_MAP = {
+  'अ':'a','आ':'aa','इ':'i','ई':'ee','उ':'u','ऊ':'oo','ऋ':'ri','ए':'e','ऐ':'ai','ओ':'o','औ':'au','अं':'am','अः':'ah',
+  'क':'k','ख':'kh','ग':'g','घ':'gh','ङ':'ng',
+  'च':'ch','छ':'chh','ज':'j','झ':'jh','ञ':'ny',
+  'ट':'t','ठ':'th','ड':'d','ढ':'dh','ण':'n',
+  'त':'t','थ':'th','द':'d','ध':'dh','न':'n',
+  'प':'p','फ':'ph','ब':'b','भ':'bh','म':'m',
+  'य':'y','र':'r','ल':'l','व':'v',
+  'श':'sh','ष':'sh','स':'s','ह':'h',
+  'क्ष':'ksh','त्र':'tr','ज्ञ':'gy',
+  '़':'', 'ा':'aa','ि':'i','ी':'ee','ु':'u','ू':'oo','ृ':'ri','े':'e','ै':'ai','ो':'o','ौ':'au','ं':'n','ँ':'n','ः':'h','्':''
+};
+
+function devanagariToRoman(str) {
+  let res = '';
+  for (const ch of str || '') {
+    if (DEVA_CHAR_MAP[ch] !== undefined) res += DEVA_CHAR_MAP[ch];
+    else if (/[a-zA-Z0-9]/.test(ch)) res += ch.toLowerCase();
+  }
+  return res;
+}
+
+// Strips virama/halant, nukta, chandrabindu, anusvara, punctuation, and whitespace
+function normalizeHindi(str) {
+  return (str || '').replace(/[\u094D\u093C\u0901\u0902\s\u0964\u0965.,!?]/g, '');
+}
 
 // ─── Phonetic normalizer ──────────────────────────────────────────────────────
 function phoneticallyNormalize(text) {
   return text.toLowerCase().trim()
     .replace(/[^a-z0-9\u0900-\u097F\s]/g, '')
     .replace(/([aeiou])\1+/g, '$1')
-    .replace(/shh/g, 'sh');
+    .replace(/shh/g, 'sh')
+    .replace(/ph/g, 'f')
+    .replace(/v/g, 'b'); // v and b are interchangeable in Hindi phonetics
 }
 
 // ─── Core NLP evaluator ───────────────────────────────────────────────────────
@@ -53,10 +85,12 @@ function evaluatePronunciation(transcript, expectedAnswer, expectedHindi) {
   const t = transcript.trim();
   const tLow = t.toLowerCase();
   const expected = (expectedAnswer || '').trim().toLowerCase();
-  const expectedH = (expectedHindi || '').trim().replace(/ँ/g, 'ं');
+  const expectedH = (expectedHindi || '').trim();
 
-  // 1. Exact Hindi match
-  if (expectedH.length > 0 && t.replace(/ँ/g, 'ं').includes(expectedH)) {
+  // 1. Direct or normalized Hindi match (handles बिल्कुल == बिलकुल, विल्कुल == विलकुल)
+  const normHindiT = normalizeHindi(t);
+  const normHindiE = normalizeHindi(expectedH);
+  if (normHindiE.length > 0 && (normHindiT.includes(normHindiE) || normHindiE.includes(normHindiT))) {
     return { isCorrect: true, confidence: 1.0, feedback: '🎉 Perfect pronunciation!', matchType: 'exact_hindi' };
   }
 
@@ -65,59 +99,72 @@ function evaluatePronunciation(transcript, expectedAnswer, expectedHindi) {
     return { isCorrect: true, confidence: 0.98, feedback: '✅ Excellent!', matchType: 'exact_roman' };
   }
 
-  // 3. Transliteration match
+  // 3. Devanagari converted to Roman
+  const devaRoman = devanagariToRoman(t);
+  if (devaRoman && (devaRoman === expected || devaRoman.includes(expected) || expected.includes(devaRoman))) {
+    return { isCorrect: true, confidence: 0.95, feedback: '🎉 Perfect pronunciation!', matchType: 'transliteration' };
+  }
+
+  // 4. Word-level transliteration dictionary
   const romanFromTranscript = HINDI_TO_ROMAN[t.trim()] || '';
   if (romanFromTranscript && (romanFromTranscript === expected || romanFromTranscript.includes(expected))) {
     return { isCorrect: true, confidence: 0.95, feedback: '✅ Great pronunciation!', matchType: 'transliteration' };
   }
 
-  // 4. Phonetic normalization
+  // 5. Phonetic normalization (collapses vowels, consonants, and spaces)
   const normT = phoneticallyNormalize(tLow);
   const normE = phoneticallyNormalize(expected);
-  if (normT === normE || normT.includes(normE)) {
-    return { isCorrect: true, confidence: 0.90, feedback: '✅ Good pronunciation!', matchType: 'phonetic_norm' };
+  const normTNoSpace = normT.replace(/\s+/g, '');
+  const normENoSpace = normE.replace(/\s+/g, '');
+  if (normTNoSpace === normENoSpace || normTNoSpace.includes(normENoSpace)) {
+    return { isCorrect: true, confidence: 0.92, feedback: '✅ Good pronunciation!', matchType: 'phonetic_norm' };
   }
 
-  // 5. Double Metaphone (English phonetic algorithm — great for romanized Hindi)
-  // 5. Double Metaphone — only accept if Levenshtein is also close
+  // 6. Devanagari converted + phonetic normalization (handles "विल्कुल" -> "vilkul" -> "bilkul")
+  if (devaRoman) {
+    const normDeva = phoneticallyNormalize(devaRoman);
+    if (normDeva === normENoSpace || normDeva.includes(normENoSpace)) {
+      return { isCorrect: true, confidence: 0.90, feedback: '✅ Good pronunciation!', matchType: 'deva_phonetic' };
+    }
+  }
+
+  // 7. Double Metaphone (handles "bill cool" == "bilkul")
   const metaphone = natural.DoubleMetaphone;
-  const tCodes = metaphone.process(normT.replace(/\s+/g, ''));
-  const eCodes = metaphone.process(normE.replace(/\s+/g, ''));
+  const tCodes = metaphone.process(normTNoSpace);
+  const eCodes = metaphone.process(normENoSpace);
   const metaphoneMatch = tCodes[0] === eCodes[0] || tCodes[1] === eCodes[1] || tCodes[0] === eCodes[1];
-  const levenCheck = natural.LevenshteinDistance(normT, normE);
-  const levenSimCheck = 1 - levenCheck / (Math.max(normT.length, normE.length) || 1);
-  if (metaphoneMatch && levenSimCheck >= 0.60) {
+  const levenCheck = natural.LevenshteinDistance(normTNoSpace, normENoSpace);
+  const levenSimCheck = 1 - levenCheck / (Math.max(normTNoSpace.length, normENoSpace.length) || 1);
+  if (metaphoneMatch && levenSimCheck >= 0.50) {
     return { isCorrect: true, confidence: 0.85, feedback: '✅ Close enough — well done!', matchType: 'metaphone' };
   }
 
-  // 6. Levenshtein distance (fuzzy match >=75%)
-  const leven = natural.LevenshteinDistance(normT, normE);
-  const maxLen = Math.max(normT.length, normE.length) || 1;
+  // 8. Levenshtein distance (fuzzy match >=70%)
+  const leven = natural.LevenshteinDistance(normTNoSpace, normENoSpace);
+  const maxLen = Math.max(normTNoSpace.length, normENoSpace.length) || 1;
   const levenSim = 1 - leven / maxLen;
-  if (levenSim >= 0.75) {
+  if (levenSim >= 0.70) {
     return { isCorrect: true, confidence: levenSim, feedback: '✅ Very close! Minor difference.', matchType: 'fuzzy_levenshtein' };
   }
 
-  // 7. Dice/Bigram string similarity (>=70%)
-  const dice = stringSimilarity.compareTwoStrings(normT, normE);
-  if (dice >= 0.70) {
+  // 9. Dice/Bigram string similarity (>=65%)
+  const dice = stringSimilarity.compareTwoStrings(normTNoSpace, normENoSpace);
+  if (dice >= 0.65) {
     return { isCorrect: true, confidence: dice, feedback: '✅ Almost there!', matchType: 'dice_similarity' };
   }
 
-  // 8. Partial word match (handles STT returning extra surrounding words)
+  // 10. Partial word match (handles STT returning extra surrounding words)
   const words = normT.split(/\s+/);
   for (const word of words) {
-    const wordSim = stringSimilarity.compareTwoStrings(word, normE);
-    if (wordSim >= 0.80) {
+    const wordSim = stringSimilarity.compareTwoStrings(word, normENoSpace);
+    if (wordSim >= 0.75) {
       return { isCorrect: true, confidence: wordSim, feedback: '✅ Good — I heard it!', matchType: 'partial_word' };
     }
   }
 
-  // Incorrect
+  // Incorrect - show transparent feedback with what was heard
   const bestSim = Math.max(levenSim, dice);
-  const feedback = bestSim > 0.5
-    ? `❌ Almost! You said "${transcript}" — try again for "${expectedAnswer}".`
-    : `❌ Not quite. The correct sound is "${expectedAnswer}".`;
+  const feedback = `❌ Not quite. I heard "${transcript}". The correct sound is "${expectedAnswer}".`;
 
   return { isCorrect: false, confidence: bestSim, feedback, matchType: 'no_match' };
 }

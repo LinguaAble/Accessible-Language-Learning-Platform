@@ -1129,6 +1129,8 @@ const LearningScreen = () => {
 
   const mediaRecorderRef = React.useRef(null);
   const audioChunksRef = React.useRef([]);
+  const speechRecognitionRef = React.useRef(null);
+  const speechTranscriptRef = React.useRef('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [nlpFeedback, setNlpFeedback] = useState(null); // NLP: { feedback, confidence, matchType }
 
@@ -1148,6 +1150,37 @@ const LearningScreen = () => {
     }
 
     try {
+      // Clear previous transcript
+      speechTranscriptRef.current = '';
+
+      // Initialize Web Speech API for native browser speech-to-text
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        try {
+          const recognition = new SpeechRecognition();
+          recognition.lang = 'hi-IN';
+          recognition.interimResults = false;
+          recognition.maxAlternatives = 3;
+          recognition.continuous = false;
+
+          recognition.onresult = (event) => {
+            if (event.results && event.results.length > 0) {
+              const text = event.results[0][0].transcript;
+              if (text) speechTranscriptRef.current = text.trim();
+            }
+          };
+
+          recognition.onerror = (e) => {
+            console.warn('SpeechRecognition error/notice:', e.error);
+          };
+
+          recognition.start();
+          speechRecognitionRef.current = recognition;
+        } catch (e) {
+          console.warn('Could not start Web Speech Recognition:', e);
+        }
+      }
+
       // FIX: Request 48000Hz sample rate explicitly so it matches what we tell Google
       // { audio: true } lets browser pick any rate — often 44100Hz — causing mismatch
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -1186,7 +1219,38 @@ const LearningScreen = () => {
           const currentSlide = activeSlides[currentSlideIndex];
           const hints = currentSlide ? [currentSlide.mainChar, currentSlide.answer] : [];
 
-          const transcript = await transcribeAudio(audioBlob, hints);
+          // Wait up to 800ms for SpeechRecognition to finalize transcript if not yet ready
+          let transcript = speechTranscriptRef.current;
+          if (!transcript && speechRecognitionRef.current) {
+            await new Promise((resolve) => {
+              const timer = setTimeout(resolve, 800);
+              const rec = speechRecognitionRef.current;
+              if (rec) {
+                const prevOnResult = rec.onresult;
+                rec.onresult = (ev) => {
+                  if (prevOnResult) prevOnResult(ev);
+                  clearTimeout(timer);
+                  resolve();
+                };
+                const prevOnEnd = rec.onend;
+                rec.onend = () => {
+                  if (prevOnEnd) prevOnEnd();
+                  clearTimeout(timer);
+                  resolve();
+                };
+              }
+            });
+            transcript = speechTranscriptRef.current;
+          }
+
+          // If native Web Speech didn't capture, try Google Speech-to-Text API
+          if (!transcript || transcript.trim() === '') {
+            try {
+              transcript = await transcribeAudio(audioBlob, hints);
+            } catch (sttErr) {
+              console.warn("transcribeAudio fallback error:", sttErr?.message || sttErr);
+            }
+          }
 
           if (!transcript || transcript.trim() === '') {
             setListeningText("No speech detected. Please try again.");
@@ -1216,6 +1280,11 @@ const LearningScreen = () => {
   };
 
   const stopRecording = () => {
+    if (speechRecognitionRef.current) {
+      try {
+        speechRecognitionRef.current.stop();
+      } catch (e) {}
+    }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       setIsListening(false);
@@ -1240,6 +1309,7 @@ const LearningScreen = () => {
       feedback: result.feedback,
       confidence: result.confidence,
       matchType: result.matchType,
+      heardText: transcript,
     });
     setListeningText(result.feedback);
 
@@ -1770,6 +1840,11 @@ const LearningScreen = () => {
                       <p className="listening-status" style={{ margin: 0, fontWeight: '500' }}>
                         {nlpFeedback.feedback}
                       </p>
+                      {nlpFeedback.heardText && (
+                        <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+                          Heard: "{nlpFeedback.heardText}"
+                        </p>
+                      )}
                     </div>
                   )}
                   {!isProcessing && !nlpFeedback && (
