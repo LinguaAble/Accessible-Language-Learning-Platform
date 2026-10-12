@@ -15,8 +15,15 @@ app.use(cors({
     if (!origin) return callback(null, true);
     // Allow any localhost port (for Vite :5173, Flutter web :random port, etc.)
     if (origin.match(/^http:\/\/localhost:\d+$/)) return callback(null, true);
-    // Allow your Vercel production URL and Cloud Run URL
-    if (origin === 'https://linguaable.vercel.app' || origin === 'https://frontend-service-704569764751.us-central1.run.app' || origin === 'https://linguaable-704569764751.us-central1.run.app') return callback(null, true);
+    // Allow production deployments
+    const allowed = [
+      'https://linguaable.vercel.app',
+      'https://frontend-service-704569764751.us-central1.run.app',
+      'https://linguaable-704569764751.us-central1.run.app',
+      // AWS CloudFront production domain
+      'https://d2mrtes5nl38lf.cloudfront.net',
+    ];
+    if (allowed.includes(origin)) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,

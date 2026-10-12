@@ -106,21 +106,21 @@ router.post('/daily-plan', async (req, res) => {
       instruction = `Congratulate them on finishing all lessons. Suggest revisiting pronunciation lessons or Grand Review to stay sharp. Keep it to 1-2 sentences.`;
     }
 
-    const prompt = `You are a friendly Hindi learning coach for LinguaAble.
+    const prompt = `You are a friendly Hindi learning coach for LinguaAble. Always respond in ENGLISH only.
 
 SITUATION: ${situation}
 
 YOUR TASK: ${instruction}
 
-Respond with ONLY the recommendation message. No greetings, no "Here's your plan:", just the message itself. Use one emoji. Be warm and specific.`;
+Respond with ONLY the recommendation message in English. No greetings, no "Here's your plan:", just the message itself. Use one emoji. Be warm and specific.`;
 
     // Call GROQ API
     const groqResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 120,
+        max_tokens: 350,
         temperature: 0.5
       },
       {
@@ -192,6 +192,8 @@ STUDENT'S CURRENT PROGRESS (you already know this — NEVER ask the student abou
 
     const systemPrompt = `You are LinguaBot, a friendly and empathetic Hindi language learning assistant for LinguaAble — an accessible language learning app designed specifically for people with learning disabilities like dyslexia, ADHD, and autism.
 
+CRITICAL RULE: ALWAYS respond in ENGLISH. Never write full sentences or paragraphs in Hindi. You may include individual Hindi words or short Hindi phrases as examples (with English transliteration and meaning), but your entire response must be in English.
+
 ${profileContext}
 ${progressContext}
 
@@ -242,9 +244,9 @@ RULES YOU MUST FOLLOW STRICTLY:
     const groqResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages,
-        max_tokens: 200,
+        max_tokens: 450,
         temperature: 0.6
       },
       {
